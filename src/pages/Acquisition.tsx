@@ -5,6 +5,7 @@ import { WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError } from '../services/apiClient';
 import { uiCopy, type Language } from '../i18n/translations';
 import TaamenAmbientBackground from '../components/ui/taamen-ambient-background';
+import { SideProjectorsBadge } from '../components/SideProjectorsBadge';
 import { prefersReducedMotion } from '../motion/prefersReduced';
 
 const copy = {
@@ -193,6 +194,7 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
           <p className="eyebrow">{text.eyebrow}</p>
           <h1>{text.heading}</h1>
           <p className="subtitle">{text.lede}</p>
+          <SideProjectorsBadge language={language} variant="inline" />
           <div className="acquisition-hero-actions">
             <a className="primary-action" href="/">
               {text.demo}

@@ -23,6 +23,7 @@ import { applyMotionPreference, prefersReducedMotion } from './motion/prefersRed
 import { getItem } from './services/localDb';
 import { peekHomeReveal } from './motion/revealState';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
+import { SideProjectorsBadge } from './components/SideProjectorsBadge';
 import './styles/global.css';
 import './styles/taamen-ambient-background.css';
 
@@ -136,6 +137,7 @@ function MainShell(props:ShellProps){
   {scope==='normal'&&<div className="sidebar-footer"><button className="avatar avatar-button" title={labels.profile} onClick={()=>go('profile')}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>{sidebar&&<div className="user-caption"><strong>{profile.firstName} {profile.lastName}</strong><span>{identityCaption}</span></div>}</div>}
   </aside>
   <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<button className="language-button" onClick={onLanguage}>{ar?'English':'العربية'}</button>{scope==='normal'&&<button ref={bellRef} className="notification-button icon-button" onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
+   <SideProjectorsBadge language={language} variant="float"/>
    <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
    <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
    {/* Mounted only while open so overlay hooks and scroll-lock match other sheets. */}
