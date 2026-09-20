@@ -87,7 +87,7 @@ Historical records are served only to Featured Member recognition sessions via
 and must not appear in the frontend bundle. Migrated records carry `source: legacy`.
 Locally created records use `source: local`.
 
-## PWA
+## PWA.
 
 The existing PWA manifest and service worker are preserved.
 
