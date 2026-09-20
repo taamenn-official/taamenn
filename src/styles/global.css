@@ -998,6 +998,7 @@ body.tactical-focus-mode .bottom-nav{display:none!important}
   --ta-sidebar-width:250px;
   --ta-sidebar-collapsed:76px;
   --ta-bottom-nav-height:56px;
+  --ta-topbar-height:78px;
 }
 .app-shell > .sidebar[hidden],
 .app-shell .bottom-nav[hidden]{
@@ -1005,6 +1006,7 @@ body.tactical-focus-mode .bottom-nav{display:none!important}
 }
 
 @media (max-width:900px){
+  :root{--ta-topbar-height:64px}
   .app-shell > .sidebar{
     display:none;
     width:0;
@@ -1881,6 +1883,114 @@ html[data-taamen-motion=reduce] .primary-action:hover,html[data-taamen-motion=re
     flex-direction:column;
   }
 }
+
+/* Official SideProjectors listing badge. Inspected chrome:
+   sidebar 250px / collapsed 76px, topbar 78px desktop / 64px ≤900px,
+   bottom-nav ~56–65px. Logical insets keep LTR/RTL off the sidebar. */
+.sideprojectors-badge{
+  color:inherit;
+  text-decoration:none;
+  border-radius:6px;
+  transition:opacity .18s ease, filter .18s ease;
+}
+.sideprojectors-badge img{
+  display:block;
+  width:56px;
+  height:auto;
+  max-width:min(72px, calc(100vw - 24px));
+  pointer-events:none;
+}
+.sideprojectors-badge-label{
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  color:var(--muted, #BAC8D9);
+}
+.sideprojectors-badge:hover{
+  opacity:.92;
+  filter:brightness(1.06);
+}
+.sideprojectors-badge:focus-visible{
+  outline:2px solid var(--ta-lime, var(--cyan, #BAC8D9));
+  outline-offset:3px;
+}
+.sideprojectors-badge--float{
+  position:fixed;
+  z-index:26;
+  inset-block-start:calc(var(--ta-topbar-height, 78px) + 10px);
+  inset-inline-end:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:end;
+  max-width:min(200px, calc(100vw - 24px));
+}
+.sideprojectors-badge--float .sideprojectors-badge-label{
+  margin-block-start:6px;
+  padding:6px 8px;
+  border-radius:8px;
+  background:rgba(7,19,22,.88);
+  border:1px solid var(--ta-line, rgba(186,200,217,.16));
+}
+.sideprojectors-badge--inline{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  margin-top:18px;
+  max-width:100%;
+}
+.sideprojectors-badge--inline img{
+  width:52px;
+}
+@media (min-width:901px){
+  /* LTR: sidebar at inline-start. Badge stays at inline-end of the viewport. */
+  .app-shell .sideprojectors-badge--float{
+    inset-inline-end:16px;
+  }
+  /* RTL chrome pins the sidebar to inset-inline-end (physical left) and
+     offsets main-content with margin-inline-end. Keep the fixed badge in
+     the content column, not over the 250px/76px rail. */
+  [dir=rtl] .app-shell > .sidebar ~ .main-content .sideprojectors-badge--float{
+    inset-inline-end:calc(var(--ta-sidebar-width) + 16px);
+  }
+  [dir=rtl] .app-shell > .sidebar.is-collapsed ~ .main-content .sideprojectors-badge--float{
+    inset-inline-end:calc(var(--ta-sidebar-collapsed) + 16px);
+  }
+}
+@media (max-width:900px){
+  .sideprojectors-badge--float{
+    inset-block-start:calc(var(--ta-topbar-height, 64px) + 8px);
+    inset-inline-end:10px;
+  }
+  .sideprojectors-badge--float img{
+    width:44px;
+  }
+  /* Keep page titles out from under the ~44px corner pennant. */
+  .app-shell .page-content .page-heading{
+    padding-inline-end:56px;
+  }
+}
+@media (max-width:360px){
+  .sideprojectors-badge--float img{
+    width:40px;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .sideprojectors-badge{
+    transition:none;
+  }
+  .sideprojectors-badge:hover{
+    opacity:1;
+    filter:none;
+  }
+}
+html[data-taamen-motion="reduce"] .sideprojectors-badge{
+  transition:none;
+}
+html[data-taamen-motion="reduce"] .sideprojectors-badge:hover{
+  opacity:1;
+  filter:none;
+}
+
 
 
 
