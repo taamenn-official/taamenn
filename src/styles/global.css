@@ -1964,6 +1964,10 @@ html[data-taamen-motion=reduce] .primary-action:hover,html[data-taamen-motion=re
   .sideprojectors-badge--float img{
     width:44px;
   }
+  /* Keep page titles out from under the ~44px corner pennant. */
+  .app-shell .page-content .page-heading{
+    padding-inline-end:56px;
+  }
 }
 @media (max-width:360px){
   .sideprojectors-badge--float img{
