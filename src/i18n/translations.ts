@@ -264,7 +264,11 @@ export const uiCopy = {
   captureCopied:'تم نسخ لقطة الملعب وحفظها في المحفظة.',
   captureSavedNoClipboard:'تم حفظ لقطة الملعب في المحفظة. النسخ إلى الحافظة غير متاح.',
   captureFailed:'تعذر التقاط الملعب.',
-  capturePitchAria:'أخذ لقطة للملعب والتكتيك'
+  capturePitchAria:'أخذ لقطة للملعب والتكتيك',
+  acquisitionNav:'الاستحواذ',
+  acquisitionSettingsTitle:'فرصة الاستحواذ',
+  acquisitionSettingsBody:'ملف المنتج للمستحوذين المحتملين: الوضع الحالي، العمارة، والسعر. ليست عنصراً أساسياً في التنقل اليومي.',
+  acquisitionSettingsOpen:'فتح ملف الاستحواذ'
  },
  en:{
   missingVenue:'Can’t find the venue you need? Contact administration to add it.',
@@ -390,6 +394,10 @@ export const uiCopy = {
   captureCopied:'Pitch screenshot copied and saved to Capture Wallet.',
   captureSavedNoClipboard:'Pitch screenshot saved to Capture Wallet. Clipboard copy was unavailable.',
   captureFailed:'The pitch could not be captured.',
-  capturePitchAria:'Capture tactical board'
+  capturePitchAria:'Capture tactical board',
+  acquisitionNav:'Acquisition',
+  acquisitionSettingsTitle:'Acquisition',
+  acquisitionSettingsBody:'A product dossier for prospective acquirers: current state, architecture, and asking price. It is not a daily navigation item.',
+  acquisitionSettingsOpen:'Open acquisition dossier'
  }
 } as const;

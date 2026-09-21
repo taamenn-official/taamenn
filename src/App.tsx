@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Briefcase } from 'lucide-react';
 import { ProfileSetup } from './components/ProfileSetup';
 import { NotificationCenter } from './components/NotificationCenter';
 import { getProfile, removeProfile, saveProfile, type LocalProfile } from './services/profileRepository';
@@ -24,6 +24,7 @@ import { getItem } from './services/localDb';
 import { peekHomeReveal } from './motion/revealState';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
+import { uiCopy } from './i18n/translations';
 import './styles/global.css';
 import './styles/taamen-ambient-background.css';
 
@@ -134,6 +135,7 @@ function MainShell(props:ShellProps){
      </button>
    </div>
    <nav className="side-nav" ref={sideNavRef} aria-label={ar?'التنقل الرئيسي':'Primary navigation'}><NavActiveIndicator navRef={sideNavRef} activeKey={page} watch={[sidebar,language,scope,desktopNav]} introDelay={navIntroDelay.current}/>{sidebar?Object.entries(desktopSections).map(([sectionKey,sectionRoutes])=>sectionRoutes.length>0?<div key={sectionKey} className="nav-section"><span className="nav-section-label">{sectionLabels[sectionKey as keyof typeof sectionLabels][language]}</span>{sectionRoutes.map(r=>{const Icon=r.icon;return <button key={r.id} className={`nav-item ${page===r.id?'is-active':''}`} data-route={r.id} onClick={()=>go(r.id)} aria-current={page===r.id?'page':undefined}><Icon size={18}/><span>{labels[r.id]}</span></button>})}</div>:null):desktopRoutes.map(r=>{const Icon=r.icon;return <button key={r.id} className={`nav-item ${page===r.id?'is-active':''}`} data-route={r.id} onClick={()=>go(r.id)} aria-current={page===r.id?'page':undefined}><Icon size={18}/><span className="tooltip">{labels[r.id]}</span></button>})}</nav>
+   <a className="nav-item acquisition-nav" href="/acquisition" aria-label={uiCopy[language].acquisitionNav}><Briefcase size={18} aria-hidden="true"/>{sidebar?<span>{uiCopy[language].acquisitionNav}</span>:<span className="tooltip">{uiCopy[language].acquisitionNav}</span>}</a>
   {scope==='normal'&&<div className="sidebar-footer"><button className="avatar avatar-button" title={labels.profile} onClick={()=>go('profile')}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>{sidebar&&<div className="user-caption"><strong>{profile.firstName} {profile.lastName}</strong><span>{identityCaption}</span></div>}</div>}
   </aside>
   <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<button className="language-button" onClick={onLanguage}>{ar?'English':'العربية'}</button>{scope==='normal'&&<button ref={bellRef} className="notification-button icon-button" onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
