@@ -1,113 +1,71 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Globe2, LifeBuoy, Lock, Mail, Send, ShieldCheck, Smartphone } from 'lucide-react';
+import { ArrowUpRight, Globe2, LifeBuoy, Mail, Send, ShieldCheck } from 'lucide-react';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
+import {
+  ACQUISITION_OG_IMAGE,
+  ACQUISITION_URL,
+} from '../config/acquisition';
 import { WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError } from '../services/apiClient';
 import { uiCopy, type Language } from '../i18n/translations';
+import { acquisitionCopy } from '../i18n/acquisition';
 import TaamenAmbientBackground from '../components/ui/taamen-ambient-background';
 import { SideProjectorsBadge } from '../components/SideProjectorsBadge';
-import { prefersReducedMotion } from '../motion/prefersReduced';
+import { isCompactViewport, prefersReducedMotion } from '../motion/prefersReduced';
+import { gsap, useGSAP } from '../motion/gsapRuntime';
+import { EASE, MOTION, TRAVEL, compact } from '../motion/tokens';
+import { formations, genericTacticalPlayers } from '../data/tacticalPresets';
 
-const copy = {
-  ar: {
-    title: 'TAAMEN 2.0 — فرصة الاستحواذ',
-    description: 'مساحة كرة قدم محلية أولاً، حيّة على taamenn.com، قبل الإيرادات. الكود والنطاق والهوية جاهزة للنقل.',
-    eyebrow: 'TAAMEN ACQUISITION',
-    heading: 'فرصة استحواذ TAAMEN',
-    lede: 'منتج كرة قدم محلي أولاً، يعمل اليوم، بلا اشتراكات وبلا ادعاءات وهمية. المشتري يحصل على الأصل كما هو.',
-    demo: 'جرّب التجربة الحيّة',
-    contact: 'تواصل مع TAAMEN',
-    highlights: 'أبرز ما في المنتج',
-    highlightItems: [
-      'تجربة عامة بلا حساب: الملف، المباريات، السجل، التكتيك، الإعدادات، الدعم.',
-      'أعضاء مميزون بجلسة خادم للقراءة فقط على السجل التاريخي.',
-      'مشاركة عامة للملف والمباراة من الرابط نفسه دون اختراع تشفير.',
-      'PWA محلي أولاً مع عامل خدمة لا يخزّن /api/*.',
-    ],
-    technology: 'التقنية',
-    techItems: [
-      'واجهة React/Vite مع تجربة عربية RTL وإنجليزية LTR.',
-      'واجهة Cloudflare Worker على نفس الأصل لـ /api/* مع KV للجلسات والسجل التاريخي.',
-      'تواصل الدعم عبر الخادم (EmailJS)، والمستلم لا يُختار من المتصفح.',
-      'لا حسابات للمستخدم العادي. التعرف على الأعضاء المميزين يتم في الخادم فقط.',
-    ],
-    state: 'الوضع الحالي',
-    stateItems: [
-      { label: 'وظيفي', text: 'المسارات الأساسية تعمل محلياً وعلى نفس أصل الإنتاج بعد النشر.' },
-      { label: 'حيّ', text: 'النطاق المقصود https://taamenn.com — النشر منفصل عن هذا العرض.' },
-      { label: 'قبل الإيرادات', text: 'لا يوجد MRR، ولا عملاء مدفوعون، ولا اشتراكات.' },
-      { label: 'محلي أولاً', text: 'بيانات المستخدم العادي تبقى في المتصفح (IndexedDB).' },
-    ],
-    receives: 'ماذا يستلم المشتري',
-    receiveItems: [
-      'مصدر الكود الكامل كما في المستودع.',
-      'النطاق والعلامة بعد النقل المتفق عليه — بلا أسرار في git.',
-      'إعدادات النشر (Wrangler / Cloudflare) بدون مفاتيح خاصة.',
-      'وثائق التشغيل والمشاركة والبريد والدعم.',
-    ],
-    growth: 'فرص النمو (مستقبلية)',
-    growthNote: 'هذه أفكار لاحقة، ليست ميزات موجودة ولا التزامات.',
-    growthItems: [
-      'التحقق الفعلي من البريد (مجمّد حالياً).',
-      'توزيع أوسع بعد استقرار النطاق والتشغيل.',
-      'شراكات محلية لكرة القدم — ليست سوق SaaS جاهزة.',
-    ],
-    ctaTitle: 'تحدث مع مالك المنتج',
-    ctaBody: 'نفس قناة الدعم الحالية. لا يوجد دفع وهمي ولا تسجيل خروج.',
-    openApp: 'افتح TAAMEN',
-  },
-  en: {
-    title: 'TAAMEN 2.0 — Acquisition Opportunity',
-    description: 'A local-first football workspace, live at taamenn.com, pre-revenue. Code, domain, and brand are ready to transfer.',
-    eyebrow: 'TAAMEN ACQUISITION',
-    heading: 'TAAMEN Acquisition Opportunity',
-    lede: 'A local-first football product that already runs. No subscriptions and no invented metrics. A buyer receives the asset as it is.',
-    demo: 'Try the live demo',
-    contact: 'Contact TAAMEN',
-    highlights: 'Product highlights',
-    highlightItems: [
-      'General-user experience with no account: profile, matches, archive, tactical board, settings, support.',
-      'Featured Members use a server session for read-only historical records.',
-      'Public profile and match sharing from the URL itself — encoding, not encryption.',
-      'Local-first PWA whose service worker never caches /api/*.',
-    ],
-    technology: 'Technology',
-    techItems: [
-      'React/Vite UI with Arabic RTL and English LTR.',
-      'Same-origin Cloudflare Worker for /api/*, with KV for sessions and historical records.',
-      'Support mail is sent by the server (EmailJS); the browser never chooses the recipient.',
-      'No normal-user accounts. Featured recognition stays on the server.',
-    ],
-    state: 'Current state',
-    stateItems: [
-      { label: 'Functional', text: 'Core paths work locally and on the same production origin after deploy.' },
-      { label: 'Live', text: 'Intended origin https://taamenn.com — deploy is a separate operator step.' },
-      { label: 'Pre-revenue', text: 'No MRR, no paying customers, no subscriptions.' },
-      { label: 'Local-first', text: 'Ordinary user data stays in the browser (IndexedDB).' },
-    ],
-    receives: 'What a buyer receives',
-    receiveItems: [
-      'The full source repository.',
-      'Domain and brand after an agreed transfer — no secrets in git.',
-      'Deploy configuration (Wrangler / Cloudflare) without private keys.',
-      'Operator docs for deploy, sharing, mail, and support.',
-    ],
-    growth: 'Growth opportunities (future)',
-    growthNote: 'Later ideas only. Not shipped features and not commitments.',
-    growthItems: [
-      'Real email verification (currently frozen).',
-      'Wider distribution after the domain and runtime are stable.',
-      'Local football partnerships — this is not a packaged SaaS marketplace.',
-    ],
-    ctaTitle: 'Talk to the product owner',
-    ctaBody: 'The same Support contact channel. No fake checkout.',
-    openApp: 'Open TAAMEN',
-  },
-} as const;
+function upsertMeta(selector: string, attributes: Record<string, string>) {
+  let el = document.head.querySelector(selector) as HTMLMetaElement | null;
+  if (!el) {
+    el = document.createElement('meta');
+    document.head.appendChild(el);
+  }
+  for (const [key, value] of Object.entries(attributes)) el.setAttribute(key, value);
+}
+
+function AcquisitionPitchPreview() {
+  const formation = formations[0];
+  const tokens = genericTacticalPlayers.map((player, index) => {
+    const slot = player.team === 'home' ? formation.positions.home[index] : formation.positions.away[index - 5];
+    return { id: player.id, team: player.team, x: slot.x, y: slot.y, initial: player.team === 'home' ? 'H' : 'A' };
+  });
+  return (
+    <div className="acquisition-pitch-frame" aria-hidden="true">
+      <div className="pitch acquisition-pitch">
+        <div className="pitch-midline" />
+        <div className="pitch-circle" />
+        <div className="pitch-center-spot" />
+        <div className="penalty-box penalty-home" />
+        <div className="penalty-box penalty-away" />
+        <div className="goal-box goal-home" />
+        <div className="goal-box goal-away" />
+        <div className="goal-area goal-area-home" />
+        <div className="goal-area goal-area-away" />
+        <div className="penalty-spot penalty-spot-home" />
+        <div className="penalty-spot penalty-spot-away" />
+        <span className="corner-arc corner-tl" />
+        <span className="corner-arc corner-tr" />
+        <span className="corner-arc corner-bl" />
+        <span className="corner-arc corner-br" />
+        {tokens.map((player) => (
+          <span
+            key={player.id}
+            className={`player-token ${player.team}`}
+            style={{ left: `${player.x}%`, top: `${player.y}%` }}
+          >
+            <span>{player.initial}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Acquisition({ language, onLanguage }: { language: Language; onLanguage: () => void }) {
   const ar = language === 'ar';
-  const text = copy[language];
+  const text = acquisitionCopy[language];
   const support = uiCopy[language];
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -116,18 +74,45 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
   const [failed, setFailed] = useState(false);
   const [sent, setSent] = useState(false);
   const lastSent = useRef('');
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = text.title;
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', text.description);
-    else {
-      const created = document.createElement('meta');
-      created.name = 'description';
-      created.content = text.description;
-      document.head.appendChild(created);
+    upsertMeta('meta[name="description"]', { name: 'description', content: text.description });
+    upsertMeta('meta[property="og:title"]', { property: 'og:title', content: text.ogTitle });
+    upsertMeta('meta[property="og:description"]', { property: 'og:description', content: text.description });
+    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: ACQUISITION_URL });
+    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: ACQUISITION_OG_IMAGE });
+    upsertMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' });
+    upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary' });
+    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: ACQUISITION_OG_IMAGE });
+    let canonical = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
     }
-  }, [text.description, text.title]);
+    canonical.href = ACQUISITION_URL;
+  }, [text.description, text.ogTitle, text.title]);
+
+  useGSAP(() => {
+    const el = root.current;
+    if (!el) return;
+    const hero = el.querySelectorAll<HTMLElement>('[data-acq-motion="hero"]');
+    const cards = el.querySelectorAll<HTMLElement>('[data-acq-motion="card"]');
+    if (prefersReducedMotion()) {
+      gsap.set([...hero, ...cards], { clearProps: 'opacity,transform' });
+      return;
+    }
+    const travel = isCompactViewport() ? compact(TRAVEL.card) : TRAVEL.card;
+    const tl = gsap.timeline({ defaults: { ease: EASE.entrance } });
+    if (hero.length) {
+      tl.from(hero, { opacity: 0, y: travel, duration: MOTION.entrance, stagger: 0.06, clearProps: 'opacity,transform' }, 0);
+    }
+    if (cards.length) {
+      tl.from(cards, { opacity: 0, y: Math.round(travel * 0.7), duration: MOTION.panel, stagger: 0.04, clearProps: 'opacity,transform' }, 0.12);
+    }
+  }, { scope: root, dependencies: [language] });
 
   const submit = async (event: { preventDefault(): void }) => {
     event.preventDefault();
@@ -173,10 +158,11 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
   };
 
   return (
-    <div className="acquisition-shell">
+    <div className="acquisition-shell" ref={root}>
       <TaamenAmbientBackground key="atmosphere" variant="home" active={!prefersReducedMotion()} />
+      <a className="acquisition-skip" href="#acquisition-main">{text.skip}</a>
       <header className="acquisition-top">
-        <a className="acquisition-brand" href="/">
+        <a className="acquisition-brand" href="/" aria-label={text.brandHome}>
           <img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} />
           <span>TAAMEN 2.0</span>
         </a>
@@ -189,63 +175,267 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
         </div>
       </header>
 
-      <main className="acquisition-main">
-        <section className="acquisition-hero panel">
+      <main id="acquisition-main" className="acquisition-main">
+        <section className="acquisition-hero panel" data-acq-motion="hero">
           <p className="eyebrow">{text.eyebrow}</p>
+          <ul className="acquisition-status" aria-label={text.statusLive}>
+            <li><span className="status-chip">{text.statusLive}</span></li>
+            <li><span className="status-chip">{text.statusVersion}</span></li>
+            <li><span className="status-chip muted">{text.statusPreRevenue}</span></li>
+            <li><span className="status-chip muted">{text.statusLocalFirst}</span></li>
+          </ul>
           <h1>{text.heading}</h1>
           <p className="subtitle">{text.lede}</p>
           <SideProjectorsBadge language={language} variant="inline" />
           <div className="acquisition-hero-actions">
-            <a className="primary-action" href="/">
-              {text.demo}
+            <a className="primary-action" href="#acquisition-snapshot">
+              {text.explore}
               <ArrowUpRight size={16} />
             </a>
-            <a className="dark-action" href="#acquisition-contact">
-              <LifeBuoy size={16} />
-              {text.contact}
-            </a>
+            <a className="dark-action" href="/">{text.openApp}</a>
+            <a className="text-button acquisition-quiet-link" href="#acquisition-architecture">{text.technical}</a>
           </div>
         </section>
 
-        <section className="acquisition-grid">
+        <section id="acquisition-snapshot" className="panel" data-acq-motion="card">
+          <p className="eyebrow">SNAPSHOT</p>
+          <h2>{text.snapshotTitle}</h2>
+          <p className="subtitle">{text.snapshotIntro}</p>
+          <dl className="acquisition-snapshot">
+            {text.snapshot.map((item) => (
+              <div key={item.label}>
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <nav className="acquisition-toc panel" aria-label={text.tocLabel} data-acq-motion="card">
+          <p className="eyebrow">DOSSIER</p>
+          <h2>{text.tocLabel}</h2>
+          <ol>
+            {text.toc.map((item) => (
+              <li key={item.href}><a href={item.href}>{item.label}</a></li>
+            ))}
+          </ol>
+        </nav>
+
+        <section id="acquisition-what" className="panel">
+          <p className="eyebrow">PRODUCT</p>
+          <h2>{text.whatTitle}</h2>
+          <p>{text.whatBody}</p>
+          <p className="settings-note">{text.audiencesLabel}</p>
+          <ul className="acquisition-pills">
+            {text.audiences.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </section>
+
+        <section id="acquisition-thesis" className="panel">
+          <p className="eyebrow">THESIS</p>
+          <h2>{text.thesisTitle}</h2>
+          <p>{text.thesisBody}</p>
+          <p className="settings-note">{text.flowLabel}</p>
+          <ol className="acquisition-flow">
+            {text.flow.map((item) => (
+              <li key={item.step}>
+                <strong>{item.step}</strong>
+                <span>{item.maps}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section id="acquisition-ecosystem" className="panel">
+          <p className="eyebrow">ECOSYSTEM</p>
+          <h2>{text.ecosystemTitle}</h2>
+          <p className="subtitle">{text.ecosystemIntro}</p>
+          <div className="acquisition-card-grid">
+            {text.ecosystem.map((item) => (
+              <article key={item.title} className="acquisition-mini">
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+          <p className="settings-note">{text.lifecycleTitle}</p>
+          <ol className="acquisition-timeline">
+            {text.lifecycle.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+          <p className="acquisition-footnote">{text.analyticsNote}</p>
+        </section>
+
+        <section id="acquisition-how" className="panel">
+          <p className="eyebrow">WORKSPACE</p>
+          <h2>{text.howTitle}</h2>
+          <p>{text.howBody}</p>
+        </section>
+
+        <section className="panel acquisition-tactical">
+          <p className="eyebrow">TACTICAL</p>
+          <h2>{text.tacticalTitle}</h2>
+          <p>{text.tacticalBody}</p>
+          <AcquisitionPitchPreview />
+          <p className="acquisition-caption">{text.tacticalCaption}</p>
+        </section>
+
+        <section id="acquisition-architecture" className="panel">
+          <p className="eyebrow">ARCHITECTURE</p>
+          <h2>{text.architectureTitle}</h2>
+          <p className="subtitle">{text.architectureIntro}</p>
+          <ul className="acquisition-list">{text.architectureCurrent.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
+
+        <section id="acquisition-local" className="acquisition-grid">
           <article className="panel">
-            <h2>{text.highlights}</h2>
-            <ul>{text.highlightItems.map((item) => <li key={item}>{item}</li>)}</ul>
+            <h2>{text.localTitle}</h2>
+            <h3>{text.localBenefitsTitle}</h3>
+            <ul className="acquisition-list">{text.localBenefits.map((item) => <li key={item}>{item}</li>)}</ul>
           </article>
           <article className="panel">
-            <h2>{text.technology}</h2>
-            <ul>{text.techItems.map((item) => <li key={item}>{item}</li>)}</ul>
+            <h3>{text.localTradeoffsTitle}</h3>
+            <ul className="acquisition-list">{text.localTradeoffs.map((item) => <li key={item}>{item}</li>)}</ul>
           </article>
         </section>
 
-        <section className="panel acquisition-state">
-          <h2>{text.state}</h2>
-          <div className="acquisition-state-grid">
-            {text.stateItems.map((item) => (
-              <div key={item.label}>
-                <span className="status-chip">{item.label}</span>
-                <p>{item.text}</p>
-              </div>
+        <section id="acquisition-implemented" className="panel">
+          <p className="eyebrow">CURRENT</p>
+          <h2>{text.implementedTitle}</h2>
+          <ul className="acquisition-list">{text.implemented.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>
+
+        <section id="acquisition-evolution" className="panel">
+          <p className="eyebrow">CURRENT / FUTURE</p>
+          <h2>{text.evolutionTitle}</h2>
+          <p className="subtitle">{text.evolutionIntro}</p>
+          <div className="acquisition-compare">
+            <div>
+              <span className="status-chip">{text.architectureNow}</span>
+              <ul className="acquisition-list">{text.evolutionCurrent.map((item) => <li key={item}>{item}</li>)}</ul>
+            </div>
+            <div>
+              <span className="status-chip muted">{text.architectureFuture}</span>
+              <ul className="acquisition-list">{text.evolutionFuture.map((item) => <li key={item}>{item}</li>)}</ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="acquisition-stack" className="acquisition-grid">
+          <article className="panel">
+            <h2>{text.stackTitle}</h2>
+            <dl className="acquisition-snapshot">
+              {text.stackItems.map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <article className="panel">
+            <h2>{text.infraTitle}</h2>
+            <p>{text.infraBody}</p>
+            <h3>{text.securityTitle}</h3>
+            <p className="subtitle">{text.securityIntro}</p>
+            <ul className="acquisition-list">{text.security.map((item) => <li key={item}>{item}</li>)}</ul>
+          </article>
+        </section>
+
+        <section id="acquisition-maturity" className="panel acquisition-maturity">
+          <p className="eyebrow">LAUNCH</p>
+          <h2>{text.maturityTitle}</h2>
+          <p>{text.maturityBody}</p>
+          <aside className="acquisition-traffic" aria-labelledby="acquisition-traffic-title">
+            <h3 id="acquisition-traffic-title">{text.trafficTitle}</h3>
+            <p>{text.trafficPhrase}</p>
+            <dl className="acquisition-traffic-metrics">
+              {text.trafficMetrics.map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="acquisition-footnote">{text.trafficFootnote}</p>
+          </aside>
+        </section>
+
+        <section id="acquisition-included" className="acquisition-grid">
+          <article className="panel">
+            <h2>{text.includedTitle}</h2>
+            <ul className="acquisition-list">{text.included.map((item) => <li key={item}>{item}</li>)}</ul>
+            <div className="acquisition-price">
+              <span className="eyebrow">{text.priceTitle}</span>
+              <strong>{text.priceValue}</strong>
+              <p>{text.priceNote}</p>
+            </div>
+          </article>
+          <article className="panel">
+            <h2>{text.excludedTitle}</h2>
+            <ul className="acquisition-list">{text.excluded.map((item) => <li key={item}>{item}</li>)}</ul>
+            <h3>{text.whyNotZeroTitle}</h3>
+            <p>{text.whyNotZero}</p>
+          </article>
+        </section>
+
+        <section id="acquisition-commercial" className="panel">
+          <p className="eyebrow">FUTURE</p>
+          <h2>{text.commercialTitle}</h2>
+          <p className="subtitle">{text.commercialIntro}</p>
+          <div className="acquisition-card-grid acquisition-commercial">
+            {text.commercial.map((item) => (
+              <article key={item.n} className="acquisition-mini">
+                <span className="acquisition-index">{item.n}</span>
+                <h3>{item.title}</h3>
+                <p>{item.need}</p>
+              </article>
             ))}
           </div>
         </section>
 
-        <section className="acquisition-grid">
-          <article className="panel">
-            <div className="panel-heading">
-              <h2>{text.receives}</h2>
-              <Lock size={18} />
-            </div>
-            <ul>{text.receiveItems.map((item) => <li key={item}>{item}</li>)}</ul>
-          </article>
-          <article className="panel">
-            <div className="panel-heading">
-              <h2>{text.growth}</h2>
-              <Smartphone size={18} />
-            </div>
-            <p className="settings-note">{text.growthNote}</p>
-            <ul>{text.growthItems.map((item) => <li key={item}>{item}</li>)}</ul>
-          </article>
+        <section id="acquisition-buyer" className="panel">
+          <p className="eyebrow">ACQUIRER</p>
+          <h2>{text.buyerTitle}</h2>
+          <p className="subtitle">{text.buyerIntro}</p>
+          <div className="acquisition-card-grid">
+            {text.buyers.map((item) => (
+              <article key={item.title} className="acquisition-mini">
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="acquisition-process" className="panel">
+          <p className="eyebrow">PROCESS</p>
+          <h2>{text.processTitle}</h2>
+          <p className="subtitle">{text.processIntro}</p>
+          <ol className="acquisition-steps">
+            {text.process.map((item) => (
+              <li key={item.n}>
+                <span className="acquisition-index">{item.n}</span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="acquisition-disclaimer">{text.legalDisclaimer}</p>
+        </section>
+
+        <section id="acquisition-faq" className="panel">
+          <p className="eyebrow">DUE DILIGENCE</p>
+          <h2>{text.faqTitle}</h2>
+          <div className="acquisition-faq">
+            {text.faq.map((item) => (
+              <details key={item.q}>
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </div>
         </section>
 
         <section id="acquisition-contact" className="panel support-contact">
@@ -257,10 +447,24 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
             <Mail size={18} />
           </div>
           <p className="subtitle">{text.ctaBody}</p>
-          {status && <div className={`${failed ? 'error-banner' : sent ? 'success-banner contact-sent' : 'contact-status'}`} role={failed ? 'alert' : 'status'} aria-live="polite">{status}</div>}
+          <div className="acquisition-hero-actions">
+            <a className="dark-action" href="/">{text.ctaOpen}</a>
+            <a className="text-button acquisition-quiet-link" href="#acquisition-architecture">{text.ctaTechnical}</a>
+          </div>
+          {status && (
+            <div className={`${failed ? 'error-banner' : sent ? 'success-banner contact-sent' : 'contact-status'}`} role={failed ? 'alert' : 'status'} aria-live="polite">
+              {status}
+            </div>
+          )}
           <form className="support-contact-form" onSubmit={submit} noValidate>
-            <label>{support.contactEmailLabel}<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" maxLength={254} autoComplete="email" disabled={busy} /></label>
-            <label>{support.contactMessageLabel}<textarea rows={5} value={message} onChange={(event) => setMessage(event.target.value)} placeholder={support.contactMessagePlaceholder} maxLength={2000} disabled={busy} /></label>
+            <label>
+              {support.contactEmailLabel}
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" maxLength={254} autoComplete="email" disabled={busy} />
+            </label>
+            <label>
+              {support.contactMessageLabel}
+              <textarea rows={5} value={message} onChange={(event) => setMessage(event.target.value)} placeholder={support.contactMessagePlaceholder} maxLength={2000} disabled={busy} />
+            </label>
             <button className="primary-action" type="submit" disabled={busy} aria-busy={busy}>
               <Send size={15} />
               {busy ? support.contactSending : failed ? support.contactRetry : support.contactSend}
@@ -271,6 +475,10 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
             <a className="support-action whatsapp-action" href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer noopener">{support.openWhatsAppChannel}</a>
           </div>
           <p className="settings-note"><ShieldCheck size={14} /> {ar ? 'لا أسرار في الواجهة. المستلم يحدده الخادم.' : 'No secrets in the browser. The server owns the recipient.'}</p>
+          <p className="acquisition-footnote">{text.listingNote}</p>
+          <p className="acquisition-footnote">
+            <LifeBuoy size={14} /> {text.priceValue} · {text.priceNote}
+          </p>
         </section>
       </main>
     </div>

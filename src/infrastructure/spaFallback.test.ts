@@ -28,3 +28,14 @@ test('spa fallback is a no-op when the path is already restored', () => {
     null,
   );
 });
+
+test('spa fallback restores /acquisition after a static 404 bounce to /', () => {
+  assert.equal(
+    spaFallbackNextPath(
+      'https://taamenn.com/acquisition',
+      'https://taamenn.com',
+      'https://taamenn.com/',
+    ),
+    '/acquisition',
+  );
+});

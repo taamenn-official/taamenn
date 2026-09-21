@@ -67,7 +67,7 @@ test.describe('SideProjectors listing badge', () => {
     await expect(badge).toHaveAttribute('target', '_blank');
     await expect(badge).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(page.locator('a.sideprojectors-badge--float')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: /live demo|جرّب/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Open TAAMEN|افتح TAAMEN|Explore the acquisition|استكشف ملف الاستحواذ/ }).first()).toBeVisible();
   });
 
   test('viewports keep the badge on-screen without covering chrome', async ({ page }) => {

@@ -141,9 +141,9 @@ test.describe('TAAMEN production path', () => {
 
   test('acquisition page is branded and bilingual', async ({ page }) => {
     await page.goto('/acquisition');
-    await expect(page).toHaveTitle(/Acquisition Opportunity|فرصة الاستحواذ/);
+    await expect(page).toHaveTitle(/Acquisition dossier|ملف الاستحواذ/);
     await expect(page.getByRole('heading').first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /live demo|جرّب/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Open TAAMEN|افتح TAAMEN/ }).first()).toBeVisible();
     await page.getByRole('button', { name: /English|العربية/ }).first().click();
     await expect(page.locator('#acquisition-contact')).toBeVisible();
     await expect(page.getByText(/No fake checkout|لا يوجد دفع وهمي/i)).toBeVisible();
