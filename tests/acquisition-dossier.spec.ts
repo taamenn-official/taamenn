@@ -103,4 +103,31 @@ test.describe('Acquisition dossier', () => {
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     }
   });
+
+  test('real product shots sit in narrative sections without an Archive capture', async ({ page }) => {
+    await page.goto('/acquisition');
+    await page.getByRole('button', { name: 'English' }).first().click();
+    const shots = page.locator('figure.acquisition-shot');
+    await expect(shots).toHaveCount(7);
+    await expect(page.locator('figure.acquisition-shot img[src*="/acquisition-assets/"]')).toHaveCount(7);
+    await expect(page.locator('img[src*="archive"]')).toHaveCount(0);
+    await expect(page.locator('#acquisition-what img[src*="02-home"]')).toHaveCount(1);
+    await expect(page.locator('#acquisition-ecosystem img[src*="01-match-center"]')).toHaveCount(1);
+    await expect(page.locator('#acquisition-how img[src*="03-login"]')).toHaveCount(1);
+    await expect(page.locator('#acquisition-how img[src*="05-profile"]')).toHaveCount(1);
+    await expect(page.locator('.acquisition-tactical img[src*="07-tactical"]')).toHaveCount(1);
+    await expect(page.locator('.acquisition-pitch')).toBeVisible();
+    await expect(page.getByText(/Not a marketing screenshot/)).toBeVisible();
+    await expect(page.locator('#acquisition-implemented img[src*="04-mobile"]')).toHaveCount(1);
+    await expect(page.locator('#acquisition-implemented img[src*="06-stadiums"]')).toHaveCount(1);
+    await expect(page.locator('#acquisition-ecosystem figcaption')).toContainText(/Match Center/);
+    await expect(page.locator('#acquisition-ecosystem figcaption')).not.toContainText(/this is Archive/i);
+    await expect(page.getByText(/No Archive screenshot/i)).toBeVisible();
+    const imgs = page.locator('figure.acquisition-shot img');
+    const count = await imgs.count();
+    for (let i = 0; i < count; i += 1) {
+      await expect(imgs.nth(i)).toHaveAttribute('loading', 'lazy');
+      await expect(imgs.nth(i)).toHaveAttribute('alt', /TAAMEN 2\.0/);
+    }
+  });
 });

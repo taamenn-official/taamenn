@@ -11,6 +11,21 @@ export const ACQUISITION_OG_IMAGE = `${ACQUISITION_ORIGIN}/assets/taamen-brand-m
 
 export const ACQUISITION_LISTING_URL = SIDEPROJECTORS_LISTING_URL;
 
+/** Same-origin product screenshots. Do not load these from SideProjectors or R2. */
+export const ACQUISITION_ASSETS_BASE = '/acquisition-assets';
+
+export const ACQUISITION_PRODUCT_SHOTS = {
+  matchCenter: { file: '01-match-center', width: 1440, height: 649 },
+  home: { file: '02-home', width: 1440, height: 658 },
+  login: { file: '03-login', width: 1440, height: 648 },
+  mobile: { file: '04-mobile', width: 254, height: 558 },
+  profile: { file: '05-profile', width: 1440, height: 654 },
+  stadiums: { file: '06-stadiums', width: 1440, height: 659 },
+  tactical: { file: '07-tactical', width: 1440, height: 658 },
+} as const;
+
+export type AcquisitionProductShotId = keyof typeof ACQUISITION_PRODUCT_SHOTS;
+
 /**
  * Cloudflare-observed traffic since launch. These are not verified unique human users.
  * Keep this phrasing if the figures are shown at all.

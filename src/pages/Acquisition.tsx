@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Globe2, LifeBuoy, Mail, Send, ShieldCheck } from 'lucide-react';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
 import {
+  ACQUISITION_ASSETS_BASE,
   ACQUISITION_OG_IMAGE,
+  ACQUISITION_PRODUCT_SHOTS,
   ACQUISITION_URL,
+  type AcquisitionProductShotId,
 } from '../config/acquisition';
 import { WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError } from '../services/apiClient';
@@ -23,6 +26,49 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
     document.head.appendChild(el);
   }
   for (const [key, value] of Object.entries(attributes)) el.setAttribute(key, value);
+}
+
+function AcquisitionProductShot({
+  shotId,
+  alt,
+  caption,
+  variant = 'wide',
+}: {
+  shotId: AcquisitionProductShotId;
+  alt: string;
+  caption: string;
+  variant?: 'wide' | 'narrow';
+}) {
+  const shot = ACQUISITION_PRODUCT_SHOTS[shotId];
+  const [failed, setFailed] = useState(false);
+  const webp = `${ACQUISITION_ASSETS_BASE}/${shot.file}.webp`;
+  const png = `${ACQUISITION_ASSETS_BASE}/${shot.file}.png`;
+  const sizes = variant === 'narrow' ? '280px' : '(max-width: 1080px) calc(100vw - 32px), 1080px';
+  return (
+    <figure className={`acquisition-shot acquisition-shot--${variant}`}>
+      <div className="acquisition-shot-frame" style={{ aspectRatio: `${shot.width} / ${shot.height}` }}>
+        {failed ? (
+          <p className="acquisition-shot-fallback">{alt}</p>
+        ) : (
+          <picture>
+            <source srcSet={webp} type="image/webp" />
+            <img
+              src={png}
+              srcSet={`${png} ${shot.width}w`}
+              sizes={sizes}
+              width={shot.width}
+              height={shot.height}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+              onError={() => setFailed(true)}
+            />
+          </picture>
+        )}
+      </div>
+      <figcaption>{caption}</figcaption>
+    </figure>
+  );
 }
 
 function AcquisitionPitchPreview() {
@@ -229,6 +275,7 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
           <ul className="acquisition-pills">
             {text.audiences.map((item) => <li key={item}>{item}</li>)}
           </ul>
+          <AcquisitionProductShot shotId="home" alt={text.shots.home.alt} caption={text.shots.home.caption} />
         </section>
 
         <section id="acquisition-thesis" className="panel">
@@ -258,6 +305,8 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
               </article>
             ))}
           </div>
+          <AcquisitionProductShot shotId="matchCenter" alt={text.shots.matchCenter.alt} caption={text.shots.matchCenter.caption} />
+          <p className="acquisition-footnote">{text.shotArchiveNote}</p>
           <p className="settings-note">{text.lifecycleTitle}</p>
           <ol className="acquisition-timeline">
             {text.lifecycle.map((item) => <li key={item}>{item}</li>)}
@@ -269,12 +318,15 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
           <p className="eyebrow">WORKSPACE</p>
           <h2>{text.howTitle}</h2>
           <p>{text.howBody}</p>
+          <AcquisitionProductShot shotId="login" alt={text.shots.login.alt} caption={text.shots.login.caption} />
+          <AcquisitionProductShot shotId="profile" alt={text.shots.profile.alt} caption={text.shots.profile.caption} />
         </section>
 
         <section className="panel acquisition-tactical">
           <p className="eyebrow">TACTICAL</p>
           <h2>{text.tacticalTitle}</h2>
           <p>{text.tacticalBody}</p>
+          <AcquisitionProductShot shotId="tactical" alt={text.shots.tactical.alt} caption={text.shots.tactical.caption} />
           <AcquisitionPitchPreview />
           <p className="acquisition-caption">{text.tacticalCaption}</p>
         </section>
@@ -302,6 +354,8 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
           <p className="eyebrow">CURRENT</p>
           <h2>{text.implementedTitle}</h2>
           <ul className="acquisition-list">{text.implemented.map((item) => <li key={item}>{item}</li>)}</ul>
+          <AcquisitionProductShot shotId="mobile" variant="narrow" alt={text.shots.mobile.alt} caption={text.shots.mobile.caption} />
+          <AcquisitionProductShot shotId="stadiums" alt={text.shots.stadiums.alt} caption={text.shots.stadiums.caption} />
         </section>
 
         <section id="acquisition-evolution" className="panel">

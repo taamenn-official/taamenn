@@ -85,8 +85,39 @@ export const acquisitionCopy = {
     howTitle: 'كيف يعمل',
     howBody: 'المستخدم العادي ينشئ ملفاً محلياً بلا حساب. المباريات والخطط والإشعارات تُكتب في IndexedDB. العضو المميز مسار اختياري على الخادم: معرّف يفتح سجلاً تاريخياً للقراءة فقط. رسائل الدعم تُرسل عبر الخادم نفسه.',
     tacticalTitle: 'الملعب التكتيكي',
-    tacticalBody: 'اللوح الحقيقي في التطبيق لوحة محلية بنسبة مئوية على ملعب CSS. الإحداثيات x/y هي مصدر الموقع، والمركز يُشتق منها. التشكيلات (ماسة، مربع، هرم، ضغط Y، مرتدة) تطبَّق على عشرة لاعبين. الحفظ في IndexedDB. المشاركة ترسل وصفاً نصياً أو لقطة PNG عبر محفظة الالتقاط. الشكل أدناه يعيد استخدام هندسة الملعب الحالية — ليس لقطة مخترعة.',
+    tacticalBody: 'اللوح الحقيقي في التطبيق لوحة محلية بنسبة مئوية على ملعب CSS. الإحداثيات x/y هي مصدر الموقع، والمركز يُشتق منها. التشكيلات (ماسة، مربع، هرم، ضغط Y، مرتدة) تطبَّق على عشرة لاعبين. الحفظ في IndexedDB. المشاركة ترسل وصفاً نصياً أو لقطة PNG عبر محفظة الالتقاط. اللقطة أدناه من المنتج الحي. الشكل الهندسي الذي يليها يعيد استخدام هندسة الملعب الحالية — ليس لقطة مخترعة.',
     tacticalCaption: 'معاينة هندسية من لوح التكتيك الحي (تشكيلة الماسة). ليست لقطة شاشة تسويقية.',
+    shotArchiveNote: 'لا توجد لقطة لشاشة السجل في هذه المجموعة. مركز المباريات يُعرض لإدارة المباريات، وليس بديلاً عن السجل. السجل يبقى إسقاطاً للمباريات المكتملة كما هو موصوف في النص.',
+    shots: {
+      home: {
+        alt: 'الشاشة الرئيسية في TAAMEN 2.0 لملف محلي باسم alex، مع بطاقات السجل والمباريات المحسومة والتعادلات عند صفر، واختصار للأماكن.',
+        caption: 'منتج حي: الرئيسية بعد إنشاء ملف محلي. بطاقات ملخص السجل / المحسوم / التعادلات، واختصار للأماكن. الأعداد الظاهرة أصفار على هذا الجهاز — ليست مقاييس نمو.',
+      },
+      matchCenter: {
+        alt: 'مركز المباريات في TAAMEN 2.0 بحالة فارغة: لا مباريات حالية، مع إجراءات إنشاء مباراة وإنشاء أول مباراة.',
+        caption: 'إدارة المباريات: مركز المباريات بلا مواعيد قادمة. إنشاء مباراة يبدأ مواجهة محلية على هذا الجهاز. هذه الشاشة ليست السجل.',
+      },
+      login: {
+        alt: 'نموذج إعداد الملف في TAAMEN 2.0: صورة اختيارية تُحفظ محلياً، الاسم الأول، حقول تواصل اختيارية، وموافقة الخصوصية.',
+        caption: 'طبقة اللاعب — الإعداد: الاسم الأول مطلوب؛ اسم العائلة والبريد والهاتف اختيارية وتُحفظ على الجهاز. هذه بداية استخدام محلية، وليست تسجيل دخول لحساب سحابي.',
+      },
+      profile: {
+        alt: 'شاشة الملف في TAAMEN 2.0 لملف محلي باسم alex، مع مشاركة عامة وحفظ الملف وتحرير الحقول.',
+        caption: 'طبقة اللاعب — الملف: هوية محلية. المشاركة العامة وحفظ الملف على هذه الشاشة. البيانات الشخصية تبقى على الجهاز ما لم يشارك المستخدم ملفاً عاماً.',
+      },
+      tactical: {
+        alt: 'اللوح التكتيكي في TAAMEN 2.0 بتشكيلة الماسة 1-2-1 ولاعبين على الملعب، مع أزرار التشكيلات وتركيز الملعب.',
+        caption: 'لقطة حقيقية من الملعب التكتيكي (اللوح التكتيكي) بتشكيلة الماسة 1-2-1. الشكل الهندسي التالي يعيد استخدام مكوّن الملعب الحي — وليس لقطة شاشة.',
+      },
+      mobile: {
+        alt: 'الرئيسية على الجوال في TAAMEN 2.0 لملف محلي باسم alex، مع شريط سفلي: الرئيسية والسجل ومركز المباريات والملعب التكتيكي والملف والإعدادات.',
+        caption: 'PWA على الجوال: الرئيسية مع التنقل السفلي (الرئيسية، السجل، مركز المباريات، الملعب التكتيكي، الملف، الإعدادات). الاستحواذ ليس في هذا الشريط.',
+      },
+      stadiums: {
+        alt: 'شاشة الملاعب في TAAMEN 2.0 تعرض ملاعب في الخليل مع حقل بحث: القصراوي، الأهلي، سيدات الخليل، الشريف، والسلام.',
+        caption: 'بنية كرة القدم — الملاعب: قائمة مع بحث. السجلات الظاهرة ملاعب في الخليل موجودة في المنتج (القصراوي، الأهلي، سيدات الخليل، الشريف، السلام). بيانات بنية تحتية، وليست ادّعاء شراكة.',
+      },
+    },
     architectureTitle: 'العمارة الحالية',
     architectureIntro: 'مساران واضحان: محلي أولاً للاستخدام العادي، وWorker على المنشأ نفسه للخدمات المحدودة.',
     architectureNow: 'حالي',
@@ -316,8 +347,39 @@ export const acquisitionCopy = {
     howTitle: 'How it works',
     howBody: 'A normal user creates a local profile with no account. Matches, plans, and notices write to IndexedDB. Featured Member is an optional server path: an identifier opens a read-only historical record. Support messages post through the same-origin Worker.',
     tacticalTitle: 'Tactical Playground',
-    tacticalBody: 'The real board is a local, percentage-based pitch built in CSS. x/y coordinates are the source of position; role labels are derived from them. Formations (diamond, square, pyramid, Y press, counter) apply to ten players. Plans persist in IndexedDB. Sharing sends a text description or a PNG via Capture Wallet. The figure reuses the live pitch geometry — it is not a fabricated screenshot.',
+    tacticalBody: 'The real board is a local, percentage-based pitch built in CSS. x/y coordinates are the source of position; role labels are derived from them. Formations (diamond, square, pyramid, Y press, counter) apply to ten players. Plans persist in IndexedDB. Sharing sends a text description or a PNG via Capture Wallet. The product screenshot below is the live Tactical Board. The geometric figure after it reuses the live pitch geometry — it is not a fabricated screenshot.',
     tacticalCaption: 'Geometric preview from the live tactical board (diamond formation). Not a marketing screenshot.',
+    shotArchiveNote: 'There is no Archive screenshot in this set. Match Center is shown for match management, not as a stand-in for Archive. Archive remains a projection of completed matches, described in the text.',
+    shots: {
+      home: {
+        alt: 'TAAMEN 2.0 Home for a local profile named alex, with Archive, Decided matches, and Draws cards at zero, plus a Venues shortcut.',
+        caption: 'Live product: Home after a local profile is created. Archive / decided / draws summary cards and a venues shortcut. Counts shown are zeros on this device — not growth metrics.',
+      },
+      matchCenter: {
+        alt: 'TAAMEN 2.0 Match Center empty state: No current matches, with Create match and Create first match actions.',
+        caption: 'Match management: Match Center with no upcoming fixtures. Create match starts a local fixture on this device. This screen is not Archive.',
+      },
+      login: {
+        alt: 'TAAMEN 2.0 profile setup form with optional photo stored locally, first name, optional contact fields, and privacy consent.',
+        caption: 'Player layer — setup: first name is required; family name, email, and phone are optional and stored on the device. This is local onboarding, not a cloud-account login.',
+      },
+      profile: {
+        alt: 'TAAMEN 2.0 Profile for a local profile named alex, with Public share, Save profile, and Edit profile fields.',
+        caption: 'Player layer — Profile: a local identity. Public share and Save profile are on this screen. Personal data stays on the device unless the user shares a public profile.',
+      },
+      tactical: {
+        alt: 'TAAMEN 2.0 Tactical Board with Diamond 1-2-1 selected and players on the pitch, plus formation and Focus pitch controls.',
+        caption: 'Real product screenshot of Tactical Playground (Tactical Board) with Diamond 1-2-1. The geometric figure that follows reuses the live pitch component — it is not a screenshot.',
+      },
+      mobile: {
+        alt: 'TAAMEN 2.0 mobile Home for a local profile named alex, with bottom navigation: Home, Archive, Match Center, Tactical Playground, Profile, and Settings.',
+        caption: 'Mobile PWA: Home with bottom navigation (Home, Archive, Match Center, Tactical Playground, Profile, Settings). Acquisition is not in this bar.',
+      },
+      stadiums: {
+        alt: 'TAAMEN 2.0 Stadiums list of Hebron venues with a search field: Al Qasrawi, Al Ahli, Hebron Women, Al Shareef, and Al Salam.',
+        caption: 'Football infrastructure — Stadiums: searchable list. Records shown are Hebron venues already in the product (Al Qasrawi, Al Ahli, Hebron Women, Al Shareef, Al Salam). Infrastructure data, not a partnership claim.',
+      },
+    },
     architectureTitle: 'Current architecture',
     architectureIntro: 'Two clear tracks: local-first for ordinary use, and a same-origin Worker for bounded services.',
     architectureNow: 'Current',

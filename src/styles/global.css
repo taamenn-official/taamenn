@@ -2059,6 +2059,48 @@ html[data-taamen-motion=reduce] .primary-action:hover,html[data-taamen-motion=re
   line-height:1.65;
   color:var(--muted);
 }
+.acquisition-shot{
+  margin:16px 0 0;
+  max-width:100%;
+}
+.acquisition-shot-frame{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  border-radius:14px;
+  border:1px solid var(--ta-line, var(--line));
+  background:rgba(8,22,28,.45);
+}
+.acquisition-shot-frame picture,
+.acquisition-shot-frame img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  object-fit:contain;
+}
+.acquisition-shot figcaption{
+  margin-top:8px;
+  font-size:12px;
+  line-height:1.65;
+  color:var(--muted);
+}
+.acquisition-shot--narrow{
+  max-width:280px;
+  margin-inline:auto;
+}
+.acquisition-shot-fallback{
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:120px;
+  padding:16px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
 .acquisition-pitch-frame{
   margin-top:16px;
   border-radius:16px;

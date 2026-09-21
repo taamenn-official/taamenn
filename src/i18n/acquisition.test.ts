@@ -34,3 +34,24 @@ test('acquisition copy does not invent traction, revenue, or sale banners', () =
   assert.match(acquisitionCopy.en.lede, /designed for|local-first workspace/i);
   assert.match(acquisitionCopy.en.whatBody, /designed for/);
 });
+
+test('product-shot copy is bilingual, factual, and does not relabel Match Center as Archive', () => {
+  assert.deepEqual(Object.keys(acquisitionCopy.ar.shots).sort(), Object.keys(acquisitionCopy.en.shots).sort());
+  assert.deepEqual(Object.keys(acquisitionCopy.en.shots).sort(), [
+    'home',
+    'login',
+    'matchCenter',
+    'mobile',
+    'profile',
+    'stadiums',
+    'tactical',
+  ]);
+  assert.equal('archive' in acquisitionCopy.en.shots, false);
+  assert.match(acquisitionCopy.en.shotArchiveNote, /no Archive screenshot/i);
+  assert.match(acquisitionCopy.ar.shotArchiveNote, /لا توجد لقطة لشاشة السجل/);
+  assert.match(acquisitionCopy.en.shots.matchCenter.caption, /Match Center/);
+  assert.match(acquisitionCopy.en.shots.matchCenter.caption, /not Archive/);
+  assert.doesNotMatch(acquisitionCopy.en.shots.matchCenter.caption, /this is Archive/i);
+  assert.match(acquisitionCopy.en.shots.tactical.caption, /not a screenshot/i);
+  assert.match(acquisitionCopy.en.tacticalCaption, /Not a marketing screenshot/);
+});
