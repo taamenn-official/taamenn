@@ -1979,6 +1979,7 @@ html[data-taamen-motion=reduce] .primary-action:hover,html[data-taamen-motion=re
   font-size:14px;
   font-weight:700;
   color:var(--text);
+  overflow-wrap:anywhere;
 }
 .acquisition-toc ol{
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -2078,6 +2079,17 @@ html[data-taamen-motion=reduce] .primary-action:hover,html[data-taamen-motion=re
   pointer-events:none;
   position:absolute;
   transform:translate(-50%,-50%);
+}
+.acquisition-pitch .player-token span{
+  width:18px;
+  height:18px;
+  font-size:8px;
+  box-shadow:none;
+}
+.acquisition-pitch .player-token small,
+.acquisition-pitch .player-token em,
+.acquisition-pitch .player-token i{
+  display:none;
 }
 .acquisition-compare{
   display:grid;
