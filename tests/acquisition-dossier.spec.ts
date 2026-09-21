@@ -126,8 +126,14 @@ test.describe('Acquisition dossier', () => {
     const imgs = page.locator('figure.acquisition-shot img');
     const count = await imgs.count();
     for (let i = 0; i < count; i += 1) {
-      await expect(imgs.nth(i)).toHaveAttribute('loading', 'lazy');
-      await expect(imgs.nth(i)).toHaveAttribute('alt', /TAAMEN 2\.0/);
+      const img = imgs.nth(i);
+      await img.scrollIntoViewIfNeeded();
+      await expect(img).toHaveAttribute('loading', 'lazy');
+      await expect(img).toHaveAttribute('alt', /TAAMEN 2\.0/);
+      await expect.poll(async () => img.evaluate((el) => {
+        const node = el as HTMLImageElement;
+        return node.complete && node.naturalWidth > 0;
+      })).toBe(true);
     }
   });
 });
