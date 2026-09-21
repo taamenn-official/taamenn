@@ -146,7 +146,7 @@ test.describe('TAAMEN production path', () => {
     await expect(page.getByRole('link', { name: /Open TAAMEN|افتح TAAMEN/ }).first()).toBeVisible();
     await page.getByRole('button', { name: /English|العربية/ }).first().click();
     await expect(page.locator('#acquisition-contact')).toBeVisible();
-    await expect(page.getByText(/No fake checkout|لا يوجد دفع وهمي/i)).toBeVisible();
+    await expect(page.locator('#acquisition-contact').getByText(/No fake checkout|لا يوجد دفع وهمي/i)).toBeVisible();
   });
 
   test('responsive viewports keep the shell usable', async ({ page }) => {

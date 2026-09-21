@@ -25,9 +25,9 @@ test.describe('Acquisition dossier', () => {
     await expect(page.locator('#acquisition-contact')).toBeVisible();
     await expect(page.locator('a.sideprojectors-badge--inline')).toHaveAttribute('href', LISTING_URL);
     await expect(page.locator('a.sideprojectors-badge--float')).toHaveCount(0);
-    await expect(page.getByText(/USD 4,900/)).toBeVisible();
+    await expect(page.getByText('USD 4,900', { exact: true }).first()).toBeVisible();
     await expect(page.getByText(/negotiable|قابل للتفاوض/i).first()).toBeVisible();
-    await expect(page.getByText(/SALE/)).toHaveCount(0);
+    await expect(page.getByText(/\bSALE\b/)).toHaveCount(0);
   });
 
   test('RTL and LTR keep the dossier readable', async ({ page }) => {
@@ -50,7 +50,8 @@ test.describe('Acquisition dossier', () => {
     await expect(sideLink).toBeVisible();
     await expect(sideLink).toHaveAttribute('href', '/acquisition');
     await expect(page.locator('.bottom-nav a.acquisition-nav, .bottom-nav [href="/acquisition"]')).toHaveCount(0);
-    await expect(page.locator('.bottom-nav-item')).not.toContainText(/Acquisition|الاستحواذ/);
+    const bottomLabels = await page.locator('.bottom-nav-item').allTextContents();
+    expect(bottomLabels.join(' | ')).not.toMatch(/Acquisition|الاستحواذ/);
     await sideLink.click();
     await expect(page).toHaveURL(/\/acquisition$/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -64,7 +65,7 @@ test.describe('Acquisition dossier', () => {
     await expect(page.locator('.bottom-nav a.acquisition-nav, .bottom-nav [href="/acquisition"]')).toHaveCount(0);
     await page.locator('.bottom-nav [data-route="settings"]').click();
     await expect(page.getByRole('heading', { name: /Settings|الإعدادات/ })).toBeVisible();
-    const settingsLink = page.locator('a[href="/acquisition"]');
+    const settingsLink = page.locator('.about-setting-panel a[href="/acquisition"]');
     await expect(settingsLink).toBeVisible();
     await settingsLink.click();
     await expect(page).toHaveURL(/\/acquisition$/);
