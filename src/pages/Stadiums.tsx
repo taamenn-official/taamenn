@@ -3,6 +3,7 @@ import { Search, MapPin, Phone, ChevronDown, ChevronUp, X, MessageCircle } from 
 import { searchStadiums } from '../data/stadiums';
 import { WHATSAPP_URL } from '../config/support';
 import { uiCopy } from '../i18n/translations';
+import AdSlot from '../components/monetization/AdSlot';
 
 type Language = 'ar' | 'en';
 
@@ -62,6 +63,8 @@ export default function Stadiums({ language }: { language: Language }) {
           )}
         </label>
       </div>
+
+      <AdSlot placement="stadiums" />
 
       {filteredStadiums.length > 0 ? (
         <div className="stadiums-list">

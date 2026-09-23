@@ -116,6 +116,13 @@
 
 html {
   text-size-adjust: 100%;
+  scrollbar-width: none;
+  overflow-x: clip;
+}
+
+html::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 body {
@@ -734,4 +741,136 @@ html[data-theme="light"] .entry-controls .language-switch {
   .hamburger-toggle {
     transition: none;
   }
+}
+
+/* ---------- Main column width ----------
+   The sidebar is fixed, so a 100% main column plus its offset margin
+   overflows the viewport. Width is the remaining space. */
+@media (max-width: 900px) {
+  .app-shell > .main-content,
+  .app-shell > .sidebar.is-collapsed ~ .main-content,
+  [dir="rtl"] .app-shell > .main-content,
+  [dir="rtl"] .app-shell > .sidebar.is-collapsed ~ .main-content {
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+  }
+}
+
+@media (min-width: 901px) {
+  .app-shell > .main-content {
+    box-sizing: border-box;
+    min-width: 0;
+    width: calc(100% - var(--sidebar-width));
+    max-width: calc(100% - var(--sidebar-width));
+    margin-inline-start: var(--sidebar-width);
+    margin-inline-end: 0;
+  }
+
+  .app-shell > .sidebar.is-collapsed ~ .main-content {
+    width: calc(100% - var(--sidebar-collapsed));
+    max-width: calc(100% - var(--sidebar-collapsed));
+    margin-inline-start: var(--sidebar-collapsed);
+    margin-inline-end: 0;
+  }
+
+  html[dir="rtl"] .app-shell > .sidebar {
+    inset-inline-start: auto;
+    inset-inline-end: auto;
+    left: auto;
+    right: 0;
+  }
+
+  html[dir="rtl"] .app-shell > .main-content {
+    margin-inline-start: var(--sidebar-width);
+    margin-inline-end: 0;
+  }
+
+  html[dir="rtl"] .app-shell > .sidebar.is-collapsed ~ .main-content {
+    width: calc(100% - var(--sidebar-collapsed));
+    max-width: calc(100% - var(--sidebar-collapsed));
+    margin-inline-start: var(--sidebar-collapsed);
+    margin-inline-end: 0;
+  }
+}
+
+/* ---------- Collapsed sidebar tooltips ----------
+   The tooltip sits on the physical content-facing edge of the sidebar.
+   LTR sidebar is on the left, so the tooltip is on the right.
+   RTL sidebar is on the right, so the tooltip is on the left.
+   Text direction stays with the document. */
+.app-shell > .sidebar.is-collapsed .side-nav,
+.app-shell > .sidebar.is-collapsed .nav-item {
+  overflow: visible;
+}
+
+html[dir="ltr"] .app-shell > .sidebar.is-collapsed .tooltip {
+  inset-inline-start: auto;
+  inset-inline-end: auto;
+  top: 50%;
+  left: calc(100% + 10px);
+  right: auto;
+  transform: translateY(-50%);
+}
+
+html[dir="rtl"] .app-shell > .sidebar.is-collapsed .tooltip {
+  inset-inline-start: auto;
+  inset-inline-end: auto;
+  top: 50%;
+  left: auto;
+  right: calc(100% + 10px);
+  transform: translateY(-50%);
+}
+
+.app-shell > .sidebar.is-collapsed .nav-item:hover .tooltip,
+.app-shell > .sidebar.is-collapsed .nav-item:focus .tooltip,
+.app-shell > .sidebar.is-collapsed .nav-item:focus-visible .tooltip {
+  opacity: 1;
+}
+
+/* ---------- Advertising slots ----------
+   Shown only when preview or a real AdSense unit is mounted.
+   An unmounted slot leaves no gap. */
+.ad-slot {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-block: var(--space-5);
+  min-height: 96px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(7, 19, 22, .45);
+  color: var(--text-muted);
+  display: grid;
+  align-content: center;
+  gap: var(--space-1);
+}
+
+.ad-slot-kicker,
+.ad-slot p {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+.ad-slot p {
+  font-size: var(--text-sm);
+}
+
+.ad-slot .adsbygoogle {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 90px;
+}
+
+html[data-theme="light"] .ad-slot {
+  background: rgba(25, 57, 64, .06);
+  color: var(--text-muted);
+  border-color: rgba(25, 57, 64, .12);
 }

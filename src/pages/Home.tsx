@@ -8,6 +8,7 @@ import { hasRecordedResult } from '../services/matchLifecycle';
 import { api, type Session } from '../services/apiClient';
 import { matchUiCopy, uiCopy } from '../i18n/translations';
 import { useHomeEntrance, useHomeMatchReveal } from '../motion/useHomeEntrance';
+import AdSlot from '../components/monetization/AdSlot';
 
 export default function Home({language,go,profile,session=null}:{language:'ar'|'en';go:(p:RouteId)=>void;profile?:{firstName:string};session?:Session|null}) {
   const ar=language==='ar';
@@ -64,6 +65,7 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
         <span className="home-venues-cta">{uiCopy[language].openVenues}</span>
       </button>
     </div>
+    <AdSlot placement="home" />
     <section className="panel archive-preview-panel" data-ta-motion="panel">
       <div className="panel-heading"><div><p className="eyebrow">{featured?'TAAMEN / HISTORY':(ar?'من السجل':'FROM THE ARCHIVE')}</p><h2>{ar?'أحدث المواجهات':'Latest matches'}</h2></div><button className="text-button" data-ta-icons onClick={()=>go(featured?'historical-match-center':'archive')}>{ar?'عرض الكل':'View all'}<ChevronRight size={15}/></button></div>
       <div className="home-match-list">{latest.map(m=><MatchCard key={m.id} match={m} language={language} featured={featured}/>)}</div>

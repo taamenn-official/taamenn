@@ -80,9 +80,13 @@ export default function NavActiveIndicator({
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => place(false));
     };
+    const onDirection = () => place(false);
+    const direction = new MutationObserver(onDirection);
+    direction.observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
+      direction.disconnect();
       cancelAnimationFrame(frame);
     };
   }, { dependencies: [activeKey, ...watch] });
