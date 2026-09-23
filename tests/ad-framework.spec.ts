@@ -59,14 +59,14 @@ async function expectIndicatorCoversActive(nav: Locator) {
   const active = nav.locator('.is-active');
   await expect(pill).toBeVisible();
   await expect(active).toBeVisible();
-  const pillBox = await pill.boundingBox();
-  const activeBox = await active.boundingBox();
-  expect(pillBox).toBeTruthy();
-  expect(activeBox).toBeTruthy();
-  if (!pillBox || !activeBox) return;
-  const x = Math.max(0, Math.min(pillBox.x + pillBox.width, activeBox.x + activeBox.width) - Math.max(pillBox.x, activeBox.x));
-  const y = Math.max(0, Math.min(pillBox.y + pillBox.height, activeBox.y + activeBox.height) - Math.max(pillBox.y, activeBox.y));
-  expect((x * y) / (activeBox.width * activeBox.height)).toBeGreaterThan(0.7);
+  await expect.poll(async () => {
+    const pillBox = await pill.boundingBox();
+    const activeBox = await active.boundingBox();
+    if (!pillBox || !activeBox || activeBox.height === 0) return 0;
+    const x = Math.max(0, Math.min(pillBox.x + pillBox.width, activeBox.x + activeBox.width) - Math.max(pillBox.x, activeBox.x));
+    const y = Math.max(0, Math.min(pillBox.y + pillBox.height, activeBox.y + activeBox.height) - Math.max(pillBox.y, activeBox.y));
+    return (x * y) / (activeBox.width * activeBox.height);
+  }).toBeGreaterThan(0.7);
 }
 
 async function expectTooltipSide(page: Page, dir: 'ltr' | 'rtl') {

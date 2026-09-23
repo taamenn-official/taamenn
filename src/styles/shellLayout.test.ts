@@ -40,8 +40,9 @@ test('main content width is the space beside the sidebar', () => {
   const desktop = section(shellCss, '@media (min-width: 901px) {\n  .app-shell > .main-content {', '/* ---------- Collapsed sidebar tooltips');
   assert.match(desktop, /width:\s*calc\(100% - var\(--sidebar-width\)\)/);
   assert.match(desktop, /width:\s*calc\(100% - var\(--sidebar-collapsed\)\)/);
-  assert.match(desktop, /margin-inline-end:\s*var\(--sidebar-width\)/);
-  assert.match(desktop, /margin-inline-end:\s*var\(--sidebar-collapsed\)/);
+  assert.match(desktop, /margin-inline-start:\s*var\(--sidebar-width\)/);
+  assert.match(desktop, /margin-inline-start:\s*var\(--sidebar-collapsed\)/);
+  assert.match(desktop, /right:\s*0/);
   assert.equal(desktop.includes('!important'), false);
   assert.equal(/margin(?:-inline)?\s*:\s*-/.test(desktop), false);
   const mobile = section(shellCss, '@media (max-width: 900px) {\n  .app-shell > .main-content', '@media (min-width: 901px)');

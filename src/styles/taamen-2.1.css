@@ -777,14 +777,23 @@ html[data-theme="light"] .entry-controls .language-switch {
     margin-inline-end: 0;
   }
 
-  [dir="rtl"] .app-shell > .main-content {
-    margin-inline-start: 0;
-    margin-inline-end: var(--sidebar-width);
+  html[dir="rtl"] .app-shell > .sidebar {
+    inset-inline-start: auto;
+    inset-inline-end: auto;
+    left: auto;
+    right: 0;
   }
 
-  [dir="rtl"] .app-shell > .sidebar.is-collapsed ~ .main-content {
-    margin-inline-start: 0;
-    margin-inline-end: var(--sidebar-collapsed);
+  html[dir="rtl"] .app-shell > .main-content {
+    margin-inline-start: var(--sidebar-width);
+    margin-inline-end: 0;
+  }
+
+  html[dir="rtl"] .app-shell > .sidebar.is-collapsed ~ .main-content {
+    width: calc(100% - var(--sidebar-collapsed));
+    max-width: calc(100% - var(--sidebar-collapsed));
+    margin-inline-start: var(--sidebar-collapsed);
+    margin-inline-end: 0;
   }
 }
 
