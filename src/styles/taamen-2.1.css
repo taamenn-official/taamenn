@@ -209,7 +209,7 @@ body {
 }
 
 .app-shell .notification-button,
-.app-shell .theme-toggle {
+.theme-toggle {
   width: var(--control-height);
   height: var(--control-height);
   min-width: var(--control-height);
