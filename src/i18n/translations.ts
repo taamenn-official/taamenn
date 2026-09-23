@@ -401,3 +401,22 @@ export const uiCopy = {
   acquisitionSettingsOpen:'Open acquisition dossier'
  }
 } as const;
+
+export const shellCopy = {
+  ar: {
+    languageSwitch: 'التبديل إلى English',
+    themeToLight: 'تفعيل المظهر الفاتح',
+    themeToDark: 'تفعيل المظهر الداكن',
+    themeLabel: 'المظهر',
+    themeDark: 'داكن',
+    themeLight: 'فاتح',
+  },
+  en: {
+    languageSwitch: 'Switch to العربية',
+    themeToLight: 'Use light theme',
+    themeToDark: 'Use dark theme',
+    themeLabel: 'Theme',
+    themeDark: 'Dark',
+    themeLight: 'Light',
+  },
+} as const;

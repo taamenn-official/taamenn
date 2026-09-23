@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Globe2, LifeBuoy, Mail, Send, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, LifeBuoy, Mail, Send, ShieldCheck } from 'lucide-react';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
 import {
   ACQUISITION_ASSETS_BASE,
@@ -11,6 +11,8 @@ import {
 import { WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError } from '../services/apiClient';
 import { uiCopy, type Language } from '../i18n/translations';
+import { LanguageSwitch, ThemeToggle } from '../components/ShellControls';
+import type { TaamenTheme } from '../theme/theme';
 import { acquisitionCopy } from '../i18n/acquisition';
 import TaamenAmbientBackground from '../components/ui/taamen-ambient-background';
 import { SideProjectorsBadge } from '../components/SideProjectorsBadge';
@@ -109,7 +111,7 @@ function AcquisitionPitchPreview() {
   );
 }
 
-export default function Acquisition({ language, onLanguage }: { language: Language; onLanguage: () => void }) {
+export default function Acquisition({ language, onLanguage, theme, onTheme }: { language: Language; onLanguage: () => void; theme: TaamenTheme; onTheme: () => void }) {
   const ar = language === 'ar';
   const text = acquisitionCopy[language];
   const support = uiCopy[language];
@@ -213,10 +215,8 @@ export default function Acquisition({ language, onLanguage }: { language: Langua
           <span>TAAMEN 2.0</span>
         </a>
         <div className="acquisition-top-actions">
-          <button type="button" className="language-button" onClick={onLanguage}>
-            <Globe2 size={14} />
-            {ar ? 'English' : 'العربية'}
-          </button>
+          <LanguageSwitch language={language} onLanguage={onLanguage} />
+          <ThemeToggle theme={theme} onTheme={onTheme} language={language} />
           <a className="dark-action" href="/">{text.openApp}</a>
         </div>
       </header>
