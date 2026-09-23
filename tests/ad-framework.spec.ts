@@ -99,25 +99,31 @@ test.beforeEach(({ }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'viewports are set inside each test');
 });
 
-test('default build renders no ad and does not call Google advertising', async ({ page }) => {
-  const urls: string[] = [];
-  page.on('request', request => urls.push(request.url()));
+const VERIFICATION_SRC = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7265269139254398';
+
+async function expectVerificationScriptOnce(page: Page) {
+  const scripts = page.locator(`script[src="${VERIFICATION_SRC}"]`);
+  await expect(scripts).toHaveCount(1);
+  await expect(page.locator('#taamen-adsense')).toHaveCount(0);
+  await expect(page.locator('[data-ad-slot]')).toHaveCount(0);
+}
+
+test('default build shows the verification script once and no visible ad', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await boot(page, 'en');
   await expect(page.locator('.ad-slot')).toHaveCount(0);
-  await expect(page.locator('script[src*="googlesyndication"]')).toHaveCount(0);
+  await expectVerificationScriptOnce(page);
   for (const hash of ['tactical', 'settings', 'support', 'match-center', 'profile']) {
     await page.goto(`/#${hash}`);
     await expect(page.locator('.ad-slot')).toHaveCount(0);
+    await expectVerificationScriptOnce(page);
   }
   await page.goto('/acquisition');
   await expect(page.locator('.ad-slot')).toHaveCount(0);
-  expect(urls.some(url => /googlesyndication|doubleclick|adservice\.google/.test(url))).toBeFalsy();
+  await expectVerificationScriptOnce(page);
 });
 
 test('preview slots stay on home, stadiums, and archive only', async ({ page }) => {
-  const urls: string[] = [];
-  page.on('request', request => urls.push(request.url()));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => localStorage.setItem('taamen-language', 'en'));
@@ -129,7 +135,7 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   await expect(page.locator('.ad-slot-preview')).toHaveCount(1);
   await expect(page.getByRole('region', { name: 'Advertisement' })).toBeVisible();
   await expect(page.locator('.ad-slot a, .ad-slot button')).toHaveCount(0);
-  await expect(page.locator('script[src*="googlesyndication"]')).toHaveCount(0);
+  await expectVerificationScriptOnce(page);
 
   await page.goto(`${PREVIEW}/#stadiums`);
   await expect(page.locator('.ad-slot')).toHaveCount(1);
@@ -142,7 +148,7 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   }
   await page.goto(`${PREVIEW}/acquisition`);
   await expect(page.locator('.ad-slot')).toHaveCount(0);
-  expect(urls.some(url => /googlesyndication|doubleclick|adservice\.google/.test(url))).toBeFalsy();
+  await expectVerificationScriptOnce(page);
 });
 
 test('desktop LTR expanded and collapsed tooltip and indicator stay inside the viewport', async ({ page }) => {
