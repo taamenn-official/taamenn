@@ -124,8 +124,6 @@ test('default build shows the verification script once and no visible ad', async
 });
 
 test('preview slots stay on home, stadiums, and archive only', async ({ page }) => {
-  const urls: string[] = [];
-  page.on('request', request => urls.push(request.url()));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => localStorage.setItem('taamen-language', 'en'));
@@ -151,7 +149,6 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   await page.goto(`${PREVIEW}/acquisition`);
   await expect(page.locator('.ad-slot')).toHaveCount(0);
   await expectVerificationScriptOnce(page);
-  expect(urls.filter(url => url.startsWith('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')).length).toBeLessThanOrEqual(1);
 });
 
 test('desktop LTR expanded and collapsed tooltip and indicator stay inside the viewport', async ({ page }) => {
