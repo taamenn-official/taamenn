@@ -21,6 +21,8 @@ function fakeDocument(): AdSenseDocument & { nodes: AdSenseScriptElement[] } {
       return nodes.find(node => node.id === id) ?? null;
     },
     querySelector(selector) {
+      const exact = selector.match(/script\[src="([^"]+)"\]/)?.[1];
+      if (exact) return nodes.find(node => node.src === exact) ?? null;
       const src = selector.match(/script\[src\^="([^"]+)"\]/)?.[1];
       if (!src) return null;
       return nodes.find(node => node.src.startsWith(src)) ?? null;
@@ -58,6 +60,25 @@ test('a real publisher id loads the official script once', () => {
   assert.equal(doc.nodes[0].crossOrigin, 'anonymous');
   assert.equal(doc.nodes[0].src, `${ADSENSE_SCRIPT_BASE}?client=${clientId}`);
   assert.equal(doc.nodes[0].src.includes('analytics.ahrefs.com'), false);
+});
+
+test('the loader skips the site-verification script already in the document head', () => {
+  resetAdSenseForTests();
+  const html = fs.readFileSync(fileURLToPath(new URL('../../index.html', import.meta.url)), 'utf8');
+  const src = html.match(/src="(https:\/\/pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=ca-pub-\d+)"/)?.[1];
+  assert.ok(src);
+  const clientId = new URL(src).searchParams.get('client') ?? '';
+  const doc = fakeDocument();
+  doc.nodes.push({
+    id: '',
+    src,
+    async: true,
+    crossOrigin: 'anonymous',
+    onerror: null,
+  });
+  assert.equal(ensureAdSenseScript(clientId, doc), false);
+  assert.equal(doc.nodes.length, 1);
+  assert.equal(doc.nodes[0].src, src);
 });
 
 test('a failed ad push does not throw', () => {

@@ -33,13 +33,21 @@ export function adsenseScriptUrl(clientId: string): string | null {
   return `${ADSENSE_SCRIPT_BASE}?client=${encodeURIComponent(clientId.trim())}`;
 }
 
+function documentAlreadyLoadsAdSense(target: AdSenseDocument, src: string): boolean {
+  return Boolean(
+    target.getElementById(ADSENSE_SCRIPT_ID)
+    || target.querySelector(`script[src="${src}"]`)
+    || target.querySelector(`script[src^="${ADSENSE_SCRIPT_BASE}"]`),
+  );
+}
+
 /** Returns true only when this call inserted the script. */
 export function ensureAdSenseScript(clientId: string | undefined, doc?: AdSenseDocument): boolean {
   const src = clientId ? adsenseScriptUrl(clientId) : null;
   if (!src) return false;
   const target = doc ?? (typeof document === 'undefined' ? undefined : document as unknown as AdSenseDocument);
   if (!target) return false;
-  if (started || target.getElementById(ADSENSE_SCRIPT_ID) || target.querySelector(`script[src^="${ADSENSE_SCRIPT_BASE}"]`)) {
+  if (started || documentAlreadyLoadsAdSense(target, src)) {
     started = true;
     return false;
   }

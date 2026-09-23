@@ -122,23 +122,41 @@ test('AdSlot is mounted only on home, stadiums, and archive', () => {
   assert.deepEqual(hits.sort(), [...allowed].filter(file => file.endsWith('.tsx') && file !== 'src/components/monetization/AdSlot.tsx').sort());
 });
 
-test('source and public files contain no publisher id and no ads.txt', () => {
+test('index.html contains the AdSense site-verification script exactly once', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const script = [
+    '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7265269139254398"',
+    '     crossorigin="anonymous"></script>',
+  ].join('\n');
+  assert.equal(html.split(script).length - 1, 1);
+  assert.equal(html.indexOf(script) < html.indexOf('</head>'), true);
+  assert.equal((html.match(/googlesyndication/g) ?? []).length, 1);
+  assert.equal((html.match(/ca-pub-\d+/g) ?? []).join(','), 'ca-pub-7265269139254398');
+  assert.equal(html.includes('enable_page_level_ads'), false);
+  assert.equal(html.includes('data-ad-client'), false);
+  assert.equal(html.includes('data-ad-slot'), false);
+  assert.equal(html.includes('<AdSlot'), false);
+});
+
+test('source and public files contain no extra publisher id and no ads.txt', () => {
   assert.equal(fs.existsSync(path.join(root, 'public/ads.txt')), false);
+  assert.equal(fs.existsSync(path.join(root, 'ads.txt')), false);
   const scan = (dir: string) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || entry.name === 'dist') continue;
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) scan(full);
+      else if (/\.test\.ts$/.test(entry.name)) continue;
       else if (/\.(ts|tsx|js|mjs|html|css|txt|json|jsonc|example)$/.test(entry.name)) {
         const text = fs.readFileSync(full, 'utf8');
         assert.equal(/ca-pub-\d/.test(text), false, full);
-        assert.equal(text.includes('pagead2.googlesyndication.com') && entry.name === 'index.html', false);
+        assert.equal(text.includes('enable_page_level_ads'), false, full);
+        if (text.includes('pagead2.googlesyndication.com')) {
+          assert.equal(full.endsWith(`${path.sep}src${path.sep}monetization${path.sep}adsense.ts`), true, full);
+        }
       }
     }
   };
   scan(path.join(root, 'src'));
   scan(path.join(root, 'public'));
-  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  assert.equal(html.includes('googlesyndication'), false);
-  assert.equal(html.includes('adsbygoogle'), false);
 });
