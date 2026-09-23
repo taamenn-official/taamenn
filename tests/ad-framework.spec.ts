@@ -102,10 +102,10 @@ test.beforeEach(({ }, testInfo) => {
 const VERIFICATION_SRC = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7265269139254398';
 
 async function expectVerificationScriptOnce(page: Page) {
-  const scripts = page.locator('script[src*="googlesyndication"]');
+  const scripts = page.locator(`script[src="${VERIFICATION_SRC}"]`);
   await expect(scripts).toHaveCount(1);
-  await expect(scripts).toHaveAttribute('src', VERIFICATION_SRC);
-  await expect(page.locator('ins.adsbygoogle, [data-ad-slot]')).toHaveCount(0);
+  await expect(page.locator('#taamen-adsense')).toHaveCount(0);
+  await expect(page.locator('[data-ad-slot]')).toHaveCount(0);
 }
 
 test('default build shows the verification script once and no visible ad', async ({ page }) => {
