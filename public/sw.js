@@ -9,6 +9,8 @@ self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET') return;
   const url=new URL(event.request.url);
   // Never cache or serve API traffic: responses are per-session and private.
+  // Other origins (analytics, fonts, future ad hosts) are never cached or required.
+  // Do not put future commercial config into CORE or this runtime cache.
   if(url.origin!==location.origin || url.pathname.startsWith('/api/')) return;
   // Share tokens are unique URLs. Do not fill Cache Storage with them.
   // Network first, then the SPA shell so React can decode the still-current path.

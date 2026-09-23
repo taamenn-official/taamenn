@@ -21,6 +21,9 @@ import { gsap, useGSAP } from './motion/gsapRuntime';
 import { EASE, MOTION } from './motion/tokens';
 import { applyMotionPreference, prefersReducedMotion } from './motion/prefersReduced';
 import { getItem } from './services/localDb';
+import { analyticsEnabled, syncAhrefsAnalytics } from './services/analytics';
+import { legalDocumentForPath } from './config/publicRoutes';
+import LegalDocument from './pages/LegalDocument';
 import { peekHomeReveal } from './motion/revealState';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
@@ -152,6 +155,7 @@ export default function App(){
  const pathName=(window.location.pathname.replace(/\/+$/, '')||'/');
  const sharePath=pathName.match(/^\/share\/(match|profile)\/(.+)$/);
  const isAcquisition=pathName==='/acquisition';
+ const legalDocument=legalDocumentForPath(pathName);
  const[language,setLanguage]=useState<Language>(()=>(localStorage.getItem('taamen-language') as Language)||'ar');
  const[profile,setProfile]=useState<LocalProfile>();
  const[boot,setBoot]=useState(true);
@@ -163,7 +167,7 @@ export default function App(){
  useEffect(()=>{installService.init();const onUpdate=()=>setUpdateAvailable(true);window.addEventListener('taamen-sw-update',onUpdate);return()=>window.removeEventListener('taamen-sw-update',onUpdate)},[]);
  useEffect(()=>{document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';localStorage.setItem('taamen-language',language)},[language]);
  // The Settings motion switch has to apply from boot, not only while Settings is open.
- useEffect(()=>{getItem<{motion?:boolean}>('settings','privacy').then(v=>applyMotionPreference(v?.motion!==false)).catch(()=>{})},[]);
+ useEffect(()=>{getItem<{motion?:boolean;analytics?:boolean}>('settings','privacy').then(v=>{applyMotionPreference(v?.motion!==false);syncAhrefsAnalytics(analyticsEnabled(v))}).catch(()=>{})},[]);
 
  // The server owns session state. Local storage never records who is signed in.
  useEffect(()=>{
@@ -194,6 +198,7 @@ export default function App(){
   setLanguage('ar');
  },[]);
 
+ if(legalDocument)return <ErrorBoundary language={language} label={legalDocument}><LegalDocument language={language} onLanguage={toggle} documentId={legalDocument}/></ErrorBoundary>;
  if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}><Acquisition language={language} onLanguage={toggle}/></Suspense></ErrorBoundary>;
  if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])}/>;
  if(boot)return <div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>;

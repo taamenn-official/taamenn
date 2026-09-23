@@ -29,6 +29,17 @@ test('spa fallback is a no-op when the path is already restored', () => {
   );
 });
 
+test('spa fallback restores public legal paths after a static 404 bounce to /', () => {
+  assert.equal(
+    spaFallbackNextPath('https://taamenn.com/privacy', 'https://taamenn.com', 'https://taamenn.com/'),
+    '/privacy',
+  );
+  assert.equal(
+    spaFallbackNextPath('https://taamenn.com/terms', 'https://taamenn.com', 'https://taamenn.com/'),
+    '/terms',
+  );
+});
+
 test('spa fallback restores /acquisition after a static 404 bounce to /', () => {
   assert.equal(
     spaFallbackNextPath(
