@@ -28,6 +28,8 @@ import { peekHomeReveal } from './motion/revealState';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
 import { uiCopy } from './i18n/translations';
+import { LanguageSwitch, ThemeToggle } from './components/ShellControls';
+import { applyTheme, nextTheme, readTheme, type TaamenTheme } from './theme/theme';
 import './styles/global.css';
 import './styles/taamen-ambient-background.css';
 
@@ -47,22 +49,24 @@ type ShellProps={
  onProfile:(p:LocalProfile)=>void;
  onReset:()=>void;
  onLanguage:()=>void;
+ theme:TaamenTheme;
+ onTheme:()=>void;
  onSession:(s:Session)=>void;
  onSignOut:()=>void;
  /** Lets App keep the ambient atmosphere in sync with the visible route. */
  onPage:(p:RouteId)=>void;
 };
 
-function RouteView({page,language,profile,go,onProfile,onReset,onLanguage,session,onSession,onSignOut,registerLeaveGuard}:ShellProps&{page:RouteId;go:(p:RouteId)=>void;registerLeaveGuard:(guard:(()=>boolean)|null)=>void}){
+function RouteView({page,language,profile,go,onProfile,onReset,onLanguage,theme,onTheme,session,onSession,onSignOut,registerLeaveGuard}:ShellProps&{page:RouteId;go:(p:RouteId)=>void;registerLeaveGuard:(guard:(()=>boolean)|null)=>void}){
  const common={language};
  const scope=scopeFor(session);
  return <ErrorBoundary language={language} label={page}><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}>
-  {page==='home'&&<Home {...common} profile={profile} go={go} session={session}/>} {page==='archive'&&scope==='normal'&&<Archive {...common}/>} {page==='match-center'&&scope==='normal'&&<Matches {...common}/>} {page==='historical-match-center'&&scope==='featured'&&<HistoricalMatchCenter {...common} onExitFeatured={onSignOut}/>} {page==='tactical'&&scope==='normal'&&<Tactical {...common}/>} {page==='stadiums'&&<Stadiums {...common}/>} {page==='profile'&&scope==='normal'&&<Profile language={language} profile={profile} onProfile={onProfile} session={session} registerLeaveGuard={registerLeaveGuard}/>} {page==='support'&&<Support language={language} profile={profile}/>} {page==='settings'&&<Settings language={language} profile={profile} onLanguage={onLanguage} onReset={onReset} onProfile={onProfile} session={session} onSession={onSession} onSignOut={onSignOut}/>}
+  {page==='home'&&<Home {...common} profile={profile} go={go} session={session}/>} {page==='archive'&&scope==='normal'&&<Archive {...common}/>} {page==='match-center'&&scope==='normal'&&<Matches {...common}/>} {page==='historical-match-center'&&scope==='featured'&&<HistoricalMatchCenter {...common} onExitFeatured={onSignOut}/>} {page==='tactical'&&scope==='normal'&&<Tactical {...common}/>} {page==='stadiums'&&<Stadiums {...common}/>} {page==='profile'&&scope==='normal'&&<Profile language={language} profile={profile} onProfile={onProfile} session={session} registerLeaveGuard={registerLeaveGuard}/>} {page==='support'&&<Support language={language} profile={profile}/>} {page==='settings'&&<Settings language={language} profile={profile} onLanguage={onLanguage} theme={theme} onTheme={onTheme} onReset={onReset} onProfile={onProfile} session={session} onSession={onSession} onSignOut={onSignOut}/>}
  </Suspense></ErrorBoundary>;
 }
 
 function MainShell(props:ShellProps){
- const {language,profile,session,onLanguage,onPage}=props;
+ const {language,profile,session,onLanguage,theme,onTheme,onPage}=props;
  const ar=language==='ar';const scope=scopeFor(session);
  const routes=useMemo(()=>routesForScope(scope),[scope]);const mobileRoutes=useMemo(()=>routesForMobileNav(scope),[scope]);const desktopSections=useMemo(()=>routesBySection(scope),[scope]);const desktopRoutes=useMemo(()=>routesForDesktopNav(scope),[scope]);const labels=routeRegistry.reduce((a,r)=>(a[r.id]=r.label[language],a),{} as Record<string,string>);const sectionLabels:{core:{ar:string;en:string};football:{ar:string;en:string};personal:{ar:string;en:string};system:{ar:string;en:string}}={core:{ar:'الأساسي',en:'Core'},football:{ar:'كرة القدم',en:'Football'},personal:{ar:'الشخصي',en:'Personal'},system:{ar:'النظام',en:'System'}}; const[unread,setUnread]=useState(0);const[page,setPage]=useState<RouteId>(()=>(location.hash.slice(1) as RouteId)||'home');const[notifications,setNotifications]=useState(false);
  const pageRef=useRef(page); pageRef.current=page;
@@ -141,7 +145,7 @@ function MainShell(props:ShellProps){
    <a className="nav-item acquisition-nav" href="/acquisition" aria-label={uiCopy[language].acquisitionNav}><Briefcase size={18} aria-hidden="true"/>{sidebar?<span>{uiCopy[language].acquisitionNav}</span>:<span className="tooltip">{uiCopy[language].acquisitionNav}</span>}</a>
   {scope==='normal'&&<div className="sidebar-footer"><button className="avatar avatar-button" title={labels.profile} onClick={()=>go('profile')}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>{sidebar&&<div className="user-caption"><strong>{profile.firstName} {profile.lastName}</strong><span>{identityCaption}</span></div>}</div>}
   </aside>
-  <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<button className="language-button" onClick={onLanguage}>{ar?'English':'العربية'}</button>{scope==='normal'&&<button ref={bellRef} className="notification-button icon-button" onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
+  <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<LanguageSwitch language={language} onLanguage={onLanguage}/><ThemeToggle theme={theme} onTheme={onTheme} language={language}/>{scope==='normal'&&<button ref={bellRef} className="notification-button icon-button" onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
    <SideProjectorsBadge language={language} variant="float"/>
    <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
    <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
@@ -157,6 +161,7 @@ export default function App(){
  const isAcquisition=pathName==='/acquisition';
  const legalDocument=legalDocumentForPath(pathName);
  const[language,setLanguage]=useState<Language>(()=>(localStorage.getItem('taamen-language') as Language)||'ar');
+ const[theme,setTheme]=useState<TaamenTheme>(()=>readTheme());
  const[profile,setProfile]=useState<LocalProfile>();
  const[boot,setBoot]=useState(true);
  const[updateAvailable,setUpdateAvailable]=useState(false);
@@ -166,6 +171,8 @@ export default function App(){
 
  useEffect(()=>{installService.init();const onUpdate=()=>setUpdateAvailable(true);window.addEventListener('taamen-sw-update',onUpdate);return()=>window.removeEventListener('taamen-sw-update',onUpdate)},[]);
  useEffect(()=>{document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';localStorage.setItem('taamen-language',language)},[language]);
+ useEffect(()=>{applyTheme(theme)},[theme]);
+ const toggleTheme=()=>setTheme(value=>nextTheme(value));
  // The Settings motion switch has to apply from boot, not only while Settings is open.
  useEffect(()=>{getItem<{motion?:boolean;analytics?:boolean}>('settings','privacy').then(v=>{applyMotionPreference(v?.motion!==false);syncAhrefsAnalytics(analyticsEnabled(v))}).catch(()=>{})},[]);
 
@@ -199,12 +206,12 @@ export default function App(){
  },[]);
 
  if(legalDocument)return <ErrorBoundary language={language} label={legalDocument}><LegalDocument language={language} onLanguage={toggle} documentId={legalDocument}/></ErrorBoundary>;
- if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}><Acquisition language={language} onLanguage={toggle}/></Suspense></ErrorBoundary>;
+ if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}><Acquisition language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme}/></Suspense></ErrorBoundary>;
  if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])}/>;
  if(boot)return <div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>;
  /* One persistent atmosphere host. Keeping it first in both branches means the
     profile setup screen hands over to Home without the background cutting. */
  const atmosphere=<TaamenAmbientBackground key="atmosphere" variant={profile?'home':'auth'} active={!profile||shellPage==='home'}/>;
- if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable}><span>{language==='ar'?'يتوفر تحديث جديد لـ TAAMEN.':'A new TAAMEN update is available.'}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{language==='ar'?'تحديث':'Update'}</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
- return <>{atmosphere}<ProfileSetup language={language} onLanguage={toggle} onSave={async p=>{const saved=await saveProfile(p);setProfile(saved)}}/></>;
+ if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable}><span>{language==='ar'?'يتوفر تحديث جديد لـ TAAMEN.':'A new TAAMEN update is available.'}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{language==='ar'?'تحديث':'Update'}</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
+ return <>{atmosphere}<ProfileSetup language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSave={async p=>{const saved=await saveProfile(p);setProfile(saved)}}/></>;
 }

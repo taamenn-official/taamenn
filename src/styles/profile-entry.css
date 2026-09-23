@@ -19,11 +19,11 @@
   position: relative;
 }
 
-/* Mobile language button — compact top-right */
+/* Mobile language button — pinned to the inline end in both directions */
 .mobile-language {
   position: absolute;
-  top: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -36,13 +36,8 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   z-index: 10;
-}
-
-[dir=rtl] .mobile-language {
-  right: auto;
-  left: 0;
 }
 
 .mobile-language:hover {

@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import { ChevronLeft, Globe2, ImagePlus, Trash2, AlertCircle, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ImagePlus, Trash2, AlertCircle, ChevronDown } from 'lucide-react';
+import { LanguageSwitch, ThemeToggle } from './ShellControls';
+import type { TaamenTheme } from '../theme/theme';
 import type { LocalProfile } from '../services/profileRepository';
 import { imageFileToDataUrl } from '../services/imageProcessing';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
@@ -13,7 +15,7 @@ import { ImageActionSheet, ImageViewer } from './ImageActionOverlay';
 type Draft = Omit<LocalProfile, 'id' | 'updatedAt' | 'bannerData'>;
 const empty: Draft = { firstName: '', lastName: '', email: '', phone: '', avatarData: '', emailVerified: false };
 
-export function ProfileSetup({ language, onSave, onLanguage }: { language: 'ar' | 'en'; onSave: (p: Draft) => void; onLanguage: () => void }) {
+export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: { language: 'ar' | 'en'; onSave: (p: Draft) => void; onLanguage: () => void; theme: TaamenTheme; onTheme: () => void }) {
   const ar = language === 'ar';
   const [p, setP] = useState<Draft>(empty);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -114,10 +116,10 @@ export function ProfileSetup({ language, onSave, onLanguage }: { language: 'ar' 
         <ImageViewer src={p.avatarData} alt={ar ? 'الصورة الشخصية' : 'Profile photo'} language={language} onClose={() => setImageViewer(false)} />
       )}
       <div className="entry-container">
-        <button className="language-button mobile-language" onClick={onLanguage}>
-          <Globe2 size={14} />
-          {ar ? 'EN' : 'AR'}
-        </button>
+        <div className="entry-controls">
+          <ThemeToggle theme={theme} onTheme={onTheme} language={language} />
+          <LanguageSwitch language={language} onLanguage={onLanguage} className="mobile-language" />
+        </div>
         <div className="entry-content" ref={contentRef}>
           <div className="mobile-branding">
             <div className="mobile-logo">

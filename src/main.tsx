@@ -2,9 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { restoreSpaFallbackLocation } from './infrastructure/spaFallback';
+import { applyTheme, readTheme } from './theme/theme';
 import './styles/global.css';
 import './styles/profile-entry.css';
+import './styles/taamen-2.1.css';
 
+applyTheme(readTheme());
 restoreSpaFallbackLocation();
 createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);
 if('serviceWorker' in navigator && import.meta.env.PROD){
