@@ -9,6 +9,7 @@ import ArchiveDetailModal from '../components/ArchiveDetailModal';
 import AddArchiveModal from '../components/AddArchiveModal';
 import ResultEntryModal from '../components/ResultEntryModal';
 import MatchShareModal from '../components/MatchShareModal';
+import AdSlot from '../components/monetization/AdSlot';
 
 export default function Archive({language}:{language:'ar'|'en'}) {
   const copy=matchUiCopy[language];
@@ -56,6 +57,7 @@ export default function Archive({language}:{language:'ar'|'en'}) {
       <header><div><Clock3 size={19}/><span><h2>{copy.pendingSection}</h2><p>{copy.pendingBody}</p></span></div><b>{pending.length}</b></header>
       {grid(pending,copy.noPending,true)}
     </section>
+    <AdSlot placement="archive" />
     <section className="archive-lifecycle-section is-recorded">
       <header><div><Trophy size={19}/><span><h2>{copy.recordedSection}</h2><p>{copy.recordedBody}</p></span></div><b>{recorded.length}</b></header>
       {grid(recorded,query?copy.trySearch:copy.noRecorded)}

@@ -1025,6 +1025,8 @@ body.tactical-focus-mode .bottom-nav{display:none!important}
   .app-shell > .sidebar.is-collapsed ~ .main-content,
   [dir=rtl] .app-shell > .main-content,
   [dir=rtl] .app-shell > .sidebar.is-collapsed ~ .main-content{
+    width:100%;
+    max-width:100%;
     margin-inline-start:0;
     margin-inline-end:0;
   }
@@ -1070,20 +1072,26 @@ body.tactical-focus-mode .bottom-nav{display:none!important}
     pointer-events:none;
   }
   .app-shell > .main-content{
-    margin-inline-start:var(--ta-sidebar-width);
+    box-sizing:border-box;
+    min-width:0;
+    width:calc(100% - var(--sidebar-width));
+    max-width:calc(100% - var(--sidebar-width));
+    margin-inline-start:var(--sidebar-width);
     margin-inline-end:0;
   }
   .app-shell > .sidebar.is-collapsed ~ .main-content{
-    margin-inline-start:var(--ta-sidebar-collapsed);
+    width:calc(100% - var(--sidebar-collapsed));
+    max-width:calc(100% - var(--sidebar-collapsed));
+    margin-inline-start:var(--sidebar-collapsed);
     margin-inline-end:0;
   }
   [dir=rtl] .app-shell > .main-content{
     margin-inline-start:0;
-    margin-inline-end:var(--ta-sidebar-width);
+    margin-inline-end:var(--sidebar-width);
   }
   [dir=rtl] .app-shell > .sidebar.is-collapsed ~ .main-content{
     margin-inline-start:0;
-    margin-inline-end:var(--ta-sidebar-collapsed);
+    margin-inline-end:var(--sidebar-collapsed);
   }
 }
 
