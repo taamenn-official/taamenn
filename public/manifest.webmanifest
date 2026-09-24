@@ -2,8 +2,15 @@
   "name": "TAAMEN — Football Command",
   "short_name": "TAAMEN",
   "description": "TAAMEN local-first football application: matches, archive, tactical board and team workspace.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
+  "shortcuts": [
+    {"name": "الرئيسية", "short_name": "Home", "url": "/#home", "description": "TAAMEN home"},
+    {"name": "مركز المباريات", "short_name": "Matches", "url": "/#match-center", "description": "Match Center"},
+    {"name": "السجل", "short_name": "Archive", "url": "/#archive", "description": "Archive"},
+    {"name": "الملعب التكتيكي", "short_name": "Tactical", "url": "/#tactical", "description": "Tactical board"}
+  ],
   "display": "standalone",
   "orientation": "any",
   "background_color": "#193940",

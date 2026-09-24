@@ -10,6 +10,7 @@ import AddArchiveModal from '../components/AddArchiveModal';
 import ResultEntryModal from '../components/ResultEntryModal';
 import MatchShareModal from '../components/MatchShareModal';
 import AdSlot from '../components/monetization/AdSlot';
+import { RouteSkeleton } from '../components/RouteSkeleton';
 
 export default function Archive({language}:{language:'ar'|'en'}) {
   const copy=matchUiCopy[language];
@@ -21,7 +22,8 @@ export default function Archive({language}:{language:'ar'|'en'}) {
   const[resultMatch,setResultMatch]=useState<Match|null>(null);
   const[shareMatch,setShareMatch]=useState<Match|null>(null);
   const[showAdd,setShowAdd]=useState(false);
-  const load=useCallback(()=>listCurrentArchive().then(setItems),[]);
+  const[ready,setReady]=useState(false);
+  const load=useCallback(()=>listCurrentArchive().then(next=>{setItems(next);setReady(true)}).catch(()=>{setItems([]);setReady(true)}),[]);
   useEffect(()=>{
     void load();
     const refresh=()=>void load();
@@ -35,6 +37,7 @@ export default function Archive({language}:{language:'ar'|'en'}) {
   const pending=filtered.filter(match=>canonicalStatus(match.status)==='COMPLETED_PENDING_RESULT');
   const recorded=filtered.filter(match=>canonicalStatus(match.status)!=='COMPLETED_PENDING_RESULT');
   const typeLabel=(value:MatchType)=>({friendly:types.friendly,normal:types.normal,competitive:types.competitive,tournament:types.tournament,strong:types.strong})[value];
+  if(!ready)return <RouteSkeleton page="archive"/>;
   const grid=(matches:Match[],empty:string,pendingResult=false)=>matches.length?<div className="archive-grid">{matches.map(match=><MatchCard key={match.id} match={match} language={language} onClick={()=>setSelected(match)} actions={<>
     {pendingResult&&<button className="primary-action compact" onClick={()=>setResultMatch(match)}><Trophy size={14}/>{copy.enterResult}</button>}
     {!pendingResult&&match.visibility!=='PRIVATE'&&<button className="dark-action compact" onClick={()=>setShareMatch(match)}><Share2 size={14}/>{copy.share}</button>}
@@ -57,11 +60,11 @@ export default function Archive({language}:{language:'ar'|'en'}) {
       <header><div><Clock3 size={19}/><span><h2>{copy.pendingSection}</h2><p>{copy.pendingBody}</p></span></div><b>{pending.length}</b></header>
       {grid(pending,copy.noPending,true)}
     </section>
-    <AdSlot placement="archive" />
     <section className="archive-lifecycle-section is-recorded">
       <header><div><Trophy size={19}/><span><h2>{copy.recordedSection}</h2><p>{copy.recordedBody}</p></span></div><b>{recorded.length}</b></header>
       {grid(recorded,query?copy.trySearch:copy.noRecorded)}
     </section>
+    <AdSlot placement="archive" />
     {selected&&<ArchiveDetailModal match={selected} language={language} onClose={()=>setSelected(null)} onShare={()=>{setShareMatch(selected);setSelected(null)}}/>}
     {resultMatch&&<ResultEntryModal match={resultMatch} language={language} onClose={()=>setResultMatch(null)} onSaved={load}/>}
     {shareMatch&&<MatchShareModal match={shareMatch} language={language} onClose={()=>setShareMatch(null)}/>}

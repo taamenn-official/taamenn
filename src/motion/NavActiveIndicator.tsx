@@ -55,9 +55,12 @@ export default function NavActiveIndicator({
       nav.classList.add('has-nav-indicator');
       const reduce = !animate || prefersReducedMotion();
       if (reduce) el.style.transition = 'none';
+      const bottom = className.includes('is-bottom');
+      const bar = bottom ? 2 : itemBox.height;
+      const yBar = bottom ? y + itemBox.height - bar : y;
       el.style.width = `${itemBox.width}px`;
-      el.style.height = `${itemBox.height}px`;
-      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      el.style.height = `${bar}px`;
+      el.style.transform = `translate3d(${x}px, ${yBar}px, 0)`;
       el.style.visibility = 'visible';
       if (reduce) {
         requestAnimationFrame(() => {

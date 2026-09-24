@@ -1,9 +1,24 @@
 import { Download, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { installService } from '../../infrastructure/pwa/installService';
-import { useEffect,useState } from 'react';
-export function InstallBanner({language}:{language:'ar'|'en'}){
- const ar=language==='ar'; const [state,setState]=useState(installService.getInstallationState());
- useEffect(()=>{const unsubscribe=installService.subscribe(()=>setState(installService.getInstallationState()));return ()=>{unsubscribe?.()};},[]);
- if(state!=='installable' || installService.isDismissed())return null;
- return <div className="install-banner" role="dialog" aria-label={ar?'تثبيت TAAMEN':'Install TAAMEN'}><div><strong>{ar?'ثبّت TAAMEN على جهازك':'Install TAAMEN on your device'}</strong><span>{ar?'استخدمه كتطبيق مستقل مع دعم العمل المحلي دون اتصال.':'Use TAAMEN like an app, with offline local capabilities.'}</span></div><div className="install-actions"><button className="primary-action" onClick={()=>installService.promptInstall()}><Download size={15}/>{ar?'تثبيت TAAMEN':'Install TAAMEN'}</button><button className="icon-button" onClick={()=>installService.dismiss()} aria-label={ar?'لاحقًا':'Later'}><X size={16}/></button></div></div>;
+import { installCopy } from '../../i18n/translations';
+import { TAAMEN_LOGO_SRC } from '../../config/branding';
+
+export function InstallBanner({ language }: { language: 'ar' | 'en' }) {
+  const copy = installCopy[language];
+  const [mode, setMode] = useState(installService.bannerMode());
+  useEffect(() => installService.subscribe(() => setMode(installService.bannerMode())), []);
+  if (mode === 'hidden') return null;
+  const ios = mode === 'ios';
+  return (
+    <div className="install-banner" role="region" aria-label={ios ? copy.iosTitle : copy.installTitle}>
+      <img className="install-banner-mark" src={TAAMEN_LOGO_SRC} alt="" width={28} height={28} decoding="async" />
+      <div className="install-banner-copy">
+        <p className="install-banner-line">{ios ? copy.iosTitle : copy.installTitle}</p>
+        {ios && <span className="install-hint">{copy.iosHint}</span>}
+      </div>
+      {!ios && <button type="button" className="primary-action" onClick={() => { void installService.promptInstall(); }}><Download size={15} />{copy.installAction}</button>}
+      <button type="button" className="icon-button" onClick={() => (ios ? installService.dismissIosGuidance() : installService.dismiss())} aria-label={copy.close}><X size={16} /></button>
+    </div>
+  );
 }

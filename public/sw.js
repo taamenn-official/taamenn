@@ -1,4 +1,4 @@
-const VERSION='v7';
+const VERSION='v8';
 const SHELL=`taamen-shell-${VERSION}`;
 const RUNTIME=`taamen-runtime-${VERSION}`;
 const CORE=['/','/manifest.webmanifest','/assets/taamen-brand-mark.png'];

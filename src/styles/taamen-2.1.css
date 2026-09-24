@@ -33,8 +33,13 @@
   --content-max-width: 1240px;
   --page-gutter: clamp(20px, 3vw, 48px);
   --page-gutter-mobile: 14px;
+  --gutter: var(--page-gutter);
   --section-gap: var(--space-5);
   --section-gap-mobile: var(--space-4);
+  --widget-gap: var(--space-3);
+  --widget-padding: var(--space-3);
+  --title-size: var(--heading-sm);
+  --body-size: var(--text-sm);
   --header-height: 72px;
   --header-height-mobile: 60px;
   --header-h: var(--header-height);
@@ -490,9 +495,15 @@ body {
 }
 
 @media (max-width: 900px) {
+  html { scroll-behavior: auto; }
   :root {
-    --bottom-nav-height: 60px;
-    --ta-bottom-nav-height: 60px;
+    --gutter: var(--page-gutter-mobile);
+    --bottom-nav-height: 64px;
+    --ta-bottom-nav-height: 64px;
+    --widget-gap: var(--space-2);
+    --widget-padding: 12px;
+    --title-size: 1.35rem;
+    --body-size: var(--text-sm);
     --shadow: 0 8px 18px rgba(0, 0, 0, .16);
     --ta-shadow: 0 8px 18px rgba(0, 0, 0, .16);
     --ta-topbar-height: calc(var(--header-height-mobile) + env(safe-area-inset-top, 0px));
@@ -501,12 +512,24 @@ body {
   .app-shell .topbar {
     height: calc(var(--header-height-mobile) + env(safe-area-inset-top, 0px));
     min-height: calc(var(--header-height-mobile) + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
     padding-inline: var(--page-gutter-mobile);
+    box-sizing: border-box;
   }
 
   .page-content {
     padding-inline: var(--page-gutter-mobile);
     padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-5));
+  }
+
+  /* The install banner is fixed above the nav. Clear it only while it is mounted. */
+  .main-content:has(.install-banner) .page-content {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px + var(--touch-target) + 16px + 12px);
+  }
+
+  /* The update pill sits under the top bar. Keep the first line of the page below it. */
+  body:has(.update-banner:not([hidden])) .page-content {
+    padding-top: calc(22px + var(--touch-target) + 28px);
   }
 
   .page-heading {
@@ -879,6 +902,321 @@ html[data-theme="light"] .ad-slot {
   border-color: rgba(25, 57, 64, .12);
 }
 
+/* ---------- Home widgets ----------
+   Flat surfaces. One padding, radius, and gap. Not glass cards. */
+.boot-screen,
+.loading-screen,
+.app-shell,
+.access-screen,
+.profile-entry {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.boot-screen {
+  display: grid;
+  place-items: center;
+  background: var(--bg-1, #193940);
+}
+
+.boot-screen img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  opacity: .9;
+}
+
+.home-greeting { margin-bottom: var(--widget-gap); }
+.home-greeting h1 {
+  margin: 0;
+  font-size: var(--title-size);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+.home-greeting p:last-child {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: var(--body-size);
+  line-height: 1.5;
+}
+
+.home-dashboard {
+  display: grid;
+  gap: var(--widget-gap);
+}
+
+.home-pair {
+  display: grid;
+  gap: var(--widget-gap);
+  min-width: 0;
+}
+
+@media (min-width: 390px) and (max-width: 767px) {
+  .home-pair { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 768px) {
+  .home-dashboard {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
+.home-greeting,
+.home-next,
+.home-dashboard > [data-ta-motion="next"],
+.ta-widget-interactive,
+.home-venues,
+.home-dashboard .ad-slot { grid-column: 1 / -1; }
+}
+
+.home-dashboard .ad-slot {
+  margin-block: 0;
+}
+
+.ta-widget {
+  min-width: 0;
+  padding: var(--widget-padding);
+  border: 1px solid var(--border, rgba(186, 200, 217, .18));
+  border-radius: var(--radius-md);
+  background: rgba(8, 24, 29, .92);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+  color: var(--text-main, #fff);
+}
+
+.ta-widget-prominent { padding: 14px; }
+.ta-widget-compact { padding: 10px 12px; }
+.ta-widget-accent { border-color: rgba(155, 242, 114, .28); }
+.ta-widget-dark { background: rgba(7, 19, 22, .96); }
+.ta-widget-interactive { background: transparent; border: 0; box-shadow: none; padding: 0; }
+
+.ta-widget-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ta-widget-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.ta-widget-empty,
+.ta-widget-note,
+.next-widget-meta,
+.archive-summary-line {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--body-size);
+  line-height: 1.45;
+}
+
+.ta-widget-note { margin-top: 4px; }
+
+.next-widget-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.next-widget-teams strong {
+  min-width: 0;
+  font-size: var(--text-md);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.next-widget-teams strong:first-child { text-align: end; }
+.next-widget-teams strong:last-child { text-align: start; }
+.next-widget-vs,
+.next-widget-score {
+  font-size: 1.15rem;
+  letter-spacing: 0;
+}
+.next-widget-score span { margin-inline: 4px; color: var(--text-muted); }
+
+.next-widget-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 8px;
+}
+
+.next-widget-count {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 0;
+  direction: ltr;
+  unicode-bidi: isolate;
+  justify-content: flex-start;
+}
+
+.next-widget-count b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.widget-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: var(--touch-target);
+  padding: 6px 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.widget-row strong { font-size: var(--text-sm); }
+.widget-row span { color: var(--text-muted); font-size: var(--text-xs); }
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 8px;
+}
+.quick-action {
+  min-height: var(--touch-target);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border: 1px solid var(--border, rgba(186, 200, 217, .18));
+  border-radius: var(--radius-sm);
+  background: rgba(8, 24, 29, .92);
+  color: inherit;
+  cursor: pointer;
+}
+.quick-action span {
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+.stat-strip div { min-width: 0; }
+.stat-strip dt { margin: 0; color: var(--text-muted); font-size: var(--text-xs); }
+.stat-strip dd { margin: 2px 0 0; font-size: 1.25rem; font-weight: 800; }
+
+.archive-summary-line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.archive-summary-line b { font-size: 1.25rem; color: var(--text-main); }
+
+.venue-widget-button {
+  width: 100%;
+  min-height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.venue-widget-button span { display: grid; min-width: 0; }
+.venue-widget-button small { color: var(--text-muted); }
+.venue-widget-button em { margin-inline-start: auto; font-style: normal; font-size: var(--text-xs); color: var(--accent); }
+
+[dir="rtl"] .widget-chevron { transform: scaleX(-1); }
+
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.install-banner-mark {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.install-banner-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+}
+.install-banner-line {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+}
+.install-hint {
+  flex: 0 1 auto;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.skeleton-line,
+.skeleton-block,
+.skeleton-row {
+  border-radius: var(--radius-sm);
+  background: rgba(186, 200, 217, .12);
+}
+.skeleton-line { height: 14px; }
+.skeleton-line.is-title { width: min(220px, 70%); height: 28px; margin-bottom: 12px; }
+.skeleton-block { min-height: 72px; }
+.skeleton-block.is-next { min-height: 132px; }
+.skeleton-block.is-row { min-height: 64px; }
+.skeleton-block.is-venue { min-height: 76px; }
+.skeleton-block.is-profile { min-height: 160px; }
+.skeleton-block.is-pitch { min-height: 240px; }
+.skeleton-grid,
+.skeleton-list { display: grid; gap: var(--widget-gap); }
+.skeleton-row { height: 40px; margin-bottom: 10px; }
+
+@media (max-width: 900px) {
+  .home-greeting { margin-bottom: 0; }
+  .home-dashboard,
+  .home-pair { gap: 4px; }
+  .archive-page .page-heading h1,
+  .stadiums-page .page-heading h1,
+  .matches-page .page-heading h1 { font-size: 1.6rem; }
+  .archive-page .match-card,
+  .stadiums-page .stadium-card { padding: 12px; }
+  .archive-toolbar { gap: 8px; }
+  .archive-toolbar input,
+  .archive-toolbar select,
+  .stadiums-search input { font-size: 16px; }
+}
+
+html[data-theme="light"] .ta-widget {
+  background: #fff;
+  color: #102228;
+  border-color: rgba(25, 57, 64, .12);
+  box-shadow: 0 8px 18px rgba(16, 34, 40, .06);
+}
+html[data-theme="light"] .ta-widget-interactive { background: transparent; }
+html[data-theme="light"] .quick-action { background: #fff; color: #102228; }
+html[data-theme="light"] .skeleton-line,
+html[data-theme="light"] .skeleton-block,
+html[data-theme="light"] .skeleton-row { background: rgba(25, 57, 64, .08); }
+html[data-theme="light"] .boot-screen { background: var(--bg-1); }
+
+@media (min-width: 901px) {
+  html { scroll-behavior: smooth; }
+}
+
 /* ---------- Mobile performance ----------
    Same tokens and surfaces. Phones drop secondary blur, shorten the
    shell, and keep one light topbar glass. Desktop rules above stay. */
@@ -895,6 +1233,18 @@ button,
 a,
 [role="button"] {
   touch-action: manipulation;
+}
+
+button:active,
+a:active,
+[role="button"]:active {
+  opacity: .86;
+}
+
+.pitch:active,
+.player-token:active,
+.pitch :active {
+  opacity: 1;
 }
 
 .pitch,
@@ -937,14 +1287,19 @@ a,
   }
 
   .app-shell .bottom-nav {
-    min-height: 0;
+    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
     backdrop-filter: none;
+    box-shadow: none;
   }
 
   .nav-active-indicator.is-bottom {
     box-shadow: none;
+    border-radius: 0;
+    background: var(--accent, #9bf272);
   }
 
+  .ta-widget,
   .panel,
   .match-card,
   .stat-card,
@@ -967,13 +1322,16 @@ a,
   }
 
   .update-banner {
+    top: calc(var(--ta-topbar-height, 60px) + 8px);
     gap: var(--space-2);
     padding: 6px 8px 6px 12px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
   }
 
-  .update-banner .primary-action {
+  .update-banner .primary-action,
+  .update-banner .icon-button {
     min-height: var(--touch-target);
+    min-width: var(--touch-target);
     padding-inline: 12px;
     flex-shrink: 0;
   }
@@ -987,6 +1345,19 @@ a,
     padding: 8px 10px;
     border-radius: var(--radius-md);
     box-shadow: 0 8px 18px rgba(0, 0, 0, .2);
+  }
+
+  .install-banner-line,
+  .install-hint {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .install-banner .icon-button {
+    flex: 0 0 var(--touch-target);
+    width: var(--touch-target);
+    min-height: var(--touch-target);
   }
 
   .install-banner > div:first-child span {
