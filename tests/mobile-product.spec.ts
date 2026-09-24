@@ -28,7 +28,7 @@ test('classic home shows the archive hero and not the dashboard', async ({ page 
   await expect(page.getByRole('heading', { name: 'Welcome Omar' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Latest matches' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Explore archive' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Profile' })).toBeVisible();
+  await expect(page.locator('.home-actions').getByRole('button', { name: 'Profile' })).toBeVisible();
   await expect(page.locator('.home-dashboard')).toHaveCount(0);
   await expect(page.locator('.ta-widget')).toHaveCount(0);
   await expect(page.locator('.quick-action')).toHaveCount(0);
