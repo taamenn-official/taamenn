@@ -1,6 +1,6 @@
 import { useRef, type RefObject } from 'react';
 import { gsap, useGSAP } from './gsapRuntime';
-import { EASE, MOTION, TRAVEL, compact } from './tokens';
+import { EASE, MOTION, TRAVEL } from './tokens';
 import { isCompactViewport, prefersReducedMotion } from './prefersReduced';
 
 /**
@@ -20,10 +20,18 @@ export function useFormEntrance<T extends HTMLElement>(): RefObject<T | null> {
       return;
     }
 
-    const travel = isCompactViewport() ? compact(TRAVEL.page) : TRAVEL.page;
+    const compactViewport = isCompactViewport();
+    const travel = compactViewport ? 4 : TRAVEL.page;
     const rows = el.querySelectorAll<HTMLElement>(':scope > *');
     const tl = gsap.timeline();
-    tl.from(el, { opacity: 0, y: travel, duration: MOTION.panel, ease: EASE.entrance, clearProps: 'opacity,transform' }, 0);
+    tl.from(el, {
+      opacity: 0,
+      y: travel,
+      duration: compactViewport ? 0.18 : MOTION.panel,
+      ease: EASE.entrance,
+      clearProps: 'opacity,transform',
+    }, 0);
+    if (compactViewport) return;
     if (rows.length > 1) {
       tl.from(rows, {
         opacity: 0,

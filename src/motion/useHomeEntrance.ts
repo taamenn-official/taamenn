@@ -46,6 +46,27 @@ export function useHomeEntrance(root: RefObject<HTMLElement | null>) {
 
     const tl = gsap.timeline();
 
+    if (compactViewport) {
+      const steps: Array<[HTMLElement[], number]> = [
+        [greeting, 0],
+        [cta, 0.05],
+        [cards, 0.1],
+        [panel, 0.16],
+      ];
+      for (const [nodes, at] of steps) {
+        if (!nodes.length) continue;
+        tl.from(nodes, {
+          opacity: 0,
+          y: 4,
+          duration: 0.18,
+          ease: EASE.entrance,
+          stagger: nodes.length > 1 ? 0.03 : 0,
+          clearProps: CLEAR,
+        }, at);
+      }
+      return;
+    }
+
     if (reveal === 'light') {
       if (greeting.length) {
         tl.from(greeting, {
@@ -141,12 +162,13 @@ export function useHomeMatchReveal(root: RefObject<HTMLElement | null>, count: n
       gsap.fromTo(cards, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'none', clearProps: 'opacity' });
       return;
     }
+    const compactViewport = isCompactViewport();
     gsap.from(cards, {
       opacity: 0,
-      y: isCompactViewport() ? compact(TRAVEL.card) : TRAVEL.card,
-      duration: 0.45,
+      y: compactViewport ? 4 : TRAVEL.card,
+      duration: compactViewport ? 0.18 : 0.4,
       ease: EASE.entrance,
-      stagger: 0.07,
+      stagger: compactViewport ? 0.03 : 0.06,
       clearProps: CLEAR,
     });
   }, { dependencies: [count], scope: root });

@@ -491,6 +491,10 @@ body {
 
 @media (max-width: 900px) {
   :root {
+    --bottom-nav-height: 60px;
+    --ta-bottom-nav-height: 60px;
+    --shadow: 0 8px 18px rgba(0, 0, 0, .16);
+    --ta-shadow: 0 8px 18px rgba(0, 0, 0, .16);
     --ta-topbar-height: calc(var(--header-height-mobile) + env(safe-area-inset-top, 0px));
   }
 
@@ -873,4 +877,145 @@ html[data-theme="light"] .ad-slot {
   background: rgba(25, 57, 64, .06);
   color: var(--text-muted);
   border-color: rgba(25, 57, 64, .12);
+}
+
+/* ---------- Mobile performance ----------
+   Same tokens and surfaces. Phones drop secondary blur, shorten the
+   shell, and keep one light topbar glass. Desktop rules above stay. */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+.pitch,
+.player-token,
+.pitch .player-token {
+  touch-action: none;
+}
+
+@keyframes ta-bell-pulse {
+  50% { transform: scale(1.06); }
+}
+
+@keyframes ta-bell-fade {
+  50% { opacity: .62; }
+}
+
+.notification-button.is-pulse {
+  animation: ta-bell-pulse 220ms ease;
+}
+
+.update-banner {
+  max-width: calc(100vw - 20px);
+  gap: var(--space-2);
+}
+
+.update-banner span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .notification-button.is-pulse {
+    animation-name: ta-bell-fade;
+  }
+
+  .app-shell .topbar {
+    backdrop-filter: blur(8px);
+  }
+
+  .app-shell .bottom-nav {
+    min-height: 0;
+    backdrop-filter: none;
+  }
+
+  .nav-active-indicator.is-bottom {
+    box-shadow: none;
+  }
+
+  .panel,
+  .match-card,
+  .stat-card,
+  .home-venues-card,
+  .readiness-card,
+  .access-card,
+  .entry-grid,
+  .capture-actions .icon-button,
+  .modal-card,
+  .archive-modal,
+  .guide-modal,
+  .archive-detail-modal,
+  .privacy-modal,
+  .notification-drawer,
+  .image-action-sheet,
+  .image-viewer-frame,
+  .install-banner,
+  .update-banner {
+    backdrop-filter: none;
+  }
+
+  .update-banner {
+    gap: var(--space-2);
+    padding: 6px 8px 6px 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+  }
+
+  .update-banner .primary-action {
+    min-height: var(--touch-target);
+    padding-inline: 12px;
+    flex-shrink: 0;
+  }
+
+  .install-banner {
+    inset-inline: 10px;
+    inset-block-end: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px);
+    max-width: calc(100vw - 20px);
+    align-items: center;
+    gap: var(--space-2);
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .2);
+  }
+
+  .install-banner > div:first-child span {
+    display: none;
+  }
+
+  .install-actions {
+    flex-direction: row;
+  }
+
+  .install-banner .primary-action {
+    min-height: var(--touch-target);
+    padding-inline: 12px;
+  }
+
+  .share-football-motion i {
+    animation: none;
+  }
+
+  .page-heading h1,
+  .home-hero-copy h1 {
+    font-size: clamp(1.7rem, 8vw, 2.15rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-stage.is-entering,
+  .notification-button.is-pulse,
+  .share-football-motion i {
+    animation: none;
+  }
 }

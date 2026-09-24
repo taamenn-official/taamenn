@@ -39,7 +39,9 @@ export function SideProjectorsBadge({
           alt={text.alt}
           width={SIDEPROJECTORS_BADGE_WIDTH}
           height={SIDEPROJECTORS_BADGE_HEIGHT}
+          loading="lazy"
           decoding="async"
+          fetchPriority="low"
           referrerPolicy="no-referrer"
           onError={() => setImageFailed(true)}
         />

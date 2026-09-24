@@ -34,13 +34,10 @@
   --ta-atmos-accent-strength:.125;
 }
 
-/* Cinematic micro-zoom wraps the base field only, never page content. */
+/* The base field stays still. Motion, when it runs, is on one glow only. */
 .ta-atmos-zoom{
   position:absolute;
-  inset:-3%;
-  transform-origin:50% 30%;
-  will-change:transform;
-  animation:ta-atmos-zoom 27s cubic-bezier(.45,0,.55,1) infinite;
+  inset:0;
 }
 .ta-atmos-base{
   position:absolute;
@@ -52,11 +49,9 @@
 .ta-atmos-shift{
   position:absolute;
   inset:0;
-  will-change:transform;
 }
 .ta-atmos-glow{
   position:absolute;
-  will-change:transform;
   transition:opacity 560ms cubic-bezier(.22,.61,.36,1);
 }
 .ta-atmos-glow::before{
@@ -64,8 +59,6 @@
   position:absolute;
   inset:0;
   border-radius:50%;
-  transform:translateZ(0);
-  will-change:transform,opacity;
 }
 
 .ta-atmos-glow.is-primary{
@@ -74,7 +67,7 @@
   width:131%;
   height:113%;
   opacity:var(--ta-atmos-primary);
-  animation:ta-atmos-primary-drift 24s cubic-bezier(.45,0,.55,1) infinite;
+  animation:ta-atmos-primary-drift 28s cubic-bezier(.45,0,.55,1) infinite;
 }
 .ta-atmos-glow.is-primary::before{
   background:radial-gradient(ellipse at 52% 47%,
@@ -84,7 +77,6 @@
     rgba(var(--ta-atmos-support),.05) 64%,
     transparent 76%);
   filter:blur(var(--ta-atmos-primary-blur));
-  animation:ta-atmos-breathe 19s cubic-bezier(.45,0,.55,1) infinite;
 }
 
 .ta-atmos-glow.is-secondary{
@@ -93,7 +85,6 @@
   width:144%;
   height:118%;
   opacity:var(--ta-atmos-secondary);
-  animation:ta-atmos-secondary-drift 33s cubic-bezier(.45,0,.55,1) -8s infinite;
 }
 .ta-atmos-glow.is-secondary::before{
   background:radial-gradient(ellipse at 47% 50%,
@@ -102,7 +93,6 @@
     rgba(var(--ta-atmos-accent),calc(var(--ta-atmos-accent-strength) * .55)) 58%,
     transparent 74%);
   filter:blur(var(--ta-atmos-secondary-blur));
-  animation:ta-atmos-breathe 22s cubic-bezier(.45,0,.55,1) -6s infinite;
 }
 
 .ta-atmos-illumination{
@@ -119,8 +109,7 @@
   background:
     radial-gradient(84% 56% at 50% 12%,rgba(var(--ta-atmos-cool),.1),transparent 72%),
     radial-gradient(70% 52% at 50% 100%,rgba(var(--ta-atmos-support),.08),transparent 80%);
-  will-change:opacity;
-  animation:ta-atmos-illuminate 21s ease-in-out -4s infinite;
+  animation:ta-atmos-illuminate 28s ease-in-out -4s infinite;
 }
 
 /* Keeps the centre of the screen dark so content keeps its hierarchy. */
@@ -138,45 +127,39 @@
   51%{transform:translate3d(.5%,1.6%,0)}
   76%{transform:translate3d(-3%,.6%,0)}
 }
-@keyframes ta-atmos-secondary-drift{
-  0%,100%{transform:translate3d(-2%,1%,0)}
-  26%{transform:translate3d(2%,2.4%,0)}
-  53%{transform:translate3d(5%,-.6%,0)}
-  78%{transform:translate3d(-4%,-1.8%,0)}
-}
-@keyframes ta-atmos-breathe{
-  0%,100%{opacity:.88;transform:scale(1)}
-  27%{opacity:.94;transform:scale(1.012)}
-  52%{opacity:1;transform:scale(1.02)}
-  76%{opacity:.93;transform:scale(1.012)}
-}
 @keyframes ta-atmos-illuminate{
   0%,100%{opacity:.74}
   48%{opacity:1}
 }
-@keyframes ta-atmos-zoom{
-  0%,100%{transform:scale(1)}
-  26%{transform:scale(1.012)}
-  51%{transform:scale(1.022)}
-  76%{transform:scale(1.013)}
-}
-
-/* Phones get a calmer, cleaner composition rather than a scaled-down desktop one. */
+/* Phones get a static radial atmosphere. Desktop keeps one slow drift. */
 @media (max-width:900px),(hover:none),(pointer:coarse){
   .ta-atmos{
-    --ta-atmos-primary:.42;
-    --ta-atmos-secondary:.26;
-    --ta-atmos-illumination:.5;
-    --ta-atmos-accent-strength:.07;
-    --ta-atmos-primary-blur:62px;
-    --ta-atmos-secondary-blur:76px;
+    --ta-atmos-primary:.48;
+    --ta-atmos-secondary:.3;
+    --ta-atmos-illumination:.55;
+    --ta-atmos-accent-strength:.08;
+    --ta-atmos-primary-blur:0px;
+    --ta-atmos-secondary-blur:0px;
   }
   .ta-atmos[data-variant='auth']{
-    --ta-atmos-primary:.53;
-    --ta-atmos-secondary:.34;
+    --ta-atmos-primary:.56;
+    --ta-atmos-secondary:.36;
     --ta-atmos-illumination:.7;
     --ta-atmos-accent-strength:.1;
   }
+  .ta-atmos-glow,
+  .ta-atmos-glow.is-primary,
+  .ta-atmos-glow.is-secondary,
+  .ta-atmos-glow::before,
+  .ta-atmos-glow.is-primary::before,
+  .ta-atmos-glow.is-secondary::before,
+  .ta-atmos-illumination::before,
+  .ta-atmos-zoom{
+    animation:none;
+  }
+  .ta-atmos-glow::before,
+  .ta-atmos-glow.is-primary::before,
+  .ta-atmos-glow.is-secondary::before{filter:none}
   .ta-atmos-glow.is-primary{top:-34%;inset-inline-start:-32%;width:164%}
   .ta-atmos-glow.is-secondary{inset-inline-start:-38%;bottom:-46%;width:172%}
   .ta-atmos-shift{transform:none !important}

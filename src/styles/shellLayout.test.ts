@@ -61,6 +61,15 @@ test('only the root scrollbar is hidden', () => {
   assert.match(globalCss, /\.notification-drawer\{[^}]*overflow:auto/);
 });
 
+test('mobile chrome keeps tap targets and drops the tap flash', () => {
+  assert.match(shellCss, /-webkit-tap-highlight-color:\s*transparent/);
+  assert.match(shellCss, /max-width:\s*calc\(100vw - 20px\)/);
+  assert.match(shellCss, /touch-action:\s*none/);
+  const globalCss = fs.readFileSync(path.join(root, 'src/styles/global.css'), 'utf8');
+  assert.match(globalCss, /button:focus-visible/);
+  assert.match(globalCss, /\.pitch \{\s*touch-action:\s*none/);
+});
+
 test('active indicator stays on physical coordinates', () => {
   assert.match(indicator, /itemBox\.left - navBox\.left/);
   assert.match(indicator, /itemBox\.top - navBox\.top/);

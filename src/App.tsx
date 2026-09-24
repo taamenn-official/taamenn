@@ -17,8 +17,6 @@ import DateTimeBlock from './components/DateTimeBlock';
 import TaamenAmbientBackground from './components/ui/taamen-ambient-background';
 import PageStage from './motion/PageStage';
 import NavActiveIndicator from './motion/NavActiveIndicator';
-import { gsap, useGSAP } from './motion/gsapRuntime';
-import { EASE, MOTION } from './motion/tokens';
 import { applyMotionPreference, prefersReducedMotion } from './motion/prefersReduced';
 import { getItem } from './services/localDb';
 import { analyticsEnabled, syncAhrefsAnalytics } from './services/analytics';
@@ -72,10 +70,10 @@ function MainShell(props:ShellProps){
  const pageRef=useRef(page); pageRef.current=page;
  const sideNavRef=useRef<HTMLElement>(null);
  const bottomNavRef=useRef<HTMLElement>(null);
- const bellRef=useRef<HTMLButtonElement>(null);
+ const[bellPulse,setBellPulse]=useState(false);
  // Captured on the first render, before Home consumes the reveal flag.
  const navIntroDelay=useRef(peekHomeReveal()==='cinematic'?0.85:0.2);
- const unreadSettled=useRef(false);
+ const bellSkips=useRef(2);
  const previousUnread=useRef(0);
  const leaveGuardRef=useRef<(()=>boolean)|null>(null);
  const registerLeaveGuard=useCallback((guard:(()=>boolean)|null)=>{leaveGuardRef.current=guard},[]);
@@ -102,19 +100,51 @@ function MainShell(props:ShellProps){
      return next;
    });
  };
- useEffect(()=>{const refresh=async()=>{await reconcileMatchLifecycle();setUnread(await unreadCount())};refresh();const id=window.setInterval(refresh,15000);return()=>clearInterval(id)},[]);
+ useEffect(()=>{
+  let timer=0;
+  let stopped=false;
+  const refresh=async()=>{
+   if(stopped||document.hidden)return;
+   await reconcileMatchLifecycle();
+   if(!stopped)setUnread(await unreadCount());
+  };
+  const arm=()=>{
+   window.clearInterval(timer);
+   timer=0;
+   if(document.hidden)return;
+   void refresh();
+   timer=window.setInterval(()=>{void refresh()},15000);
+  };
+  const onVisibility=()=>{
+   if(document.hidden){window.clearInterval(timer);timer=0;return}
+   arm();
+  };
+  arm();
+  document.addEventListener('visibilitychange',onVisibility);
+  return()=>{stopped=true;window.clearInterval(timer);document.removeEventListener('visibilitychange',onVisibility)};
+ },[]);
+ const skipPageRefresh=useRef(true);
+ useEffect(()=>{
+  if(skipPageRefresh.current){skipPageRefresh.current=false;return}
+  if(document.hidden)return;
+  let active=true;
+  unreadCount().then(count=>{if(active)setUnread(count)});
+  return()=>{active=false};
+ },[page]);
  useEffect(()=>{onPage(page)},[onPage,page]);
- // A single emphasis when new notifications arrive, never on the first count.
- useGSAP(()=>{
-  const el=bellRef.current;const grew=unread>previousUnread.current;
+ // A single emphasis when new notifications arrive, never on the boot count.
+ useEffect(()=>{
+  const grew=unread>previousUnread.current;
   previousUnread.current=unread;
-  if(!unreadSettled.current){unreadSettled.current=true;return}
-  if(!el||!grew||prefersReducedMotion())return;
-  gsap.fromTo(el,{scale:1},{scale:1.14,duration:MOTION.fast,ease:EASE.hover,yoyo:true,repeat:1,clearProps:'transform'});
- },{dependencies:[unread]});
+  if(bellSkips.current>0){bellSkips.current-=1;return}
+  if(!grew||prefersReducedMotion())return;
+  setBellPulse(true);
+  const id=window.setTimeout(()=>setBellPulse(false),220);
+  return()=>window.clearTimeout(id);
+ },[unread]);
  useEffect(()=>{if(!routes.some(r=>r.id===page)){const fallback=scope==='featured'?'historical-match-center':'home';setPage(fallback);history.replaceState(null,'',`${location.pathname}#${fallback}`)}},[routes,page,scope]);
  useEffect(()=>{const onHash=()=>{const next=location.hash.slice(1) as RouteId;if(!routes.some(r=>r.id===next)){history.replaceState(null,'',`${location.pathname}#${pageRef.current}`);return}if(!requestRoute(next)){history.replaceState(null,'',`${location.pathname}#${pageRef.current}`);return;}setPage(next)};window.addEventListener('hashchange',onHash);return()=>window.removeEventListener('hashchange',onHash)},[routes]);
- const go=(p:RouteId)=>{if(!routes.some(r=>r.id===p))return;if(!requestRoute(p))return;setPage(p);history.replaceState(null,'',`${location.pathname}#${p}`);window.scrollTo({top:0,behavior:'smooth'})};
+ const go=(p:RouteId)=>{if(!routes.some(r=>r.id===p))return;if(!requestRoute(p))return;setPage(p);history.replaceState(null,'',`${location.pathname}#${p}`);window.scrollTo({top:0,behavior:'auto'})};
  const identityCaption=scope==='featured'?'FEATURED':'LOCAL · TAAMEN';
  const navClass=desktopNav===null?'':desktopNav?'is-desktop-nav':'is-mobile-nav';
  return <div className={`app-shell ${navClass} ${scope==='featured'?'is-featured-shell':''}`}>
@@ -122,7 +152,7 @@ function MainShell(props:ShellProps){
    <div className={`brand-row ${sidebar?'':'is-collapsed'}`}>
      {sidebar && (
        <div className="brand-identity" onClick={()=>go('home')} role="button" tabIndex={0} title={labels.home}>
-         <img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/>
+         <img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={32} height={32} decoding="async"/>
          <span className="brand-name">TAAMEN 2.0</span>
        </div>
      )}
@@ -145,7 +175,7 @@ function MainShell(props:ShellProps){
    <a className="nav-item acquisition-nav" href="/acquisition" aria-label={uiCopy[language].acquisitionNav}><Briefcase size={18} aria-hidden="true"/>{sidebar?<span>{uiCopy[language].acquisitionNav}</span>:<span className="tooltip">{uiCopy[language].acquisitionNav}</span>}</a>
   {scope==='normal'&&<div className="sidebar-footer"><button className="avatar avatar-button" title={labels.profile} onClick={()=>go('profile')}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>{sidebar&&<div className="user-caption"><strong>{profile.firstName} {profile.lastName}</strong><span>{identityCaption}</span></div>}</div>}
   </aside>
-  <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<LanguageSwitch language={language} onLanguage={onLanguage}/><ThemeToggle theme={theme} onTheme={onTheme} language={language}/>{scope==='normal'&&<button ref={bellRef} className="notification-button icon-button" onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
+  <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={32} height={32} decoding="async"/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<LanguageSwitch language={language} onLanguage={onLanguage}/><ThemeToggle theme={theme} onTheme={onTheme} language={language}/>{scope==='normal'&&<button className={`notification-button icon-button${bellPulse?' is-pulse':''}`} onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
    <SideProjectorsBadge language={language} variant="float"/>
    <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
    <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
@@ -212,6 +242,6 @@ export default function App(){
  /* One persistent atmosphere host. Keeping it first in both branches means the
     profile setup screen hands over to Home without the background cutting. */
  const atmosphere=<TaamenAmbientBackground key="atmosphere" variant={profile?'home':'auth'} active={!profile||shellPage==='home'}/>;
- if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable}><span>{language==='ar'?'يتوفر تحديث جديد لـ TAAMEN.':'A new TAAMEN update is available.'}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{language==='ar'?'تحديث':'Update'}</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
+ if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable} role="status"><span>{language==='ar'?'يتوفر تحديث جديد':'New update available'}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{language==='ar'?'تحديث':'Update'}</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
  return <>{atmosphere}<ProfileSetup language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSave={async p=>{const saved=await saveProfile(p);setProfile(saved)}}/></>;
 }
