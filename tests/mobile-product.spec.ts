@@ -66,6 +66,15 @@ test('iOS guidance is compact and does not pretend to prompt', async ({ browser 
   await expect(banner).toContainText('Add TAAMEN to your Home Screen');
   await expect(banner).toContainText('Share → Add to Home Screen');
   await expect(banner.getByRole('button', { name: 'Install' })).toHaveCount(0);
+  await page.evaluate(() => { document.scrollingElement?.scrollTo(0, document.scrollingElement.scrollHeight); });
+  const gap = await page.evaluate(() => {
+    const bar = document.querySelector('.install-banner')?.getBoundingClientRect();
+    const content = document.querySelector('.home-dashboard')?.lastElementChild?.getBoundingClientRect();
+    if (!bar || !content) return null;
+    return bar.top - (content.top + content.height);
+  });
+  expect(gap).not.toBeNull();
+  expect(gap ?? -1).toBeGreaterThanOrEqual(0);
   await banner.getByRole('button', { name: 'Close' }).click();
   await expect(banner).toHaveCount(0);
   await context.close();
@@ -79,6 +88,15 @@ test('update banner can be dismissed', async ({ page }) => {
   const banner = page.locator('.update-banner');
   await expect(banner).toBeVisible();
   await expect(banner).toContainText('Update available');
+  const overlap = await page.evaluate(() => {
+    const bar = document.querySelector('.update-banner')?.getBoundingClientRect();
+    const theme = document.querySelector('.theme-toggle')?.getBoundingClientRect();
+    if (!bar || !theme) return 1;
+    const x = Math.min(bar.right, theme.right) - Math.max(bar.left, theme.left);
+    const y = Math.min(bar.bottom, theme.bottom) - Math.max(bar.top, theme.top);
+    return x > 0 && y > 0 ? y : 0;
+  });
+  expect(overlap).toBe(0);
   await banner.getByRole('button', { name: 'Dismiss update' }).click();
   await expect(banner).toBeHidden();
 });

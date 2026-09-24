@@ -522,6 +522,16 @@ body {
     padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-5));
   }
 
+  /* The install banner is fixed above the nav. Clear it only while it is mounted. */
+  .main-content:has(.install-banner) .page-content {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px + var(--touch-target) + 16px + 12px);
+  }
+
+  /* The update pill sits under the top bar. Keep the first line of the page below it. */
+  body:has(.update-banner:not([hidden])) .page-content {
+    padding-top: calc(22px + var(--touch-target) + 28px);
+  }
+
   .page-heading {
     margin-bottom: var(--section-gap-mobile);
   }
@@ -1140,10 +1150,14 @@ html[data-theme="light"] .ad-slot {
   object-fit: contain;
   border-radius: 8px;
 }
+.install-banner-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+}
 .install-banner-line {
   margin: 0;
   min-width: 0;
-  flex: 1;
   font-size: var(--text-sm);
   line-height: 1.3;
 }
@@ -1308,13 +1322,16 @@ a:active,
   }
 
   .update-banner {
+    top: calc(var(--ta-topbar-height, 60px) + 8px);
     gap: var(--space-2);
     padding: 6px 8px 6px 12px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
   }
 
-  .update-banner .primary-action {
+  .update-banner .primary-action,
+  .update-banner .icon-button {
     min-height: var(--touch-target);
+    min-width: var(--touch-target);
     padding-inline: 12px;
     flex-shrink: 0;
   }
@@ -1328,6 +1345,19 @@ a:active,
     padding: 8px 10px;
     border-radius: var(--radius-md);
     box-shadow: 0 8px 18px rgba(0, 0, 0, .2);
+  }
+
+  .install-banner-line,
+  .install-hint {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .install-banner .icon-button {
+    flex: 0 0 var(--touch-target);
+    width: var(--touch-target);
+    min-height: var(--touch-target);
   }
 
   .install-banner > div:first-child span {
