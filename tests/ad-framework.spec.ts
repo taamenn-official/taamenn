@@ -131,16 +131,40 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   await page.getByRole('textbox', { name: /First name|الاسم الأول/ }).fill('Omar');
   await page.locator('#consent-checkbox').check();
   await page.getByRole('button', { name: /Continue|متابعة/ }).click();
+  await expect(page.locator('.home-hero-single')).toBeVisible();
+  await expect(page.locator('.home-stats')).toBeVisible();
+  await expect(page.locator('.archive-preview-panel')).toBeVisible();
+  await expect(page.locator('.home-dashboard, .ta-widget, .quick-action, .home-next')).toHaveCount(0);
   await expect(page.locator('.ad-slot')).toHaveCount(1);
   await expect(page.locator('.ad-slot-preview')).toHaveCount(1);
   await expect(page.getByRole('region', { name: 'Advertisement' })).toBeVisible();
   await expect(page.locator('.ad-slot a, .ad-slot button')).toHaveCount(0);
+  const homeOrder = await page.evaluate(() => {
+    const stats = document.querySelector('.home-stats');
+    const ad = document.querySelector('.ad-slot');
+    const panel = document.querySelector('.archive-preview-panel');
+    if (!stats || !ad || !panel) return false;
+    const after = Node.DOCUMENT_POSITION_FOLLOWING;
+    return Boolean(stats.compareDocumentPosition(ad) & after) && Boolean(ad.compareDocumentPosition(panel) & after);
+  });
+  expect(homeOrder).toBeTruthy();
   await expectVerificationScriptOnce(page);
 
   await page.goto(`${PREVIEW}/#stadiums`);
   await expect(page.locator('.ad-slot')).toHaveCount(1);
+  await page.locator('.ad-slot').evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  const stadiumAd = await page.locator('.ad-slot').boundingBox();
+  const stadiumWhatsapp = await page.locator('.stadiums-support-note').boundingBox();
+  expect(stadiumAd && stadiumWhatsapp && boxesOverlap(stadiumAd, stadiumWhatsapp)).toBeFalsy();
+
   await page.goto(`${PREVIEW}/#archive`);
   await expect(page.locator('.ad-slot')).toHaveCount(1);
+  await page.locator('.ad-slot').evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  const archiveAd = await page.locator('.ad-slot').boundingBox();
+  const toolbar = await page.locator('.archive-toolbar').boundingBox();
+  const addArchive = await page.getByRole('button', { name: 'Add archived match' }).boundingBox();
+  expect(archiveAd && toolbar && boxesOverlap(archiveAd, toolbar)).toBeFalsy();
+  expect(archiveAd && addArchive && boxesOverlap(archiveAd, addArchive)).toBeFalsy();
 
   for (const hash of ['tactical', 'settings', 'support', 'match-center', 'profile']) {
     await page.goto(`${PREVIEW}/#${hash}`);
@@ -148,7 +172,52 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   }
   await page.goto(`${PREVIEW}/acquisition`);
   await expect(page.locator('.ad-slot')).toHaveCount(0);
+  await page.goto(`${PREVIEW}/privacy`);
+  await expect(page.locator('.ad-slot')).toHaveCount(0);
+  await page.goto(`${PREVIEW}/share/match/not-a-valid-token`);
+  await expect(page.locator('.ad-slot')).toHaveCount(0);
+  await page.goto(`${PREVIEW}/#settings`);
+  await page.getByRole('button', { name: 'Notifications' }).click();
+  await expect(page.locator('.notification-drawer .ad-slot')).toHaveCount(0);
   await expectVerificationScriptOnce(page);
+});
+
+test('preview ad, badge, nav, and home actions do not intersect on phones', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => localStorage.setItem('taamen-language', 'en'));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${PREVIEW}/`);
+  await page.getByRole('textbox', { name: /First name|الاسم الأول/ }).fill('Omar');
+  await page.locator('#consent-checkbox').check();
+  await page.getByRole('button', { name: /Continue|متابعة/ }).click();
+  for (const viewport of [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(`${PREVIEW}/#home`);
+    await expect(page.locator('.ad-slot')).toHaveCount(1);
+    const ad = page.locator('.ad-slot');
+    const badge = page.locator('a.sideprojectors-badge--float');
+    const nav = page.locator('.bottom-nav');
+    const cta = page.getByRole('button', { name: 'Explore archive' });
+    await ad.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    for (const [first, second, label] of [
+      [ad, nav, 'ad vs nav'],
+      [ad, cta, 'ad vs CTA'],
+      [badge, cta, 'badge vs CTA'],
+      [badge, ad, 'badge vs ad'],
+    ] as const) {
+      const a = await first.boundingBox();
+      const b = await second.boundingBox();
+      expect(a, `${label} at ${viewport.width}`).toBeTruthy();
+      expect(b, `${label} at ${viewport.width}`).toBeTruthy();
+      if (a && b) expect(boxesOverlap(a, b), `${label} at ${viewport.width}`).toBeFalsy();
+    }
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, `overflow at ${viewport.width}`).toBeLessThanOrEqual(1);
+  }
 });
 
 test('desktop LTR expanded and collapsed tooltip and indicator stay inside the viewport', async ({ page }) => {

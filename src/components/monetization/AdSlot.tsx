@@ -3,16 +3,8 @@ import { ensureAdSenseScript, pushAdSenseUnit } from '../../monetization/adsense
 import { adEnvFromImportMeta, resolvePlacement, type AdPlacement } from '../../monetization/placements';
 
 const COPY = {
-  en: {
-    label: 'Advertisement',
-    preview: 'Advertisement Preview',
-    space: 'Responsive ad space',
-  },
-  ar: {
-    label: 'إعلان',
-    preview: 'معاينة الإعلان',
-    space: 'مساحة إعلان متجاوبة',
-  },
+  en: { label: 'Advertisement' },
+  ar: { label: 'إعلان' },
 } as const;
 
 function subscribeLanguage(onChange: () => void) {
@@ -66,9 +58,8 @@ export default function AdSlot({ placement }: { placement: AdPlacement }) {
   const copy = COPY[language];
   return (
     <section className="ad-slot ad-slot-preview" aria-label={copy.label}>
-      <span className="ad-slot-kicker">{copy.label}</span>
-      <p>{copy.preview}</p>
-      <p>{copy.space}</p>
+      <p className="ad-slot-kicker">{copy.label}</p>
+      <div className="ad-slot-area" />
     </section>
   );
 }
