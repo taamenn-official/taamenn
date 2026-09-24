@@ -13,6 +13,24 @@ import {
 } from './matchLifecycle';
 import { dateISOToKey, formatMatchDate, PALESTINE_TIMEZONE } from '../shared/formatting/dateTime';
 import { classifySharedImport, materializeSharedMatch, requireShareSave, type MatchSharePayload, type SharedImportDecision, type SharedImportKind } from './shareService';
+import { nextLifecycleDelay } from '../domain/matches/lifecycleSchedule.ts';
+
+let repositoryReady: Promise<void> | null = null;
+
+/** Migration and normalization run once per page lifecycle, including after a failed attempt. */
+export function ensureMatchRepositoryReady() {
+  if (!repositoryReady) {
+    repositoryReady = initMatchRepository().catch(error => {
+      repositoryReady = null;
+      throw error;
+    });
+  }
+  return repositoryReady;
+}
+
+export function resetMatchRepositoryReadyForTests() {
+  repositoryReady = null;
+}
 
 function announceChange(){
   if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('taamen-matches-changed'));
@@ -45,7 +63,7 @@ export async function initMatchRepository(){
 }
 
 export async function listMatches():Promise<Match[]>{
-  await initMatchRepository();
+  await ensureMatchRepositoryReady();
   return (await getAll<Match>('matches'))
     .map(normalizeMatch)
     .sort((a,b)=>(b.dateKey-a.dateKey)||(Number(b.createdAt||0)-Number(a.createdAt||0)));
@@ -136,6 +154,7 @@ export async function createArchivedMatch(input:{team1:string;team2:string;score
 export async function reconcileMatchLifecycle(now=Date.now()){
   const matches=await listMatches();
   let changed=false;
+  const roster:Match[]=[];
   for(const match of matches){
     const current=canonicalStatus(match.status);
     const next=projectedStatus(match,now);
@@ -151,13 +170,14 @@ export async function reconcileMatchLifecycle(now=Date.now()){
       changed=true;
       if(next==='ACTIVE')await emitMatchNotification(value,'started',now);
       if(next==='COMPLETED_PENDING_RESULT')await emitMatchNotification(value,'result-pending',now);
-    }
+      roster.push(value);
+    } else roster.push(match);
   }
-  return changed;
+  return { changed, nextDelayMs: nextLifecycleDelay(roster, now) };
 }
 
 export async function findLocalMatch(id:string){
-  await migrateLegacyArchiveRecords();
+  await ensureMatchRepositoryReady();
   const inMatches=await getItem<Match>('matches',id);
   if(inMatches)return {store:'matches' as const,match:inMatches};
   return null;
