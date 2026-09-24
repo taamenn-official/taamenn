@@ -1,6 +1,4 @@
-import { useRef, type RefObject } from 'react';
-import { gsap, useGSAP } from './gsapRuntime';
-import { EASE, MOTION } from './tokens';
+import { useEffect, useRef, type RefObject } from 'react';
 import { prefersReducedMotion } from './prefersReduced';
 
 type NavActiveIndicatorProps = {
@@ -16,8 +14,8 @@ type NavActiveIndicatorProps = {
 
 /**
  * One shared pill per navigation. It slides between items instead of each item
- * animating its own highlight, which keeps the active state continuous across
- * routes. Purely decorative: the button keeps the label, focus and semantics.
+ * animating its own highlight. Width and height snap; only transform moves.
+ * Physical coordinates stay in viewport space so RTL does not mirror the pill.
  */
 export default function NavActiveIndicator({
   navRef,
@@ -29,7 +27,11 @@ export default function NavActiveIndicator({
   const pill = useRef<HTMLSpanElement>(null);
   const settled = useRef(false);
 
-  useGSAP(() => {
+  useEffect(() => {
+    let frame = 0;
+    let sidebarTimer = 0;
+    let introTimer = 0;
+
     const place = (animate: boolean) => {
       const nav = navRef.current;
       const el = pill.current;
@@ -38,7 +40,7 @@ export default function NavActiveIndicator({
       const active = nav.querySelector<HTMLElement>('.is-active');
       if (!active || !active.offsetParent) {
         nav.classList.remove('has-nav-indicator');
-        gsap.set(el, { autoAlpha: 0 });
+        el.style.opacity = '0';
         return;
       }
 
@@ -51,13 +53,17 @@ export default function NavActiveIndicator({
       const y = itemBox.top - navBox.top - parseFloat(navStyle.borderTopWidth || '0');
 
       nav.classList.add('has-nav-indicator');
-      gsap.set(el, { width: itemBox.width, height: itemBox.height });
-
-      if (animate && !prefersReducedMotion()) {
-        gsap.to(el, { x, y, duration: MOTION.ui, ease: EASE.hover, overwrite: 'auto' });
-        return;
+      const reduce = !animate || prefersReducedMotion();
+      if (reduce) el.style.transition = 'none';
+      el.style.width = `${itemBox.width}px`;
+      el.style.height = `${itemBox.height}px`;
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      el.style.visibility = 'visible';
+      if (reduce) {
+        requestAnimationFrame(() => {
+          if (pill.current) pill.current.style.transition = '';
+        });
       }
-      gsap.set(el, { x, y });
     };
 
     if (!settled.current) {
@@ -65,17 +71,21 @@ export default function NavActiveIndicator({
       place(false);
       const el = pill.current;
       if (el) {
-        if (prefersReducedMotion()) gsap.set(el, { autoAlpha: 1 });
-        else gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: MOTION.ui, delay: introDelay, ease: 'none' });
+        if (prefersReducedMotion() || introDelay <= 0) el.style.opacity = '1';
+        else {
+          el.style.opacity = '0';
+          introTimer = window.setTimeout(() => {
+            if (pill.current) pill.current.style.opacity = '1';
+          }, introDelay * 1000);
+        }
       }
     } else {
       place(true);
-      gsap.set(pill.current, { autoAlpha: 1 });
+      if (pill.current) pill.current.style.opacity = '1';
       // The sidebar width transition finishes after this effect, so re-measure.
-      gsap.delayedCall(0.34, () => place(false));
+      sidebarTimer = window.setTimeout(() => place(false), 340);
     }
 
-    let frame = 0;
     const onResize = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => place(false));
@@ -88,8 +98,12 @@ export default function NavActiveIndicator({
       window.removeEventListener('resize', onResize);
       direction.disconnect();
       cancelAnimationFrame(frame);
+      window.clearTimeout(sidebarTimer);
+      window.clearTimeout(introTimer);
     };
-  }, { dependencies: [activeKey, ...watch] });
+    // watch values are geometry inputs, not a live list identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKey, introDelay, navRef, ...watch]);
 
   return <span ref={pill} className={`nav-active-indicator ${className}`.trim()} aria-hidden="true" />;
 }

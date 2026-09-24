@@ -18,7 +18,7 @@ import TaamenAmbientBackground from '../components/ui/taamen-ambient-background'
 import { SideProjectorsBadge } from '../components/SideProjectorsBadge';
 import { isCompactViewport, prefersReducedMotion } from '../motion/prefersReduced';
 import { gsap, useGSAP } from '../motion/gsapRuntime';
-import { EASE, MOTION, TRAVEL, compact } from '../motion/tokens';
+import { EASE, MOTION, TRAVEL } from '../motion/tokens';
 import { formations, genericTacticalPlayers } from '../data/tacticalPresets';
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
@@ -152,8 +152,16 @@ export default function Acquisition({ language, onLanguage, theme, onTheme }: { 
       gsap.set([...hero, ...cards], { clearProps: 'opacity,transform' });
       return;
     }
-    const travel = isCompactViewport() ? compact(TRAVEL.card) : TRAVEL.card;
+    const compactViewport = isCompactViewport();
+    const travel = compactViewport ? 4 : TRAVEL.card;
     const tl = gsap.timeline({ defaults: { ease: EASE.entrance } });
+    if (compactViewport) {
+      const nodes = [...hero, ...cards];
+      if (nodes.length) {
+        tl.from(nodes, { opacity: 0, y: 4, duration: 0.18, stagger: 0.03, clearProps: 'opacity,transform' }, 0);
+      }
+      return;
+    }
     if (hero.length) {
       tl.from(hero, { opacity: 0, y: travel, duration: MOTION.entrance, stagger: 0.06, clearProps: 'opacity,transform' }, 0);
     }

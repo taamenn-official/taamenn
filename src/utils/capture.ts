@@ -1,5 +1,3 @@
-import html2canvasLib from 'html2canvas';
-
 export type PitchCaptureOptions = {
   backgroundColor?: string;
   scale?: number;
@@ -14,6 +12,7 @@ export async function html2canvas(
   target: HTMLElement,
   options: PitchCaptureOptions = {},
 ): Promise<HTMLCanvasElement> {
+  const { default: html2canvasLib } = await import('html2canvas');
   const scale = options.scale ?? Math.max(2, Math.min(window.devicePixelRatio || 1, 3));
   const width = Math.max(1, target.offsetWidth);
   const height = Math.max(1, target.offsetHeight);

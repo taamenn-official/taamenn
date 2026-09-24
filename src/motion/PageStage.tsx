@@ -1,56 +1,42 @@
-import { useRef, type ReactNode } from 'react';
-import { gsap, useGSAP } from './gsapRuntime';
-import { EASE, MOTION, TRAVEL, compact } from './tokens';
-import { isCompactViewport, prefersReducedMotion } from './prefersReduced';
+import type { CSSProperties, ReactNode } from 'react';
+import { isCompactViewport } from './prefersReduced';
 import type { RouteId } from '../config/routes';
 
 type StageProfile = { travel: number; duration: number };
 
 /**
- * Motion per route purpose. Data-heavy pages stay short and functional, Home
- * skips the wrapper entirely because it choreographs its own groups, and the
- * tactical board only fades so no transform can ever fight the drag logic.
+ * Motion per route purpose, in pixels and milliseconds. Data-heavy pages stay
+ * short. Home skips the wrapper because it choreographs its own groups, and
+ * the tactical board only fades so no transform can fight the drag logic.
  */
 const STAGE: Record<RouteId | 'default', StageProfile> = {
-  default: { travel: TRAVEL.page, duration: MOTION.page },
+  default: { travel: 12, duration: 320 },
   home: { travel: 0, duration: 0 },
-  archive: { travel: 12, duration: 0.34 },
-  'match-center': { travel: 12, duration: 0.34 },
-  'historical-match-center': { travel: 12, duration: 0.34 },
-  stadiums: { travel: 12, duration: 0.34 },
-  profile: { travel: 14, duration: 0.38 },
-  support: { travel: 14, duration: 0.38 },
-  settings: { travel: 0, duration: 0.26 },
-  tactical: { travel: 0, duration: 0.26 },
+  archive: { travel: 12, duration: 320 },
+  'match-center': { travel: 12, duration: 320 },
+  'historical-match-center': { travel: 12, duration: 320 },
+  stadiums: { travel: 12, duration: 320 },
+  profile: { travel: 14, duration: 340 },
+  support: { travel: 14, duration: 340 },
+  settings: { travel: 0, duration: 200 },
+  tactical: { travel: 0, duration: 200 },
 };
 
 /**
  * Plays the incoming half of a route change. The route has already switched by
- * the time this runs, so navigation never waits for motion.
+ * the time this renders, so navigation never waits for motion.
  */
 export default function PageStage({ page, children }: { page: RouteId; children: ReactNode }) {
-  const stage = useRef<HTMLDivElement>(null);
+  const profile = STAGE[page] ?? STAGE.default;
+  if (profile.duration === 0) return <div className="page-stage">{children}</div>;
 
-  useGSAP(() => {
-    const el = stage.current;
-    if (!el) return;
-    const profile = STAGE[page] ?? STAGE.default;
-    if (profile.duration === 0) return;
+  const compact = isCompactViewport();
+  const travel = profile.travel === 0 ? 0 : (compact ? 4 : profile.travel);
+  const duration = compact ? Math.min(200, profile.duration) : profile.duration;
+  const style = {
+    '--ta-page-travel': `${travel}px`,
+    '--ta-page-ms': `${duration}ms`,
+  } as CSSProperties;
 
-    if (prefersReducedMotion()) {
-      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.14, ease: 'none', clearProps: 'opacity' });
-      return;
-    }
-
-    const travel = isCompactViewport() ? compact(profile.travel) : profile.travel;
-    gsap.fromTo(
-      el,
-      travel > 0 ? { opacity: 0, y: travel } : { opacity: 0 },
-      travel > 0
-        ? { opacity: 1, y: 0, duration: profile.duration, ease: EASE.entrance, clearProps: 'opacity,transform' }
-        : { opacity: 1, duration: profile.duration, ease: EASE.entrance, clearProps: 'opacity' },
-    );
-  }, { dependencies: [page], revertOnUpdate: true });
-
-  return <div ref={stage} className="page-stage">{children}</div>;
+  return <div key={page} className="page-stage is-entering" style={style}>{children}</div>;
 }

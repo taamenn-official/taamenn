@@ -7,7 +7,7 @@ import { imageFileToDataUrl } from '../services/imageProcessing';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
 import PrivacyPolicyModal, { recordConsent } from './PrivacyPolicyModal';
 import { gsap, useGSAP } from '../motion/gsapRuntime';
-import { EASE, MOTION, TRAVEL, compact } from '../motion/tokens';
+import { EASE, MOTION, TRAVEL } from '../motion/tokens';
 import { isCompactViewport, prefersReducedMotion } from '../motion/prefersReduced';
 import { armCinematicHomeReveal } from '../motion/revealState';
 import { ImageActionSheet, ImageViewer } from './ImageActionOverlay';
@@ -38,8 +38,19 @@ export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: {
       return;
     }
     const rows = content.querySelectorAll<HTMLElement>('.mobile-branding, .avatar-section, .form-label, .consent-row, .mobile-submit');
-    const travel = isCompactViewport() ? compact(TRAVEL.auth) : TRAVEL.auth;
+    const compactViewport = isCompactViewport();
+    const travel = compactViewport ? 4 : TRAVEL.auth;
     const tl = gsap.timeline();
+    if (compactViewport) {
+      tl.from(content, {
+        opacity: 0,
+        y: 4,
+        duration: 0.2,
+        ease: EASE.entrance,
+        clearProps: 'opacity,transform',
+      }, 0);
+      return;
+    }
     tl.from(content, {
       opacity: 0,
       y: travel,

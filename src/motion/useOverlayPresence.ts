@@ -13,18 +13,20 @@ function travel(distance: number): number {
 
 /** Panels settle in from their own edge; the backdrop only ever fades. */
 function panelFrom(kind: OverlayKind): Vars {
+  const compact = isCompactViewport();
   if (kind === 'drawer') {
     const rtl = document.documentElement.dir === 'rtl';
-    return { opacity: 0, xPercent: rtl ? -7 : 7 };
+    return compact ? { opacity: 0, x: rtl ? -8 : 8 } : { opacity: 0, xPercent: rtl ? -7 : 7 };
   }
-  if (kind === 'sheet') return { opacity: 0, y: travel(TRAVEL.sheet) };
-  return { opacity: 0, y: travel(TRAVEL.modal), scale: isCompactViewport() ? 1 : 0.985 };
+  if (kind === 'sheet') return { opacity: 0, y: compact ? 4 : travel(TRAVEL.sheet) };
+  return { opacity: 0, y: compact ? 4 : travel(TRAVEL.modal), scale: compact ? 1 : 0.985 };
 }
 
 function panelTo(kind: OverlayKind): Vars {
-  if (kind === 'drawer') return { opacity: 1, xPercent: 0, duration: MOTION.panel, ease: EASE.entrance };
-  if (kind === 'sheet') return { opacity: 1, y: 0, duration: MOTION.panel, ease: EASE.entrance };
-  return { opacity: 1, y: 0, scale: 1, duration: MOTION.panel, ease: EASE.entrance };
+  const duration = isCompactViewport() ? 0.2 : MOTION.panel;
+  if (kind === 'drawer') return { opacity: 1, x: 0, xPercent: 0, duration, ease: EASE.entrance };
+  if (kind === 'sheet') return { opacity: 1, y: 0, duration, ease: EASE.entrance };
+  return { opacity: 1, y: 0, scale: 1, duration, ease: EASE.entrance };
 }
 
 /**

@@ -3,8 +3,23 @@ import { useEffect, useState } from 'react';
 export default function DateTimeBlock({language}:{language:'ar'|'en'}) {
   const [now,setNow]=useState(()=>new Date());
   useEffect(()=>{
-    const id=window.setInterval(()=>setNow(new Date()),1000);
-    return ()=>window.clearInterval(id);
+    const desktop=window.matchMedia('(min-width: 901px)');
+    let id=0;
+    const stop=()=>{window.clearInterval(id);id=0};
+    const start=()=>{
+      stop();
+      if(!desktop.matches||document.hidden)return;
+      setNow(new Date());
+      id=window.setInterval(()=>setNow(new Date()),1000);
+    };
+    start();
+    desktop.addEventListener('change',start);
+    document.addEventListener('visibilitychange',start);
+    return()=>{
+      stop();
+      desktop.removeEventListener('change',start);
+      document.removeEventListener('visibilitychange',start);
+    };
   },[]);
   const ar=language==='ar';
   const weekday=new Intl.DateTimeFormat(ar?'ar-PS':'en-US',{weekday:'long'}).format(now);

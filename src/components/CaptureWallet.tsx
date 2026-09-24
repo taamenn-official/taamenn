@@ -4,7 +4,7 @@ import { html2canvas } from '../utils/capture';
 import { clearCaptures, downloadCapture, importScreenshot, listCaptures, removeCapture, saveCapture, shareCapture, objectUrl, type LocalCapture } from '../services/screenshotService';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
 
-function CaptureImage({item,alt}:{item:LocalCapture;alt:string}){const [url,setUrl]=useState('');useEffect(()=>{if(!(item.blob instanceof Blob)){setUrl('');return}const u=objectUrl(item);setUrl(u);return()=>URL.revokeObjectURL(u)},[item]);if(!url)return <div className="capture-missing" aria-hidden="true"/>;return <img src={url} alt={alt}/>;}
+function CaptureImage({item,alt}:{item:LocalCapture;alt:string}){const [url,setUrl]=useState('');useEffect(()=>{if(!(item.blob instanceof Blob)){setUrl('');return}const u=objectUrl(item);setUrl(u);return()=>URL.revokeObjectURL(u)},[item]);if(!url)return <div className="capture-missing" aria-hidden="true"/>;return <img src={url} alt={alt} loading="lazy" decoding="async"/>;}
 
 export function CaptureWallet({language,embedded=false}:{language:'ar'|'en';embedded?:boolean}){
  const ar=language==='ar'; const [open,setOpen]=useState(false); const [items,setItems]=useState<LocalCapture[]>([]); const [busy,setBusy]=useState(false); const input=useRef<HTMLInputElement>(null);
