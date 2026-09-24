@@ -87,3 +87,15 @@ test('forwarded client-IP headers are ignored unless the proxy is trusted', asyn
   }
   assert.ok(blocked, 'a spoofed forwarded address must not bypass the limiter');
 });
+
+test('a spoofed CF-Connecting-IP does not refresh the rate limit', async () => {
+  let blocked = false;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const response = await api.post('/api/featured/member', {
+      headers: { 'CF-Connecting-IP': `203.0.113.${attempt % 250}` },
+      body: { memberCode: `user#CFSPOOF${attempt}` },
+    });
+    if (response.status === 429) { blocked = true; break; }
+  }
+  assert.ok(blocked, 'a spoofed Cloudflare client IP must not bypass the limiter');
+});

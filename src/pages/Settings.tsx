@@ -3,7 +3,7 @@ import { Accessibility, Bell, Database, Globe2, Mail, Moon, Sun, RotateCcw, Smar
 import type { LocalProfile } from '../services/profileRepository';
 import { saveProfile } from '../services/profileRepository';
 import { clearNotifications } from '../services/notificationService';
-import { getItem, putItem, exportTaamenBackup, importTaamenBackup, BackupError } from '../services/localDb';
+import { getItem, putItem, exportTaamenBackup, importTaamenBackup, BackupError, MAX_BACKUP_BYTES } from '../services/localDb';
 import { installService } from '../infrastructure/pwa/installService';
 import { CaptureWallet } from '../components/CaptureWallet';
 import FeaturedMember from '../components/FeaturedMember';
@@ -44,7 +44,7 @@ export default function Settings({language,profile,onLanguage,theme,onTheme,onRe
  const persistPrefs=(next:PrivacyPrefs)=>putItem('settings',{id:'privacy',notifications:notify,analytics,motion,...next});
  const saveEmail=async(email:string)=>{const next=await saveProfile({...p,email:email.trim(),emailVerified:false,verifiedAt:undefined});setP(next);onProfile(next)};
  const backup=async()=>{try{const data=await exportTaamenBackup();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`taamen-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);setStatus(uiCopy[language].backupExported)}catch{setStatus(uiCopy[language].backupExportFailed)}};
- const restore=async(file?:File)=>{if(!file)return;try{await importTaamenBackup(JSON.parse(await file.text()));setStatus(uiCopy[language].backupImported);setTimeout(()=>location.reload(),500)}catch(caught){setStatus(caught instanceof BackupError&&caught.code==='unsupported-version'?uiCopy[language].backupUnsupported:uiCopy[language].backupInvalid)}};
+ const restore=async(file?:File)=>{if(!file)return;try{if(file.size>MAX_BACKUP_BYTES)throw new BackupError('invalid');const text=await file.text();if(text.length>MAX_BACKUP_BYTES)throw new BackupError('invalid');await importTaamenBackup(JSON.parse(text));setStatus(uiCopy[language].backupImported);setTimeout(()=>location.reload(),500)}catch(caught){setStatus(caught instanceof BackupError&&caught.code==='unsupported-version'?uiCopy[language].backupUnsupported:uiCopy[language].backupInvalid)}};
  const startReset=()=>{setShowResetModal(true);setResetting(false);setResetResult(null)};
  const resetOverlay=useOverlayPresence<HTMLDivElement,HTMLDivElement>('modal',()=>setShowResetModal(false),showResetModal);
  const closeResetModal=()=>{if(!resetting)resetOverlay.requestClose()};

@@ -24,8 +24,9 @@ export default function Stadiums({ language }: { language: Language }) {
 
   const openWhatsApp = (phone: string) => {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const whatsappUrl = `https://wa.me/${cleanPhone}`;
-    window.open(whatsappUrl, '_blank');
+    if (!cleanPhone) return;
+    const popup = window.open(`https://wa.me/${cleanPhone}`, '_blank', 'noopener,noreferrer');
+    if (popup) popup.opener = null;
   };
 
   return (

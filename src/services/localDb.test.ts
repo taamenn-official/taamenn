@@ -62,6 +62,48 @@ test('malformed archive records reject the backup before any write', () => {
   }));
 });
 
+const validMatch = { id: 'LOCAL-1', team1: 'A', team2: 'B', dateKey: 20260101, visibility: 'LOCAL', source: 'local' };
+
+test('backup import rejects arrays, pollution keys, private rows, and unknown stores', () => {
+  assert.throws(
+    () => parseBackupEnvelope({ format: 'taamen-backup', version: 3, stores: [] }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => parseBackupEnvelope({ format: 'taamen-backup', version: 3, stores: { matches: { id: 'LOCAL-1' } } }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => parseBackupEnvelope(JSON.parse('{"format":"taamen-backup","version":3,"stores":{"__proto__":[{"id":"x"}]}}')),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => parseBackupEnvelope({
+      format: 'taamen-backup',
+      version: 3,
+      stores: { matches: [{ ...validMatch, constructor: { prototype: { polluted: true } } }] },
+    }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => parseBackupEnvelope({ format: 'taamen-backup', version: 3, stores: { notAStore: [] } }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => assertBackupRecordsValid({ matches: [{ ...validMatch, visibility: 'PRIVATE' }] }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => assertBackupRecordsValid({ archive: [{ ...validMatch, source: 'legacy' }] }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.throws(
+    () => assertBackupRecordsValid({ matches: [{ ...validMatch, source: 'featured' }] }),
+    (error: unknown) => error instanceof BackupError && error.code === 'invalid',
+  );
+  assert.doesNotThrow(() => assertBackupRecordsValid({ matches: [validMatch] }));
+});
+
 test('malformed screenshot records reject the backup before any write', () => {
   assert.throws(
     () => assertBackupRecordsValid({ screenshots: [{ id: 'shot-1', createdAt: Date.now() }] }),

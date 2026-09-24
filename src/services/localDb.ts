@@ -21,6 +21,10 @@ export async function resetTaamenData(){for(const s of STORES)await clearStore(s
 export async function seedMatches(seed:unknown[]){if((await getAll('matches')).length)return;for(const m of seed as Array<{id:string}>)await putItem('matches',m)}
 export async function seedNotifications(seed:unknown[]){if((await getAll('notifications')).length)return;for(const m of seed as Array<{id:string}>)await putItem('notifications',m)}
 export async function getStorageEstimate(){try{return await navigator.storage?.estimate()}catch{return undefined}}
+export const MAX_BACKUP_BYTES=32*1024*1024;
+const MAX_BACKUP_ROWS=2000;
+const MAX_BACKUP_DEPTH=8;
+const FORBIDDEN_KEYS=new Set(['__proto__','constructor','prototype']);
 export type BackupEnvelope={format:'taamen-backup';version:1|2|3;sourceVersion?:1|2|3;createdAt:string;stores:Partial<Record<StoreName,unknown[]>>};
 export class BackupError extends Error{
   readonly code:'invalid'|'unsupported-version';
@@ -30,14 +34,35 @@ export class BackupError extends Error{
     this.code=code;
   }
 }
+function assertBackupShape(value:unknown,depth:number){
+  if(depth>MAX_BACKUP_DEPTH)throw new BackupError('invalid');
+  if(Array.isArray(value)){
+    if(value.length>MAX_BACKUP_ROWS)throw new BackupError('invalid');
+    for(const item of value)assertBackupShape(item,depth+1);
+    return;
+  }
+  if(!value||typeof value!=='object')return;
+  const record=value as Record<string,unknown>;
+  for(const key of Object.keys(record)){
+    if(FORBIDDEN_KEYS.has(key))throw new BackupError('invalid');
+    assertBackupShape(record[key],depth+1);
+  }
+}
 export function parseBackupEnvelope(x:unknown):BackupEnvelope{
-  if(!x||typeof x!=='object')throw new BackupError('invalid');
+  if(!x||typeof x!=='object'||Array.isArray(x))throw new BackupError('invalid');
   const b=x as Record<string,unknown>;
+  if(Object.keys(b).some(key=>FORBIDDEN_KEYS.has(key)))throw new BackupError('invalid');
   if(b.format!=='taamen-backup')throw new BackupError('invalid');
   if(typeof b.version!=='number')throw new BackupError('invalid');
   if(![1,2,3].includes(b.version))throw new BackupError('unsupported-version');
-  if(!b.stores||typeof b.stores!=='object')throw new BackupError('invalid');
-  return{format:'taamen-backup',version:3,sourceVersion:b.version as 1|2|3,createdAt:typeof b.createdAt==='string'?b.createdAt:new Date().toISOString(),stores:b.stores as BackupEnvelope['stores']};
+  if(!b.stores||typeof b.stores!=='object'||Array.isArray(b.stores))throw new BackupError('invalid');
+  const stores=b.stores as Record<string,unknown>;
+  for(const key of Object.keys(stores)){
+    if(FORBIDDEN_KEYS.has(key)||!STORES.includes(key as StoreName))throw new BackupError('invalid');
+    if(!Array.isArray(stores[key]))throw new BackupError('invalid');
+  }
+  assertBackupShape(stores,0);
+  return{format:'taamen-backup',version:3,sourceVersion:b.version as 1|2|3,createdAt:typeof b.createdAt==='string'?b.createdAt:new Date().toISOString(),stores:stores as BackupEnvelope['stores']};
 }
 function recordsForStore(raw:unknown):Array<{id:string}>{
   if(!Array.isArray(raw))return [];
@@ -119,6 +144,8 @@ export function assertBackupRecordsValid(stores:BackupEnvelope['stores']){
       if(typeof row!=='object')throw new BackupError('invalid');
       const item=row as {id?:unknown};
       if(typeof item.id!=='string'||!item.id.trim())throw new BackupError('invalid');
+      const match=row as {visibility?:unknown;source?:unknown};
+      if(match.visibility==='PRIVATE'||match.source==='legacy'||match.source==='featured')throw new BackupError('invalid');
       if(!validRecord(target,row as {id:string}))throw new BackupError('invalid');
     }
   }

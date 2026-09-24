@@ -186,6 +186,7 @@ test('security headers are present and API responses are not cacheable', async (
   assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.match(response.headers.get('content-security-policy'), /frame-ancestors 'none'/);
   assert.equal(response.headers.get('cross-origin-resource-policy'), 'same-origin');
+  assert.equal(response.headers.get('strict-transport-security'), null, 'plain HTTP must not send HSTS');
 });
 
 test('CORS credentials are granted only to allow-listed origins', async () => {
@@ -197,6 +198,12 @@ test('CORS credentials are granted only to allow-listed origins', async () => {
   const foreign = await api.get('/api/health', { headers: { Origin: 'https://attacker.example' } });
   assert.equal(foreign.headers.get('access-control-allow-origin'), null);
   assert.equal(foreign.headers.get('cross-origin-resource-policy'), 'same-origin');
+
+  for (const origin of ['null', '*', 'http://localhost:5173.evil.com', 'http://127.0.0.1:5173']) {
+    const malformed = await api.get('/api/health', { headers: { Origin: origin } });
+    assert.equal(malformed.headers.get('access-control-allow-origin'), null, origin);
+    assert.equal(malformed.headers.get('access-control-allow-credentials'), null, origin);
+  }
 });
 
 test('oversized and malformed request bodies are rejected', async () => {
