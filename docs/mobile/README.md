@@ -1,6 +1,6 @@
 # TAAMEN mobile shell
 
-TAAMEN stays a React + TypeScript + Vite PWA. This pass makes the installed and mobile browser experience feel like a football app: a compact shell, a modular Home, and one local data read.
+TAAMEN stays a React + TypeScript + Vite PWA. The installed and mobile browser experience uses a compact shell. Home is the classic archive page, not a widget dashboard.
 
 ## Display modes
 
@@ -21,9 +21,9 @@ Mobile nav is one bar: Home, Archive, Match Center, Tactical, Profile, Settings.
 
 Route changes scroll with `auto` on viewports up to 900px and `smooth` on wider screens, unless reduced motion is on.
 
-## Home widgets
+## Home
 
-Home is a dashboard of in-app TAAMEN Home Widgets. See [widgets.md](./widgets.md). Selectors in `src/domain/matches/matchSelectors.ts` derive the next match, upcoming list, recent result, archive counts, and active match. The page asks for one summary.
+Home is the classic page: hero, archive statistics, the venues card, then the latest recorded matches. Local Home reads the current local archive. A featured session reads the historical list. Those sources stay separate.
 
 ## Deep links
 

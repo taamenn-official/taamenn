@@ -5,12 +5,13 @@ export function RouteSkeleton({ page }: { page: RouteId }) {
     return (
       <section className="page-content home-page" aria-busy="true">
         <div className="skeleton-line is-title" />
-        <div className="skeleton-block is-next" />
         <div className="skeleton-grid">
           <div className="skeleton-block" />
           <div className="skeleton-block" />
           <div className="skeleton-block" />
+          <div className="skeleton-block" />
         </div>
+        <div className="skeleton-block is-row" />
       </section>
     );
   }

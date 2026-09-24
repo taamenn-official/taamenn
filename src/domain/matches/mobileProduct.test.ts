@@ -6,14 +6,6 @@ import { installBannerMode } from '../../infrastructure/pwa/installService.ts';
 import { displayModeFromSignals } from '../../mobile/useDisplayMode.ts';
 import { getDeepLinkForRoute, parseAppDeepLink } from '../../mobile/deepLinks.ts';
 import { nextLifecycleDelay } from './lifecycleSchedule.ts';
-import {
-  getArchiveSummary,
-  getNextMatch,
-  getUpcomingMatches,
-  homeVisibleMatches,
-  summarizeHome,
-} from './matchSelectors.ts';
-import { buildWidgetSnapshot, snapshotHasPrivateMaterial } from './widgetSnapshot.ts';
 
 const fixture = (patch: Partial<Match> = {}): Match => ({
   id: 'LOCAL-1',
@@ -48,66 +40,6 @@ test('install banner shows a real prompt or iOS guidance, and hides when dismiss
   assert.equal(installBannerMode('ios-guidance', false, true), 'hidden');
   assert.equal(installBannerMode('installed', false, false), 'hidden');
   assert.equal(installBannerMode('unavailable', false, false), 'hidden');
-});
-
-test('selectors pick the next match, upcoming rows, and archive counts', () => {
-  const start = zonedDateTimeToEpoch('2026-09-24', '18:00', 'Asia/Jerusalem');
-  const now = start - 42 * 60 * 1000;
-  const later = fixture({ id: 'later', time: '20:00' });
-  const next = fixture({ id: 'next', time: '18:00' });
-  const recorded = fixture({
-    id: 'done',
-    status: 'ARCHIVED',
-    score1: 2,
-    score2: 1,
-    dateISO: '2026-09-01',
-    dateKey: 20260901,
-    resultRecordedAt: 10,
-  });
-  const draw = fixture({
-    id: 'draw',
-    status: 'COMPLETED_WITH_RESULT',
-    score1: 1,
-    score2: 1,
-    dateISO: '2026-09-02',
-    dateKey: 20260902,
-    resultRecordedAt: 20,
-  });
-  const pending = fixture({
-    id: 'pending',
-    status: 'COMPLETED_PENDING_RESULT',
-    dateISO: '2026-09-03',
-    dateKey: 20260903,
-    time: '12:00',
-  });
-  const matches = [later, recorded, next, draw, pending];
-  assert.equal(getNextMatch(matches, now)?.id, 'next');
-  assert.deepEqual(getUpcomingMatches(matches, now).map(match => match.id), ['next', 'later']);
-  const summary = getArchiveSummary(matches, now);
-  assert.equal(summary.total, 3);
-  assert.equal(summary.decided, 1);
-  assert.equal(summary.draws, 1);
-  assert.equal(summary.pending, 1);
-  const home = summarizeHome(matches, 'local', now);
-  assert.equal(home.nextMatch?.id, 'next');
-  assert.equal(home.recent?.id, 'draw');
-  assert.equal(home.archive.pending, 1);
-  assert.equal(home.upcoming.length, 2);
-});
-
-test('local home drops private and legacy rows; featured keeps its own list', () => {
-  const local = fixture({ id: 'local' });
-  const hidden = fixture({ id: 'hidden', visibility: 'PRIVATE', source: 'legacy', team1: 'Secret' });
-  assert.deepEqual(homeVisibleMatches([local, hidden], 'local').map(match => match.id), ['local']);
-  assert.equal(homeVisibleMatches([hidden], 'featured')[0]?.team1, 'Secret');
-  const localSummary = summarizeHome([local, hidden], 'local', Date.parse('2026-09-24T10:00:00Z'));
-  const snapshot = buildWidgetSnapshot(localSummary, '2026-09-24T10:00:00.000Z');
-  assert.equal(snapshot.version, 1);
-  assert.equal(snapshot.scope, 'local');
-  assert.equal(JSON.stringify(snapshot).includes('Secret'), false);
-  assert.equal(snapshotHasPrivateMaterial(snapshot), false);
-  assert.equal('email' in snapshot, false);
-  assert.equal('token' in snapshot, false);
 });
 
 test('lifecycle waits for the next real boundary instead of a 15s loop', () => {

@@ -17,23 +17,30 @@ async function useEnglish(page: Page) {
   if (await toggle.count()) await toggle.first().click();
 }
 
-test('home dashboard shows next, archive, and recent states', async ({ page }) => {
+test('classic home shows the archive hero and not the dashboard', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await completeSetup(page);
   await useEnglish(page);
+  await expect(page.locator('.home-hero-single')).toBeVisible();
+  await expect(page.locator('.home-stats')).toBeVisible();
+  await expect(page.locator('.home-venues-card')).toBeVisible();
+  await expect(page.locator('.archive-preview-panel')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Welcome Omar' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Next match' })).toBeVisible();
-  await expect(page.getByText('No upcoming match.')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Archive summary' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Latest result' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Latest matches' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Explore archive' })).toBeVisible();
+  await expect(page.locator('.home-actions').getByRole('button', { name: 'Profile' })).toBeVisible();
+  await expect(page.locator('.home-dashboard')).toHaveCount(0);
+  await expect(page.locator('.ta-widget')).toHaveCount(0);
+  await expect(page.locator('.quick-action')).toHaveCount(0);
+  await expect(page.locator('.home-next')).toHaveCount(0);
   await expect(page.locator('.ad-slot')).toHaveCount(0);
 });
 
-test('a widget opens its route and the bottom nav stays at six items', async ({ page }) => {
+test('archive action opens the archive and the bottom nav stays at six items', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await completeSetup(page);
   await useEnglish(page);
-  await page.locator('.quick-action').filter({ hasText: 'Archive' }).click();
+  await page.getByRole('button', { name: 'Explore archive' }).click();
   await expect(page.getByRole('heading', { name: 'Archive', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/#archive/);
   await expect(page.locator('.bottom-nav-item')).toHaveCount(6);
@@ -69,7 +76,7 @@ test('iOS guidance is compact and does not pretend to prompt', async ({ browser 
   await page.evaluate(() => { document.scrollingElement?.scrollTo(0, document.scrollingElement.scrollHeight); });
   const gap = await page.evaluate(() => {
     const bar = document.querySelector('.install-banner')?.getBoundingClientRect();
-    const content = document.querySelector('.home-dashboard')?.lastElementChild?.getBoundingClientRect();
+    const content = document.querySelector('.archive-preview-panel')?.getBoundingClientRect();
     if (!bar || !content) return null;
     return bar.top - (content.top + content.height);
   });
@@ -133,8 +140,8 @@ test('focus-visible remains and 360px does not overflow under the nav', async ({
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   const nav = await page.locator('.bottom-nav').boundingBox();
-  const greeting = await page.locator('.home-greeting').boundingBox();
-  expect(nav && greeting && greeting.y + greeting.height <= (nav.y ?? 0) + 1).toBeTruthy();
+  const hero = await page.locator('.home-hero-single').boundingBox();
+  expect(nav && hero && hero.y + hero.height <= (nav.y ?? 0) + 1).toBeTruthy();
 });
 
 test('share, acquisition, and legal routes still open', async ({ page }) => {

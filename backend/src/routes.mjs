@@ -1,7 +1,7 @@
 import { config } from './config.mjs';
 import {
   HttpError, clearedSessionCookie, clientIp, isSecureRequest, jsonResponse, noContentResponse,
-  parseCookies, readJsonBody, sessionCookie,
+  parseCookies, readJsonBody, sessionCookie, withTransportHeaders,
 } from './http.mjs';
 import { findActiveMemberByCode, findMemberById, store } from './store.mjs';
 import { createSession, destroySession, readSession } from './sessions.mjs';
@@ -192,6 +192,11 @@ function csrfHeader(request) {
  * adapter call this with a Fetch Request.
  */
 export async function handleFetch(request, platform = {}) {
+  const response = await routeRequest(request, platform);
+  return withTransportHeaders(response, isSecureRequest(request, platform));
+}
+
+async function routeRequest(request, platform = {}) {
   const url = new URL(request.url, 'http://localhost');
   const pathname = url.pathname.replace(/\/+$/, '') || '/';
   const secure = isSecureRequest(request, platform);

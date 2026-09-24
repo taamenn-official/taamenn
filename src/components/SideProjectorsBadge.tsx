@@ -1,18 +1,11 @@
-import { useState } from 'react';
-import {
-  SIDEPROJECTORS_BADGE_HEIGHT,
-  SIDEPROJECTORS_BADGE_SRC,
-  SIDEPROJECTORS_BADGE_WIDTH,
-  SIDEPROJECTORS_LISTING_URL,
-  sideprojectorsCopy,
-} from '../config/sideprojectors';
+import { SIDEPROJECTORS_LISTING_URL, sideprojectorsCopy } from '../config/sideprojectors';
 import type { Language } from '../i18n/translations';
 
 type BadgeVariant = 'float' | 'inline';
 
 /**
- * Official SideProjectors listing badge. Same component in MainShell (fixed) and
- * on /acquisition (inline). External image is not required for boot.
+ * Local listing mark for the official SideProjectors page.
+ * The official PNG is too small to scale, so this is vector text, not a pennant image.
  */
 export function SideProjectorsBadge({
   language,
@@ -22,8 +15,6 @@ export function SideProjectorsBadge({
   variant: BadgeVariant;
 }) {
   const text = sideprojectorsCopy[language];
-  const [imageFailed, setImageFailed] = useState(false);
-  const showLabel = variant === 'inline' || imageFailed;
 
   return (
     <a
@@ -33,20 +24,10 @@ export function SideProjectorsBadge({
       rel="noopener noreferrer"
       aria-label={text.label}
     >
-      {!imageFailed && (
-        <img
-          src={SIDEPROJECTORS_BADGE_SRC}
-          alt={text.alt}
-          width={SIDEPROJECTORS_BADGE_WIDTH}
-          height={SIDEPROJECTORS_BADGE_HEIGHT}
-          loading="lazy"
-          decoding="async"
-          fetchPriority="low"
-          referrerPolicy="no-referrer"
-          onError={() => setImageFailed(true)}
-        />
-      )}
-      {showLabel && <span className="sideprojectors-badge-label">{text.label}</span>}
+      <span className="sideprojectors-mark">
+        <span className="sideprojectors-mark-kicker">{text.kicker}</span>
+        <span className="sideprojectors-mark-name">{text.name}</span>
+      </span>
     </a>
   );
 }

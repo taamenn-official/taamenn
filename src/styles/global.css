@@ -2280,103 +2280,73 @@ html[data-taamen-motion="reduce"] .acquisition-nav{
   transition:none;
 }
 
-/* Official SideProjectors listing badge. Inspected chrome:
-   sidebar 250px / collapsed 76px, topbar 78px desktop / 64px ≤900px,
-   bottom-nav ~56–65px. Logical insets keep LTR/RTL off the sidebar. */
+/* Local SideProjectors listing mark. The official PNG is 45×115 and pixelates
+   when scaled, so this stays vector text, in the content flow, and links to
+   the official listing. */
 .sideprojectors-badge{
   color:inherit;
   text-decoration:none;
-  border-radius:6px;
-  transition:opacity .18s ease, filter .18s ease;
+  max-width:100%;
 }
-.sideprojectors-badge img{
-  display:block;
-  width:56px;
-  height:auto;
-  max-width:min(72px, calc(100vw - 24px));
-  pointer-events:none;
+.sideprojectors-mark{
+  display:grid;
+  gap:2px;
+  width:max-content;
+  max-width:min(168px, calc(100vw - 28px));
+  padding:7px 10px;
+  border:1px solid rgba(186,200,217,.28);
+  border-radius:10px;
+  background:#102228;
+  color:#f4f7f8;
+  box-shadow:none;
 }
-.sideprojectors-badge-label{
-  font-size:12px;
-  font-weight:700;
-  line-height:1.35;
-  color:var(--muted, #BAC8D9);
+.sideprojectors-mark-kicker{
+  font:700 10px/1.2 'DM Mono', ui-monospace, monospace;
+  letter-spacing:.08em;
+  color:#9BF272;
 }
-.sideprojectors-badge:hover{
-  opacity:.92;
-  filter:brightness(1.06);
+.sideprojectors-mark-name{
+  font:700 12px/1.25 Manrope, Tajawal, sans-serif;
+  letter-spacing:0;
+}
+.sideprojectors-badge:hover .sideprojectors-mark{
+  border-color:rgba(155,242,114,.45);
 }
 .sideprojectors-badge:focus-visible{
-  outline:2px solid var(--ta-lime, var(--cyan, #BAC8D9));
+  outline:2px solid var(--ta-lime, #9BF272);
   outline-offset:3px;
+  border-radius:12px;
 }
 .sideprojectors-badge--float{
-  position:fixed;
-  z-index:26;
-  inset-block-start:calc(var(--ta-topbar-height, 78px) + 10px);
-  inset-inline-end:12px;
+  position:relative;
+  z-index:1;
   display:flex;
-  flex-direction:column;
-  align-items:end;
-  max-width:min(200px, calc(100vw - 24px));
-}
-.sideprojectors-badge--float .sideprojectors-badge-label{
-  margin-block-start:6px;
-  padding:6px 8px;
-  border-radius:8px;
-  background:rgba(7,19,22,.88);
-  border:1px solid var(--ta-line, rgba(186,200,217,.16));
+  justify-content:flex-end;
+  margin:16px 0;
+  max-width:100%;
 }
 .sideprojectors-badge--inline{
   display:inline-flex;
-  align-items:center;
-  gap:12px;
   margin-top:18px;
   max-width:100%;
 }
-.sideprojectors-badge--inline img{
-  width:52px;
-}
-@media (min-width:901px){
-  /* Sidebar stays on inline-start: left in LTR, right in RTL.
-     The badge stays on inline-end, in the content column. */
-  .app-shell .sideprojectors-badge--float{
-    inset-inline-end:16px;
-  }
-}
 @media (max-width:900px){
-  .sideprojectors-badge--float{
-    inset-block-start:calc(var(--ta-topbar-height, 64px) + 8px);
-    inset-inline-end:10px;
-  }
-  .sideprojectors-badge--float img{
-    width:44px;
-  }
-  /* Keep page titles out from under the ~44px corner pennant. */
-  .app-shell .page-content .page-heading{
-    padding-inline-end:56px;
-  }
-}
-@media (max-width:360px){
-  .sideprojectors-badge--float img{
-    width:40px;
+  .app-shell .sideprojectors-badge--float{
+    margin-bottom:calc(var(--bottom-nav-height, 68px) + env(safe-area-inset-bottom, 0px) + 72px);
   }
 }
 @media (prefers-reduced-motion:reduce){
   .sideprojectors-badge{
     transition:none;
   }
-  .sideprojectors-badge:hover{
-    opacity:1;
-    filter:none;
-  }
 }
 html[data-taamen-motion="reduce"] .sideprojectors-badge{
   transition:none;
 }
-html[data-taamen-motion="reduce"] .sideprojectors-badge:hover{
-  opacity:1;
-  filter:none;
+html[data-theme="light"] .sideprojectors-mark{
+  background:#f7f4ee;
+  color:#102228;
+  border-color:rgba(25,57,64,.16);
 }
 
 

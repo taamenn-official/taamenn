@@ -135,9 +135,11 @@ export async function readJsonBody(request) {
 
 export function clientIp(request, platform = {}) {
   if (typeof platform.ip === 'string' && platform.ip) return platform.ip;
-  const cf = headerValue(request.headers, 'cf-connecting-ip').trim();
-  if (cf) return cf;
+  // Forwarded addresses are trusted only behind a proxy that overwrites them.
+  // A bare CF-Connecting-IP on Node is client-supplied and must not reset a limit.
   if (config.trustProxy) {
+    const cf = headerValue(request.headers, 'cf-connecting-ip').trim();
+    if (cf) return cf;
     const forwarded = headerValue(request.headers, 'x-forwarded-for');
     if (forwarded) {
       const first = forwarded.split(',')[0].trim();
@@ -145,4 +147,18 @@ export function clientIp(request, platform = {}) {
     }
   }
   return 'unknown';
+}
+
+/** HSTS only on HTTPS responses when the deployment requires HTTPS. */
+export function withTransportHeaders(response, secure) {
+  if (!secure || !config.requireHttps) return response;
+  const headers = new Headers(response.headers);
+  if (!headers.has('Strict-Transport-Security')) {
+    headers.set('Strict-Transport-Security', 'max-age=15552000');
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }

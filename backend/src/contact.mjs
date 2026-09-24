@@ -48,8 +48,8 @@ async function send(templateId, params) {
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      console.error('[taamen] EmailJS request failed', response.status, detail.slice(0, 180));
+      await response.body?.cancel().catch(() => {});
+      console.error('[taamen] EmailJS request failed', response.status);
       return false;
     }
     return true;

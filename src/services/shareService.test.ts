@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Match } from '../data/footballData.ts';
-import { classifySharedImport, decodeMatchShare, encodeMatchShare, materializeSharedMatch, requireShareSave, sharedMatchFingerprint } from './shareService.ts';
+import { classifySharedImport, decodeMatchShare, encodeMatchShare, matchShareSvg, materializeSharedMatch, requireShareSave, sharedMatchFingerprint } from './shareService.ts';
 
 const sample: Match = {
   id: 'LOCAL-1',
@@ -135,6 +135,21 @@ test('tampered or oversized match tokens fail closed', () => {
   assert.equal(decodeMatchShare('a'.repeat(20_000)), null);
   assert.equal(decodeMatchShare(tokenFrom({ v: 4, team1: 'A', team2: 'B', dateKey: 99, visibility: 'PUBLIC' })), null);
   assert.equal(decodeMatchShare(tokenFrom({ v: 4, team1: 'A', team2: 'B', dateKey: 20260101, visibility: 'PRIVATE' })), null);
+});
+
+test('match share svg escapes names, scores, and stadium text', () => {
+  const svg = matchShareSvg({
+    ...sample,
+    status: 'ARCHIVED',
+    team1: '<A&B>',
+    score1: '1<2' as unknown as number,
+    score2: 0,
+    stadium: "O'Field",
+  });
+  assert.equal(svg.includes('<A&B>'), false);
+  assert.equal(svg.includes('&lt;A&amp;B&gt;'), true);
+  assert.equal(svg.includes('1&lt;2'), true);
+  assert.equal(svg.includes('O&apos;Field'), true);
 });
 
 test('view-only shares are refused by the application-level save gate', () => {
