@@ -31,8 +31,8 @@ export default function PageStage({ page, children }: { page: RouteId; children:
   if (profile.duration === 0) return <div className="page-stage">{children}</div>;
 
   const compact = isCompactViewport();
-  const travel = profile.travel === 0 ? 0 : (compact ? 4 : profile.travel);
-  const duration = compact ? Math.min(200, profile.duration) : profile.duration;
+  const travel = profile.travel === 0 ? 0 : (compact ? 6 : Math.min(8, profile.travel));
+  const duration = compact ? Math.min(180, profile.duration) : Math.min(280, profile.duration);
   const style = {
     '--ta-page-travel': `${travel}px`,
     '--ta-page-ms': `${duration}ms`,

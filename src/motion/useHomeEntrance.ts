@@ -1,6 +1,6 @@
 import { useRef, type RefObject } from 'react';
 import { gsap, useGSAP } from './gsapRuntime';
-import { EASE, MOTION, STAGGER, TRAVEL, compact } from './tokens';
+import { EASE, TRAVEL, compact } from './tokens';
 import { isCompactViewport, prefersReducedMotion } from './prefersReduced';
 import { consumeHomeReveal } from './revealState';
 
@@ -14,9 +14,8 @@ function pick(root: HTMLElement | null, selector: string): HTMLElement[] {
 /**
  * Home entrance.
  *
- * The full reveal runs once, immediately after profile setup: greeting, primary
- * actions, then the icons rising from below, then the cards. Every later visit
- * gets a restrained fade so returning to Home never feels repetitive.
+ * Greeting, next match, then the widget grid. Travel stays short so Home
+ * is usable immediately. Later visits use the same small fade.
  *
  * Only `opacity` and transforms are animated, and nothing is made
  * `visibility: hidden`, so the actions stay clickable the whole time.
@@ -31,11 +30,9 @@ export function useHomeEntrance(root: RefObject<HTMLElement | null>) {
     const scale = (distance: number) => (compactViewport ? compact(distance) : distance);
 
     const greeting = pick(el, '[data-ta-motion="greeting"]');
-    const cta = pick(el, '[data-ta-motion="cta"]');
-    const cards = pick(el, '[data-ta-motion="card"]');
-    const panel = pick(el, '[data-ta-motion="panel"]');
-    const icons = pick(el, '[data-ta-icons] svg');
-    const groups = [...greeting, ...cta, ...cards, ...panel];
+    const next = pick(el, '[data-ta-motion="next"]');
+    const widgets = pick(el, '[data-ta-motion="widgets"]');
+    const groups = [...greeting, ...next, ...widgets];
 
     if (prefersReducedMotion()) {
       if (groups.length) {
@@ -46,101 +43,21 @@ export function useHomeEntrance(root: RefObject<HTMLElement | null>) {
 
     const tl = gsap.timeline();
 
-    if (compactViewport) {
-      const steps: Array<[HTMLElement[], number]> = [
-        [greeting, 0],
-        [cta, 0.05],
-        [cards, 0.1],
-        [panel, 0.16],
-      ];
-      for (const [nodes, at] of steps) {
-        if (!nodes.length) continue;
-        tl.from(nodes, {
-          opacity: 0,
-          y: 4,
-          duration: 0.18,
-          ease: EASE.entrance,
-          stagger: nodes.length > 1 ? 0.03 : 0,
-          clearProps: CLEAR,
-        }, at);
-      }
-      return;
-    }
-
-    if (reveal === 'light') {
-      if (greeting.length) {
-        tl.from(greeting, {
-          opacity: 0,
-          y: scale(12),
-          duration: MOTION.panel,
-          ease: EASE.entrance,
-          stagger: 0.05,
-          clearProps: CLEAR,
-        }, 0);
-      }
-      const rest = [...cta, ...cards, ...panel];
-      if (rest.length) {
-        tl.from(rest, {
-          opacity: 0,
-          y: scale(12),
-          duration: MOTION.panel,
-          ease: EASE.entrance,
-          stagger: 0.05,
-          clearProps: CLEAR,
-        }, 0.1);
-      }
-      return;
-    }
-
-    if (greeting.length) {
-      tl.from(greeting, {
+    const steps: Array<[HTMLElement[], number, number]> = compactViewport
+      ? [[greeting, 0, 4], [next, 0.04, 4], [widgets, 0.08, 4]]
+      : reveal === 'light'
+        ? [[greeting, 0, 8], [next, 0.06, 8], [widgets, 0.1, 6]]
+        : [[greeting, 0, 8], [next, 0.08, 8], [widgets, 0.14, 6]];
+    for (const [nodes, at, travel] of steps) {
+      if (!nodes.length) continue;
+      tl.from(nodes, {
         opacity: 0,
-        y: scale(18),
-        duration: MOTION.entrance,
+        y: scale(travel),
+        duration: compactViewport ? 0.16 : 0.28,
         ease: EASE.entrance,
-        stagger: 0.07,
+        stagger: 0,
         clearProps: CLEAR,
-      }, 0);
-    }
-    if (cta.length) {
-      tl.from(cta, {
-        opacity: 0,
-        y: scale(TRAVEL.card),
-        duration: MOTION.entrance,
-        ease: EASE.entrance,
-        clearProps: CLEAR,
-      }, 0.18);
-    }
-    // The required reveal: icons rise from below, one shortly after the other.
-    if (icons.length) {
-      tl.from(icons, {
-        opacity: 0,
-        y: scale(TRAVEL.icon),
-        scale: 0.97,
-        duration: MOTION.entrance,
-        ease: EASE.entrance,
-        stagger: compactViewport ? 0.06 : STAGGER.icons,
-        clearProps: CLEAR,
-      }, 0.3);
-    }
-    if (cards.length) {
-      tl.from(cards, {
-        opacity: 0,
-        y: scale(TRAVEL.card),
-        duration: 0.5,
-        ease: EASE.entrance,
-        stagger: compactViewport ? 0.07 : STAGGER.cards,
-        clearProps: CLEAR,
-      }, 0.36);
-    }
-    if (panel.length) {
-      tl.from(panel, {
-        opacity: 0,
-        y: scale(TRAVEL.page),
-        duration: 0.5,
-        ease: EASE.entrance,
-        clearProps: CLEAR,
-      }, 0.6);
+      }, at);
     }
   }, { scope: root });
 }

@@ -57,7 +57,7 @@ body{background:radial-gradient(circle at 75% 0,rgba(122,191,90,.09),transparent
 /* More complete pitch geometry */.pitch-center-spot{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;background:rgba(224,255,247,.55);transform:translate(-50%,-50%)}.goal-area{position:absolute;top:40%;width:8%;height:20%;border:1px solid rgba(224,255,247,.22)}.goal-area-home{left:6%}.goal-area-away{right:6%}.penalty-spot{position:absolute;top:50%;width:6px;height:6px;border-radius:50%;background:rgba(224,255,247,.55);transform:translateY(-50%)}.penalty-spot-home{left:22%}.penalty-spot-away{right:22%}.corner-arc{position:absolute;width:18px;height:18px;border:1px solid rgba(224,255,247,.26);border-radius:50%}.corner-tl{left:6%;top:6%;border-inline-end-color:transparent;border-block-end-color:transparent}.corner-tr{right:6%;top:6%;border-inline-start-color:transparent;border-block-end-color:transparent}.corner-bl{left:6%;bottom:6%;border-inline-end-color:transparent;border-block-start-color:transparent}.corner-br{right:6%;bottom:6%;border-inline-start-color:transparent;border-block-start-color:transparent}.tactical-page .pitch{touch-action:none;user-select:none}.player-token{touch-action:none;will-change:transform;user-select:none}.tactical-page .tactical-layout{grid-template-columns:1fr}.tactical-page .tactical-summary{order:2}.tactical-ops-top{justify-content:space-between;margin-bottom:10px}.ops-actions{margin-inline-start:auto}.landscape-exit{display:none}.tactical-page.is-landscape{position:fixed;z-index:60;inset:0;max-width:none;margin:0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(145deg,#071719,#0b2426);overflow:auto}.tactical-page.is-landscape .page-heading{margin-bottom:12px}.tactical-page.is-landscape .tactical-layout{min-height:0;grid-template-columns:1fr}.tactical-page.is-landscape .tactical-page .pitch,.tactical-page.is-landscape .pitch{min-height:calc(100svh - 330px);aspect-ratio:1.7/1}.tactical-page.is-landscape .landscape-exit{display:grid}.tactical-page.is-landscape .tactical-summary{margin-top:0}.tactical-page.is-landscape + *{}.tactical-page.is-landscape .bottom-nav{display:none!important}
 @keyframes sheet-in{from{transform:translateY(100%);opacity:.7}to{transform:translateY(0);opacity:1}}
 @media(max-width:900px){.sidebar{display:none}.main-content,.sidebar.is-collapsed~.main-content,[dir=rtl] .main-content,[dir=rtl] .sidebar.is-collapsed~.main-content{margin:0}.topbar{height:64px;padding:0 14px;position:sticky;top:0;z-index:24;background:rgba(7,19,22,.76);backdrop-filter:blur(18px);border-bottom:1px solid var(--ta-line)}.topbar-left,.topbar-right{display:none}.mobile-brand{display:flex}.current-page-chip{margin-inline:auto;margin-inline-end:0}.topbar-actions .language-button{padding:8px 10px}.page-content{padding:20px 14px 94px}.page-heading{flex-direction:column;gap:14px;margin-bottom:20px}.page-heading h1{font-size:34px}.content-grid,.archive-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}.stats-grid .stat-card:first-child{grid-column:1/-1}.bottom-nav{display:grid}.bottom-nav.private-bottom{display:grid}.profile-hero-body{align-items:flex-start;flex-direction:column;padding:0 16px 18px;margin-top:-52px}.profile-avatar-button{width:106px;height:106px;flex-basis:106px}.profile-hero-copy{padding-bottom:0}.profile-banner{min-height:190px}.form-grid{grid-template-columns:1fr}.admin-member-row{align-items:flex-start;flex-direction:column}.admin-member-actions{width:100%}.tactical-page.is-landscape .page-heading{flex-direction:row;align-items:center}.tactical-page.is-landscape .page-heading .subtitle{display:none}.tactical-page.is-landscape .tactical-toolbar{width:min(40vw,480px)}.more-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.bottom-nav{grid-template-columns:repeat(4,1fr)}.bottom-nav-item{font-size:8px;min-height:46px}.more-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}.stats-grid .stat-card:first-child{grid-column:auto}.page-heading .setting-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.page-heading .setting-actions .primary-action{min-height:40px}.access-card{padding:20px}.access-options{gap:10px}.access-option{padding:14px}.profile-banner{min-height:160px}.profile-hero-body{margin-top:-40px}.profile-avatar-button{width:92px;height:92px;flex-basis:92px}.profile-avatar-button span{font-size:32px}.profile-hero-copy h2{font-size:26px}.capture-trigger-row{align-items:flex-start;flex-direction:column}.capture-trigger-row .dark-action{width:100%;justify-content:center}.tactical-page.is-landscape{padding-inline:8px}.tactical-page.is-landscape .page-heading{align-items:flex-start}.tactical-page.is-landscape .tactical-toolbar{width:100%}.tactical-page.is-landscape .tactical-toolbar .formation-picker{display:none}.tactical-page.is-landscape .pitch{min-height:calc(100svh - 250px)}.tactical-summary{padding:16px}.ops-actions .icon-button{width:36px;height:36px}}
+@media(max-width:560px){.more-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}.stats-grid .stat-card:first-child{grid-column:auto}.page-heading .setting-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.page-heading .setting-actions .primary-action{min-height:40px}.access-card{padding:20px}.access-options{gap:10px}.access-option{padding:14px}.profile-banner{min-height:160px}.profile-hero-body{margin-top:-40px}.profile-avatar-button{width:92px;height:92px;flex-basis:92px}.profile-avatar-button span{font-size:32px}.profile-hero-copy h2{font-size:26px}.capture-trigger-row{align-items:flex-start;flex-direction:column}.capture-trigger-row .dark-action{width:100%;justify-content:center}.tactical-page.is-landscape{padding-inline:8px}.tactical-page.is-landscape .page-heading{align-items:flex-start}.tactical-page.is-landscape .tactical-toolbar{width:100%}.tactical-page.is-landscape .tactical-toolbar .formation-picker{display:none}.tactical-page.is-landscape .pitch{min-height:calc(100svh - 250px)}.tactical-summary{padding:16px}.ops-actions .icon-button{width:36px;height:36px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}.tactical-page.is-landscape{position:fixed}}
 
 
@@ -67,15 +67,15 @@ body{background:radial-gradient(circle at 75% 0,rgba(122,191,90,.09),transparent
 .access-heading{display:grid;gap:10px;margin-bottom:4px}.access-heading h1{line-height:1.15;margin:0}.access-heading p{line-height:1.75;margin:0;color:var(--muted)}
 .access-options{display:grid;gap:12px}.access-option{min-height:78px;text-align:start}.access-option span{display:grid;gap:5px;min-width:0}.access-option small{line-height:1.55;color:var(--muted)}
 .access-card label{display:grid;gap:7px;font-size:12px;color:var(--ta-pale);font-weight:700}.access-card input{width:100%;min-height:46px;padding:0 13px;border-radius:12px;border:1px solid var(--ta-line);background:rgba(5,20,24,.72);color:var(--ta-pale);outline:none}.access-card input:focus{border-color:rgba(155,242,114,.5);box-shadow:0 0 0 3px rgba(155,242,114,.08)}
-.page-content{padding-block:28px}.page-heading{gap:18px;margin-bottom:24px}.panel,.stat-card,.match-card{line-height:1.65}.panel p,.match-card p,.subtitle{line-height:1.75}.setting-row{min-height:52px;gap:14px;padding-block:9px}.setting-row>span:first-child{line-height:1.5}.bottom-nav{padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));gap:6px}.bottom-nav-item{min-width:0;padding-inline:5px}.bottom-nav-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-content{padding-block:28px}.page-heading{gap:18px;margin-bottom:24px}.panel,.stat-card,.match-card{line-height:1.65}.panel p,.match-card p,.subtitle{line-height:1.75}.setting-row{min-height:52px;gap:14px;padding-block:9px}.setting-row>span:first-child{line-height:1.5}.bottom-nav{padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));gap:6px}.bottom-nav-item{min-width:0;padding-inline:5px}
 .tactical-page.is-landscape{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom));padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}.tactical-page.is-landscape .tactical-layout{align-items:stretch}.tactical-page.is-landscape .pitch{max-height:calc(100svh - 190px)}
-@media(max-width:900px){.page-content{padding-top:22px}.bottom-nav{grid-template-columns:repeat(4,1fr)}.bottom-nav-item{font-size:9px}.topbar-actions{gap:6px}.current-page-chip{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
-@media(max-width:560px){.page-content{padding-inline:13px;padding-top:18px}.access-card{border-radius:20px}.access-heading h1{font-size:28px}.bottom-nav-item{min-height:48px}.bottom-nav-item svg{width:17px;height:17px}.bottom-nav-item span{font-size:8px}.tactical-page.is-landscape .pitch{min-height:0;max-height:calc(100svh - 190px);height:auto}}
+@media(max-width:900px){.page-content{padding-top:22px}.topbar-actions{gap:6px}.current-page-chip{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+@media(max-width:560px){.page-content{padding-inline:13px;padding-top:18px}.access-card{border-radius:20px}.access-heading h1{font-size:28px}.tactical-page.is-landscape .pitch{min-height:0;max-height:calc(100svh - 190px);height:auto}}
 @media(prefers-reduced-motion:reduce){.access-card input:focus{box-shadow:none}}
 
 .derived-position{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:10px 11px;border:1px solid rgba(155,242,114,.16);border-radius:11px;background:rgba(155,242,114,.04)}.derived-position span{color:var(--muted);font-size:10px}.derived-position strong{color:var(--ta-lime);font:700 13px 'DM Mono'}.derived-position small{grid-column:1/-1;color:var(--muted);font-size:9px;line-height:1.5}.player-position{display:block;margin-top:2px;font:700 8px 'DM Mono';font-style:normal;color:var(--ta-lime);letter-spacing:.04em;text-shadow:0 1px 3px #000}.player-token.away .player-position{color:#d7e4f0}
 
-@media(max-width:560px){.bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.bottom-nav-item{min-width:0}}
+
 
 /* TAAMEN Beta hardening layer — keeps the existing identity while improving app ergonomics. */
 :root{--taamen-deep:#193940;--taamen-text:#BAC8D9;--taamen-lime:#9BF272;--taamen-green:#7ABF5A;--app-radius:18px}
@@ -544,7 +544,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 /* Reduced motion */
 @media(prefers-reduced-motion:reduce){.nav-item,.dark-action,.primary-action,.language-button,.notification-button{transition:none!important}.confetti,.winner-confetti{display:none!important}}
-@media(max-width:900px){.home-hero-single{padding-top:8px}.home-hero-single .home-hero-copy{min-height:0}.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}.bottom-nav-item{font-size:8px}.bottom-nav-item.is-active{background:#9BF272;color:#193940}.setup-avatar{width:100px;height:100px}.profile-composition{min-height:220px}.form-span-2{grid-column:auto}}
+@media(max-width:900px){.home-hero-single{padding-top:8px}.home-hero-single .home-hero-copy{min-height:0}.setup-avatar{width:100px;height:100px}.profile-composition{min-height:220px}.form-span-2{grid-column:auto}}
 @media(max-width:560px){.setup-avatar{width:88px;height:88px;border-width:4px}.profile-composition{min-height:200px}.setup-media-note{align-items:flex-start;flex-direction:column}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.home-actions{display:grid;grid-template-columns:1fr}.home-actions button{width:100%}.home-secondary-actions{display:grid;grid-template-columns:1fr}.stadiums-action{width:100%;justify-content:center}}
 
 /* FINAL PRODUCT PASS — shared design tokens and tactical interaction states. */
@@ -1030,23 +1030,24 @@ body.tactical-focus-mode .bottom-nav{display:none!important}
     margin-inline-end:0;
   }
   .app-shell .bottom-nav{
-    /* !important beats earlier patch-stack grid/flex rules. Equal flex tracks follow the real item count. */
+    /* Single mobile nav: equal tracks, 64px content, safe area below. */
     display:flex !important;
     flex-direction:row;
     position:fixed;
     z-index:var(--z-nav, 40);
     inset-inline:0;
     inset-block-end:0;
-    height:auto;
-    min-height:var(--ta-bottom-nav-height);
+    height:calc(var(--ta-bottom-nav-height, 64px) + env(safe-area-inset-bottom, 0px));
+    min-height:calc(var(--ta-bottom-nav-height, 64px) + env(safe-area-inset-bottom, 0px));
     margin:0;
-    padding:4px max(6px, env(safe-area-inset-left, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-right, 0px));
-    gap:var(--nav-gap, 4px);
+    padding:0 max(4px, env(safe-area-inset-left, 0px)) env(safe-area-inset-bottom, 0px) max(4px, env(safe-area-inset-right, 0px));
+    gap:2px;
     border:0;
     border-top:1px solid var(--ta-line, rgba(186,200,217,.16));
     border-radius:0;
-    background:rgba(7,19,22,.96);
-    box-shadow:0 -4px 14px rgba(0,0,0,.18);
+    background:rgba(7,19,22,.94);
+    box-shadow:none;
+    backdrop-filter:none;
     pointer-events:auto;
   }
   .app-shell .bottom-nav-item{

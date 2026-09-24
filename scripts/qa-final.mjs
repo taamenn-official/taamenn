@@ -158,8 +158,8 @@ if (!fs.existsSync(swPath)) {
   if (!/url\.pathname\.startsWith\('\/share\/'\)/.test(sw)) {
     fail('public/sw.js must not cache unique /share/ token URLs');
   }
-  if (!/taamen-shell-v7/.test(sw) && !/VERSION='v7'/.test(sw)) {
-    fail('public/sw.js cache version must be bumped when share/API bypass behaviour changes');
+  if (!/taamen-shell-v8/.test(sw) && !/VERSION='v8'/.test(sw)) {
+    fail('public/sw.js cache version must stay pinned after the shell manifest bump');
   }
   const precache = sw.match(/const PRECACHE\s*=\s*\[(.*?)\]/s);
   if (precache && precache[1].includes('/api')) fail('public/sw.js precaches an /api path');

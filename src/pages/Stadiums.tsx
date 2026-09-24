@@ -64,8 +64,6 @@ export default function Stadiums({ language }: { language: Language }) {
         </label>
       </div>
 
-      <AdSlot placement="stadiums" />
-
       {filteredStadiums.length > 0 ? (
         <div className="stadiums-list">
           {filteredStadiums.map((stadium) => {
@@ -138,6 +136,8 @@ export default function Stadiums({ language }: { language: Language }) {
           )}
         </div>
       )}
+
+      <AdSlot placement="stadiums" />
 
       <aside className="venue-admin-helper stadiums-support-note">
         <p>{uiCopy[language].missingStadiumPage}</p>

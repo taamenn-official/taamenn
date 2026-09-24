@@ -22,10 +22,11 @@ import { getItem } from './services/localDb';
 import { analyticsEnabled, syncAhrefsAnalytics } from './services/analytics';
 import { legalDocumentForPath } from './config/publicRoutes';
 import LegalDocument from './pages/LegalDocument';
-import { peekHomeReveal } from './motion/revealState';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
-import { uiCopy } from './i18n/translations';
+import { installCopy, uiCopy } from './i18n/translations';
+import { useDisplayMode } from './mobile/useDisplayMode';
+import { RouteSkeleton } from './components/RouteSkeleton';
 import { LanguageSwitch, ThemeToggle } from './components/ShellControls';
 import { applyTheme, nextTheme, readTheme, type TaamenTheme } from './theme/theme';
 import './styles/global.css';
@@ -58,13 +59,14 @@ type ShellProps={
 function RouteView({page,language,profile,go,onProfile,onReset,onLanguage,theme,onTheme,session,onSession,onSignOut,registerLeaveGuard}:ShellProps&{page:RouteId;go:(p:RouteId)=>void;registerLeaveGuard:(guard:(()=>boolean)|null)=>void}){
  const common={language};
  const scope=scopeFor(session);
- return <ErrorBoundary language={language} label={page}><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}>
+ return <ErrorBoundary language={language} label={page}><Suspense fallback={<RouteSkeleton page={page}/>}>
   {page==='home'&&<Home {...common} profile={profile} go={go} session={session}/>} {page==='archive'&&scope==='normal'&&<Archive {...common}/>} {page==='match-center'&&scope==='normal'&&<Matches {...common}/>} {page==='historical-match-center'&&scope==='featured'&&<HistoricalMatchCenter {...common} onExitFeatured={onSignOut}/>} {page==='tactical'&&scope==='normal'&&<Tactical {...common}/>} {page==='stadiums'&&<Stadiums {...common}/>} {page==='profile'&&scope==='normal'&&<Profile language={language} profile={profile} onProfile={onProfile} session={session} registerLeaveGuard={registerLeaveGuard}/>} {page==='support'&&<Support language={language} profile={profile}/>} {page==='settings'&&<Settings language={language} profile={profile} onLanguage={onLanguage} theme={theme} onTheme={onTheme} onReset={onReset} onProfile={onProfile} session={session} onSession={onSession} onSignOut={onSignOut}/>}
  </Suspense></ErrorBoundary>;
 }
 
 function MainShell(props:ShellProps){
  const {language,profile,session,onLanguage,theme,onTheme,onPage}=props;
+ const displayMode=useDisplayMode();
  const ar=language==='ar';const scope=scopeFor(session);
  const routes=useMemo(()=>routesForScope(scope),[scope]);const mobileRoutes=useMemo(()=>routesForMobileNav(scope),[scope]);const desktopSections=useMemo(()=>routesBySection(scope),[scope]);const desktopRoutes=useMemo(()=>routesForDesktopNav(scope),[scope]);const labels=routeRegistry.reduce((a,r)=>(a[r.id]=r.label[language],a),{} as Record<string,string>);const sectionLabels:{core:{ar:string;en:string};football:{ar:string;en:string};personal:{ar:string;en:string};system:{ar:string;en:string}}={core:{ar:'الأساسي',en:'Core'},football:{ar:'كرة القدم',en:'Football'},personal:{ar:'الشخصي',en:'Personal'},system:{ar:'النظام',en:'System'}}; const[unread,setUnread]=useState(0);const[page,setPage]=useState<RouteId>(()=>(location.hash.slice(1) as RouteId)||'home');const[notifications,setNotifications]=useState(false);
  const pageRef=useRef(page); pageRef.current=page;
@@ -72,7 +74,7 @@ function MainShell(props:ShellProps){
  const bottomNavRef=useRef<HTMLElement>(null);
  const[bellPulse,setBellPulse]=useState(false);
  // Captured on the first render, before Home consumes the reveal flag.
- const navIntroDelay=useRef(peekHomeReveal()==='cinematic'?0.85:0.2);
+ const navIntroDelay=useRef(0);
  const bellSkips=useRef(2);
  const previousUnread=useRef(0);
  const leaveGuardRef=useRef<(()=>boolean)|null>(null);
@@ -101,27 +103,41 @@ function MainShell(props:ShellProps){
    });
  };
  useEffect(()=>{
-  let timer=0;
+  let boundary=0;
+  let wake=0;
   let stopped=false;
+  const armBoundary=(delay:number|null)=>{
+   window.clearTimeout(boundary);
+   boundary=0;
+   if(stopped||document.hidden||delay==null)return;
+   boundary=window.setTimeout(()=>{void refresh()},delay);
+  };
   const refresh=async()=>{
    if(stopped||document.hidden)return;
-   await reconcileMatchLifecycle();
-   if(!stopped)setUnread(await unreadCount());
+   const result=await reconcileMatchLifecycle();
+   if(stopped)return;
+   setUnread(await unreadCount());
+   armBoundary(result.nextDelayMs);
   };
-  const arm=()=>{
-   window.clearInterval(timer);
-   timer=0;
-   if(document.hidden)return;
-   void refresh();
-   timer=window.setInterval(()=>{void refresh()},15000);
+  const onWake=()=>{
+   window.clearTimeout(wake);
+   if(document.hidden){window.clearTimeout(boundary);boundary=0;return}
+   wake=window.setTimeout(()=>{void refresh()},200);
   };
-  const onVisibility=()=>{
-   if(document.hidden){window.clearInterval(timer);timer=0;return}
-   arm();
+  void refresh();
+  document.addEventListener('visibilitychange',onWake);
+  window.addEventListener('focus',onWake);
+  window.addEventListener('online',onWake);
+  window.addEventListener('taamen-matches-changed',onWake);
+  return()=>{
+   stopped=true;
+   window.clearTimeout(boundary);
+   window.clearTimeout(wake);
+   document.removeEventListener('visibilitychange',onWake);
+   window.removeEventListener('focus',onWake);
+   window.removeEventListener('online',onWake);
+   window.removeEventListener('taamen-matches-changed',onWake);
   };
-  arm();
-  document.addEventListener('visibilitychange',onVisibility);
-  return()=>{stopped=true;window.clearInterval(timer);document.removeEventListener('visibilitychange',onVisibility)};
  },[]);
  const skipPageRefresh=useRef(true);
  useEffect(()=>{
@@ -144,10 +160,10 @@ function MainShell(props:ShellProps){
  },[unread]);
  useEffect(()=>{if(!routes.some(r=>r.id===page)){const fallback=scope==='featured'?'historical-match-center':'home';setPage(fallback);history.replaceState(null,'',`${location.pathname}#${fallback}`)}},[routes,page,scope]);
  useEffect(()=>{const onHash=()=>{const next=location.hash.slice(1) as RouteId;if(!routes.some(r=>r.id===next)){history.replaceState(null,'',`${location.pathname}#${pageRef.current}`);return}if(!requestRoute(next)){history.replaceState(null,'',`${location.pathname}#${pageRef.current}`);return;}setPage(next)};window.addEventListener('hashchange',onHash);return()=>window.removeEventListener('hashchange',onHash)},[routes]);
- const go=(p:RouteId)=>{if(!routes.some(r=>r.id===p))return;if(!requestRoute(p))return;setPage(p);history.replaceState(null,'',`${location.pathname}#${p}`);window.scrollTo({top:0,behavior:'auto'})};
+ const go=(p:RouteId)=>{if(!routes.some(r=>r.id===p))return;if(!requestRoute(p))return;setPage(p);history.replaceState(null,'',`${location.pathname}#${p}`);const compact=window.matchMedia('(max-width: 900px)').matches;window.scrollTo({top:0,behavior:compact||prefersReducedMotion()?'auto':'smooth'})};
  const identityCaption=scope==='featured'?'FEATURED':'LOCAL · TAAMEN';
  const navClass=desktopNav===null?'':desktopNav?'is-desktop-nav':'is-mobile-nav';
- return <div className={`app-shell ${navClass} ${scope==='featured'?'is-featured-shell':''}`}>
+ return <div className={`app-shell ${navClass} is-${displayMode} ${scope==='featured'?'is-featured-shell':''}`}>
   <aside className={`sidebar ${sidebar?'':'is-collapsed'}`} hidden={desktopNav===false} aria-hidden={desktopNav===false} inert={desktopNav===false||undefined}>
    <div className={`brand-row ${sidebar?'':'is-collapsed'}`}>
      {sidebar && (
@@ -178,7 +194,7 @@ function MainShell(props:ShellProps){
   <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={32} height={32} decoding="async"/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<LanguageSwitch language={language} onLanguage={onLanguage}/><ThemeToggle theme={theme} onTheme={onTheme} language={language}/>{scope==='normal'&&<button className={`notification-button icon-button${bellPulse?' is-pulse':''}`} onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
    <SideProjectorsBadge language={language} variant="float"/>
    <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
-   <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
+   <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} aria-current={page===r.id?'page':undefined} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
    {/* Mounted only while open so overlay hooks and scroll-lock match other sheets. */}
    {notifications&&<NotificationCenter open={notifications} onClose={()=>setNotifications(false)} language={language} onChanged={()=>unreadCount().then(setUnread)}/>}
   </main>
@@ -195,16 +211,25 @@ export default function App(){
  const[profile,setProfile]=useState<LocalProfile>();
  const[boot,setBoot]=useState(true);
  const[updateAvailable,setUpdateAvailable]=useState(false);
+ const[updateDismissed,setUpdateDismissed]=useState(false);
  const[session,setSession]=useState<Session|null>(null);
  const[shellPage,setShellPage]=useState<RouteId>('home');
  const[needsConsent,setNeedsConsent]=useState(false);
 
- useEffect(()=>{installService.init();const onUpdate=()=>setUpdateAvailable(true);window.addEventListener('taamen-sw-update',onUpdate);return()=>window.removeEventListener('taamen-sw-update',onUpdate)},[]);
+ useEffect(()=>{installService.init();const onUpdate=()=>{setUpdateDismissed(false);setUpdateAvailable(true)};window.addEventListener('taamen-sw-update',onUpdate);return()=>window.removeEventListener('taamen-sw-update',onUpdate)},[]);
  useEffect(()=>{document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';localStorage.setItem('taamen-language',language)},[language]);
  useEffect(()=>{applyTheme(theme)},[theme]);
  const toggleTheme=()=>setTheme(value=>nextTheme(value));
  // The Settings motion switch has to apply from boot, not only while Settings is open.
  useEffect(()=>{getItem<{motion?:boolean;analytics?:boolean}>('settings','privacy').then(v=>{applyMotionPreference(v?.motion!==false);syncAhrefsAnalytics(analyticsEnabled(v))}).catch(()=>{})},[]);
+ useEffect(()=>{
+  if(!profile)return;
+  const run=()=>{void import('./pages/Archive');void import('./pages/Matches')};
+  const idle=window.requestIdleCallback?.(run,{timeout:2000});
+  if(typeof idle==='number')return()=>window.cancelIdleCallback(idle);
+  const id=window.setTimeout(run,1500);
+  return()=>window.clearTimeout(id);
+ },[profile]);
 
  // The server owns session state. Local storage never records who is signed in.
  useEffect(()=>{
@@ -236,12 +261,12 @@ export default function App(){
  },[]);
 
  if(legalDocument)return <ErrorBoundary language={language} label={legalDocument}><LegalDocument language={language} onLanguage={toggle} documentId={legalDocument}/></ErrorBoundary>;
- if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>}><Acquisition language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme}/></Suspense></ErrorBoundary>;
+ if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="boot-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/></div>}><Acquisition language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme}/></Suspense></ErrorBoundary>;
  if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])}/>;
- if(boot)return <div className="loading-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/><span>TAAMEN 2.0</span></div>;
+ if(boot)return <div className="boot-screen" role="status"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={70} height={70}/></div>;
  /* One persistent atmosphere host. Keeping it first in both branches means the
     profile setup screen hands over to Home without the background cutting. */
  const atmosphere=<TaamenAmbientBackground key="atmosphere" variant={profile?'home':'auth'} active={!profile||shellPage==='home'}/>;
- if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable} role="status"><span>{language==='ar'?'يتوفر تحديث جديد':'New update available'}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{language==='ar'?'تحديث':'Update'}</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
+ if(profile)return <>{atmosphere}<div className="update-banner" hidden={!updateAvailable||updateDismissed} role="status"><span>{installCopy[language].update}</span><button className="primary-action" onClick={()=>navigator.serviceWorker?.getRegistration().then(r=>r?.waiting?.postMessage({type:'SKIP_WAITING'})).then(()=>location.reload())}>{installCopy[language].updateAction}</button><button type="button" className="icon-button" onClick={()=>setUpdateDismissed(true)} aria-label={installCopy[language].dismissUpdate}>×</button></div><MainShell language={language} profile={profile} session={session} onProfile={setProfile} onReset={resetProfile} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSession={setSession} onSignOut={signOut} onPage={setShellPage}/>{needsConsent&&<PrivacyPolicyModal language={language} requireAccept onClose={()=>setNeedsConsent(false)}/>}</>;
  return <>{atmosphere}<ProfileSetup language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme} onSave={async p=>{const saved=await saveProfile(p);setProfile(saved)}}/></>;
 }
