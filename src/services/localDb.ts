@@ -22,6 +22,8 @@ export async function seedMatches(seed:unknown[]){if((await getAll('matches')).l
 export async function seedNotifications(seed:unknown[]){if((await getAll('notifications')).length)return;for(const m of seed as Array<{id:string}>)await putItem('notifications',m)}
 export async function getStorageEstimate(){try{return await navigator.storage?.estimate()}catch{return undefined}}
 export const MAX_BACKUP_BYTES=32*1024*1024;
+/** True when an upload must be refused before it is read or parsed. */
+export function isBackupFileTooLarge(size:number){return size>MAX_BACKUP_BYTES}
 const MAX_BACKUP_ROWS=2000;
 const MAX_BACKUP_DEPTH=8;
 const FORBIDDEN_KEYS=new Set(['__proto__','constructor','prototype']);
@@ -33,6 +35,11 @@ export class BackupError extends Error{
     this.name='BackupError';
     this.code=code;
   }
+}
+/** File-size gate for the Settings import. Oversized files throw before text() or JSON.parse. The parsed value is not measured in bytes. */
+export async function readBackupFile(file:{size:number;text:()=>Promise<string>}){
+  if(isBackupFileTooLarge(file.size))throw new BackupError('invalid');
+  return JSON.parse(await file.text()) as unknown;
 }
 function assertBackupShape(value:unknown,depth:number){
   if(depth>MAX_BACKUP_DEPTH)throw new BackupError('invalid');
