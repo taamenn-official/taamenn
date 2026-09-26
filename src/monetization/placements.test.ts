@@ -138,9 +138,36 @@ test('index.html contains the AdSense site-verification script exactly once', ()
   assert.equal(html.includes('<AdSlot'), false);
 });
 
-test('source and public files contain no extra publisher id and no ads.txt', () => {
-  assert.equal(fs.existsSync(path.join(root, 'public/ads.txt')), false);
+const ADS_TXT_LINE = 'google.com, pub-7265269139254398, DIRECT, f08c47fec0942fa0';
+
+test('public/ads.txt is the exact seller line and is not an SPA document', () => {
+  const file = path.join(root, 'public/ads.txt');
+  const text = fs.readFileSync(file, 'utf8');
+  assert.equal(text, `${ADS_TXT_LINE}\n`);
+  assert.equal(text.split('\n').filter(line => line.length > 0).length, 1);
+  assert.equal(text.includes('<'), false);
+  assert.equal(text.includes('ca-pub-'), false);
   assert.equal(fs.existsSync(path.join(root, 'ads.txt')), false);
+  const sw = fs.readFileSync(path.join(root, 'public/sw.js'), 'utf8');
+  const bypass = sw.indexOf("url.pathname==='/ads.txt'");
+  const respond = sw.indexOf('event.respondWith');
+  assert.equal(bypass > 0 && bypass < respond, true);
+  assert.match(sw, /url\.pathname==='\/sitemap\.xml'/);
+  assert.equal(sw.includes('pagead2.googlesyndication.com'), false);
+  const wrangler = fs.readFileSync(path.join(root, 'wrangler.jsonc'), 'utf8');
+  assert.match(wrangler, /"directory"\s*:\s*"dist\/client"/);
+  assert.match(wrangler, /"not_found_handling"\s*:\s*"single-page-application"/);
+  assert.match(wrangler, /"run_worker_first"\s*:\s*\[\s*"\/api\/\*"\s*\]/);
+  assert.equal(wrangler.includes('ads.txt'), false);
+  const fallback = fs.readFileSync(path.join(root, 'public/404.html'), 'utf8');
+  assert.equal(fallback.includes('ads.txt'), false);
+  const example = fs.readFileSync(path.join(root, '.env.example'), 'utf8');
+  assert.equal(/^\s*VITE_ADSENSE_ENABLED\s*=\s*true/m.test(example), false);
+  assert.equal(example.includes('ca-pub-'), false);
+  assert.equal(example.includes(ADS_TXT_LINE), false);
+});
+
+test('source and public files contain no extra publisher id', () => {
   const scan = (dir: string) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || entry.name === 'dist') continue;
