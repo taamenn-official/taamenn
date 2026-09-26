@@ -13,9 +13,9 @@ type NavActiveIndicatorProps = {
 };
 
 /**
- * One shared pill per navigation. It slides between items instead of each item
- * animating its own highlight. Width and height snap; only transform moves.
- * Physical coordinates stay in viewport space so RTL does not mirror the pill.
+ * Kept so navigation geometry still resolves in physical coordinates.
+ * The active state is the lime icon and label, so this marker stays invisible.
+ * Physical coordinates stay in viewport space so RTL does not mirror them.
  */
 export default function NavActiveIndicator({
   navRef,
@@ -52,16 +52,17 @@ export default function NavActiveIndicator({
       const x = itemBox.left - navBox.left - parseFloat(navStyle.borderLeftWidth || '0');
       const y = itemBox.top - navBox.top - parseFloat(navStyle.borderTopWidth || '0');
 
-      nav.classList.add('has-nav-indicator');
+      nav.classList.remove('has-nav-indicator');
       const reduce = !animate || prefersReducedMotion();
       if (reduce) el.style.transition = 'none';
-      const bottom = className.includes('is-bottom');
-      const bar = bottom ? 2 : itemBox.height;
-      const yBar = bottom ? y + itemBox.height - bar : y;
-      el.style.width = `${itemBox.width}px`;
-      el.style.height = `${bar}px`;
-      el.style.transform = `translate3d(${x}px, ${yBar}px, 0)`;
-      el.style.visibility = 'visible';
+      el.style.width = '0px';
+      el.style.height = '0px';
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      el.style.background = 'transparent';
+      el.style.boxShadow = 'none';
+      el.style.opacity = '0';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
       if (reduce) {
         requestAnimationFrame(() => {
           if (pill.current) pill.current.style.transition = '';
@@ -72,19 +73,9 @@ export default function NavActiveIndicator({
     if (!settled.current) {
       settled.current = true;
       place(false);
-      const el = pill.current;
-      if (el) {
-        if (prefersReducedMotion() || introDelay <= 0) el.style.opacity = '1';
-        else {
-          el.style.opacity = '0';
-          introTimer = window.setTimeout(() => {
-            if (pill.current) pill.current.style.opacity = '1';
-          }, introDelay * 1000);
-        }
-      }
     } else {
       place(true);
-      if (pill.current) pill.current.style.opacity = '1';
+      if (pill.current) pill.current.style.opacity = '0';
       // The sidebar width transition finishes after this effect, so re-measure.
       sidebarTimer = window.setTimeout(() => place(false), 340);
     }

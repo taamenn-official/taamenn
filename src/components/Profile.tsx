@@ -3,7 +3,7 @@ import { Camera, ImagePlus, Save, Share2, Trash2 } from 'lucide-react';
 import type { LocalProfile } from '../services/profileRepository';
 import { saveProfile } from '../services/profileRepository';
 import { isProfileDraftDirty } from '../services/profileDraft';
-import { imageFileToDataUrl } from '../services/imageProcessing';
+import { ImageCropOverlay } from './ImageCropOverlay';
 import { shareProfile } from '../services/profileShareService';
 import type { Session } from '../services/apiClient';
 import { uiCopy } from '../i18n/translations';
@@ -37,6 +37,7 @@ export default function Profile({
   const saveRef = useRef<HTMLButtonElement>(null);
   const [imageSheet, setImageSheet] = useState<'avatar' | 'banner' | null>(null);
   const [imageViewer, setImageViewer] = useState<'avatar' | 'banner' | null>(null);
+  const [crop, setCrop] = useState<{ file: File; kind: 'avatar' | 'banner' } | null>(null);
   const reminderRef = useRef<HTMLButtonElement>(null);
   const dirtyRef = useRef(false);
 
@@ -119,19 +120,15 @@ export default function Profile({
     void save();
   };
 
-  const pickImage = async (file: File | undefined, key: 'avatarData' | 'bannerData', maxWidth: number, maxHeight: number) => {
+  const queueCrop = (file: File | undefined, kind: 'avatar' | 'banner') => {
     if (!file) return;
-    setBusy(true);
-    setFailed(false);
-    try {
-      const data = await imageFileToDataUrl(file, { maxWidth, maxHeight, quality: 0.82 });
-      update(key, data);
-    } catch {
+    if (!file.type.startsWith('image/')) {
       setFailed(true);
       setStatus(copy.imageProcessFailed);
-    } finally {
-      setBusy(false);
+      return;
     }
+    setFailed(false);
+    setCrop({ file, kind });
   };
 
   const share = async () => {
@@ -200,7 +197,7 @@ export default function Profile({
             type="file"
             accept="image/*"
             onChange={(event) => {
-              void pickImage(event.target.files?.[0], 'bannerData', 2000, 760);
+              queueCrop(event.target.files?.[0], 'banner');
               event.target.value = '';
             }}
           />
@@ -219,7 +216,7 @@ export default function Profile({
               type="file"
               accept="image/*"
               onChange={(event) => {
-                void pickImage(event.target.files?.[0], 'avatarData', 900, 900);
+                queueCrop(event.target.files?.[0], 'avatar');
                 event.target.value = '';
               }}
             />
@@ -260,6 +257,18 @@ export default function Profile({
         </div>
       </section>
 
+      {crop && (
+        <ImageCropOverlay
+          file={crop.file}
+          kind={crop.kind}
+          language={language}
+          onCancel={() => setCrop(null)}
+          onConfirm={(dataUrl) => {
+            update(crop.kind === 'avatar' ? 'avatarData' : 'bannerData', dataUrl);
+            setCrop(null);
+          }}
+        />
+      )}
       {imageSheet && (
         <ImageActionSheet
           language={language}

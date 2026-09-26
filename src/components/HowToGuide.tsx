@@ -1,147 +1,160 @@
-import { useState } from 'react';
-import { X, ArrowLeft, BookOpen, Archive, ClipboardList, Swords, Share2, Download, Upload, Bell, BadgeCheck, Smartphone, Mail, RotateCcw } from 'lucide-react';
+import { X, ArrowLeft, BookOpen, Archive, ClipboardList, Swords, Share2, Download, Bell, BadgeCheck, Smartphone, Mail, RotateCcw, UserRound } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type Language = 'ar' | 'en';
+type Copy = { ar: string; en: string };
 
 interface GuideSection {
   id: string;
-  title: { ar: string; en: string };
-  content: { ar: string; en: string };
-  icon: any;
+  title: Copy;
+  body: Copy;
+  example?: Copy;
+  next?: Copy;
+  icon: LucideIcon;
 }
 
 const guideSections: GuideSection[] = [
   {
     id: 'getting-started',
-    title: { ar: 'البدء', en: 'Getting Started' },
-    content: {
-      ar: 'قم بإنشاء ملفك الشخصي المحلي في البداية. املأ الاسم الأول، والاسم العائلة (اختياري)، والبريد الإلكتروني (اختياري)، والهاتف (اختياري). يمكنك إضافة صورة شخصية وغلاف لملفك. بعد الإنشاء، ستنتقل مباشرة إلى الصفحة الرئيسية لتجربة TAAMEN.',
-      en: 'Create your local profile first. Fill in your first name, family name (optional), email (optional), and phone (optional). You can add a personal photo and banner for your profile. After creation, you will go directly to the Home page to experience TAAMEN.'
+    icon: BookOpen,
+    title: { ar: 'البدء', en: 'Getting started' },
+    body: {
+      ar: 'أنشئ ملفًا محليًا بالاسم الأول. العائلة والبريد والهاتف اختيارية.',
+      en: 'Create a local profile with your first name. Family name, email, and phone are optional.',
     },
-    icon: BookOpen
+    next: { ar: 'بعدها تفتح الرئيسية.', en: 'Home opens next.' },
   },
   {
     id: 'profile',
+    icon: UserRound,
     title: { ar: 'الملف الشخصي', en: 'Profile' },
-    content: {
-      ar: 'الملف الشخصي المحلي يحتوي على هويتك في TAAMEN. يمكنك تعديل اسمك، صورتك، وغلافك في أي وقت. زر الحفظ يكون نشطًا فقط عند وجود تغييرات غير محفوظة. إذا حاولت المغادرة مع تغييرات غير محفوظة، سيظهر لك تحذير. البريد والهاتف اختياريان ولا يتم مشاركتهما أبدًا في المشاركات العامة.',
-      en: 'Your local profile contains your TAAMEN identity. You can edit your name, photo, and banner at any time. The Save button is only active when there are unsaved changes. If you try to leave with unsaved changes, you will see a warning. Email and phone are optional and are never included in public shares.'
+    body: {
+      ar: 'الاسم والصورة والغلاف هويتك المحلية. الحفظ ينشط عند وجود تغيير. البريد والهاتف لا يظهران في المشاركة العامة.',
+      en: 'Name, photo, and cover are your local identity. Save turns on when something changed. Email and phone stay out of public shares.',
     },
-    icon: Swords
+    example: { ar: 'اختر ← قص ← موضع ← حفظ', en: 'Choose → crop → position → save' },
+    next: { ar: 'المغادرة مع تغيير غير محفوظ تُظهر تذكيرًا.', en: 'Leaving with unsaved changes shows a reminder.' },
   },
   {
     id: 'match-center',
+    icon: ClipboardList,
     title: { ar: 'مركز المباريات', en: 'Match Center' },
-    content: {
-      ar: 'أنشئ مبارياتك الحالية من خلال مركز المباريات. أدخل اسم الفريقين، التاريخ، الوقت، الملعب، المدينة، ونوع المباراة. يمكنك إدارة المباريات القادمة وإدخال النتائج عند انتهائها. عند إدخال النتيجة، يمكن أرشفة المباراة في السجل المحلي.',
-      en: 'Create your current matches through the Match Center. Enter team names, date, time, stadium, city, and match type. You can manage upcoming matches and enter results when they finish. After entering the result, you can archive the match to your local archive.'
+    body: {
+      ar: 'أضف مباراة قادمة بالفريقين والموعد والملعب والنوع. عند الانتهاء سجّل النتيجة ثم أرشِفها.',
+      en: 'Add an upcoming match with both teams, kickoff, stadium, and type. When it ends, record the score and archive it.',
     },
-    icon: ClipboardList
+    example: { ar: 'فريق أ × فريق ب، الجمعة 19:00، مباراة عادية، ملعب', en: 'Team A × Team B, Friday 19:00, normal match, stadium' },
   },
   {
     id: 'archive',
+    icon: Archive,
     title: { ar: 'السجل', en: 'Archive' },
-    content: {
-      ar: 'السجل المحلي يحتوي على المباريات التي أنشأتها بنفسك أو استوردتها إلى حسابك المحلي. يمكنك البحث في السجل حسب الفريق أو الملعب أو نوع المباراة. السجل التاريخي متاح فقط للأعضاء المميزين وللقراءة فقط.',
-      en: 'Your local archive contains matches you created yourself or imported into your local account. You can search the archive by team, stadium, or match type. The Historical Archive is available only to Featured Members for read-only viewing.'
+    body: {
+      ar: 'السجل المحلي يضم ما أنشأته أو استوردته. ابحث بالفريق أو الملعب أو النوع. السجل التاريخي للأعضاء المميزين وللقراءة فقط.',
+      en: 'The local archive holds matches you created or imported. Search by team, stadium, or type. Historical records are read-only for Featured Members.',
     },
-    icon: Archive
+    example: { ar: 'ريال مدريد 3 × 2 برشلونة، مسجّلة، مؤرشفة', en: 'Real Madrid 3 × 2 Barcelona, recorded, archived' },
   },
   {
     id: 'player-contributions',
-    title: { ar: 'مساهمات اللاعبين', en: 'Player Contributions' },
-    content: {
-      ar: 'عند أرشفة مباراة، يمكنك اختياريًا إضافة مساهمات اللاعبين. يمكن إضافة ما يصل إلى 5 لاعبين من كل فريق، مع إدخال عدد الأهداف والتسديدات. يتم حساب المساهمات الإجمالية تلقائيًا (الأهداف + التسديدات). هذه الميزة اختيارية ولا تُفرض لكل مباراة.',
-      en: 'When archiving a match, you can optionally add player contributions. You can add up to 5 players per team, entering their goals and assists. Total contributions are calculated automatically (goals + assists). This feature is optional and not required for every match.'
+    icon: Swords,
+    title: { ar: 'مساهمات اللاعبين', en: 'Player contributions' },
+    body: {
+      ar: 'عند الأرشفة يمكنك إضافة حتى 5 لاعبين لكل فريق: أهداف وتسديدات. المجموع يُحسب تلقائيًا.',
+      en: 'When archiving, you can add up to 5 players per team: goals and assists. The total is calculated for you.',
     },
-    icon: Swords
+    next: { ar: 'الميزة اختيارية لكل مباراة.', en: 'This stays optional for each match.' },
   },
   {
     id: 'tactical',
+    icon: Swords,
     title: { ar: 'الملعب التكتيكي', en: 'Tactical Playground' },
-    content: {
-      ar: 'الملعب التكتيكي هو لوح تكتيكي محلي يمكنك من خلاله ترتيب اللاعبين، اختيار التشكيلات، وتعيين الأدوار والتعليمات التكتيكية. يمكنك حفظ خطتك التكتيكية محليًا. في وضع التركيز الملعب، يفضل استخدام وضع أفقي للتجربة الأفضل.',
-      en: 'The Tactical Playground is a local tactical board where you can arrange players, select formations, and assign tactical roles and instructions. You can save your tactical plan locally. In tactical focus mode, landscape orientation is preferred for the best experience.'
+    body: {
+      ar: 'رتّب اللاعبين على الملعب، اختر التشكيلة، وعيّن الدور. الخطة تُحفظ على جهازك.',
+      en: 'Place players on the pitch, pick a formation, and assign a role. The plan stays on this device.',
     },
-    icon: Swords
+    example: { ar: '4-2-3-1، سحب، دور', en: '4-2-3-1, drag, role' },
+    next: { ar: 'وضع التركيز أوضح بالعرض الأفقي.', en: 'Focus mode is clearer in landscape.' },
   },
   {
     id: 'sharing',
+    icon: Share2,
     title: { ar: 'المشاركة', en: 'Sharing' },
-    content: {
-      ar: 'يمكنك مشاركة المباريات والسجلات مع الآخرين. عند المشاركة، يمكنك اختيار ما إذا كنت تريد تضمين مساهمات اللاعبين. المستلم يمكنه معاينة المحتوى أو إضافته إلى مركز المباريات أو السجل المحلي. لن يتم استبدال بياناتك المحلية تلقائيًا.',
-      en: 'You can share matches and archive records with others. When sharing, you can choose whether to include player contributions. The recipient can preview the content or add it to their Match Center or local archive. Your local data will not be automatically overwritten.'
+    body: {
+      ar: 'شارك مباراة أو سجلًا. المستلم يعاين ثم يحفظ محليًا إن أراد. بياناتك لا تُستبدل وحدها.',
+      en: 'Share a match or archive record. The recipient previews, then saves locally if they want. Your data is not replaced on its own.',
     },
-    icon: Share2
+    example: { ar: 'رابط ← معاينة ← حفظ محلي', en: 'Link → preview → save locally' },
   },
   {
     id: 'profile-sharing',
-    title: { ar: 'مشاركة الملف', en: 'Profile Sharing' },
-    content: {
-      ar: 'مشاركة الملف الشخصي تُنشئ نسخة عامة آمنة تحتوي على اسمك وصورتك فقط. البريد الإلكتروني والهاتف لا يتم تضمينهما أبدًا. المستلم يرى معاينة فقط ولا يتم استيراد الملف تلقائيًا إلى حسابه.',
-      en: 'Profile sharing creates a safe public copy containing only your name and photos. Email and phone are never included. The recipient sees only a preview and the profile is not automatically imported to their account.'
+    icon: Share2,
+    title: { ar: 'مشاركة الملف', en: 'Profile sharing' },
+    body: {
+      ar: 'النسخة العامة تعرض الاسم والصور فقط. لا بريد ولا هاتف، ولا استيراد تلقائي.',
+      en: 'The public copy shows your name and photos only. No email, no phone, and no automatic import.',
     },
-    icon: Share2
   },
   {
     id: 'import-export',
-    title: { ar: 'الاستيراد والتصدير', en: 'Import / Export' },
-    content: {
-      ar: 'يمكنك تصدير بيانات TAAMEN المحلية كنسخة احتياطية واستيرادها لاحقًا. يتم التحقق من صحة البيانات المستوردة لمنع الملفات التالفة. استخدم هذه الميزة لنقل بياناتك بين الأجهزة.',
-      en: 'You can export your local TAAMEN data as a backup and import it later. Imported data is validated to prevent corrupt files. Use this feature to transfer your data between devices.'
+    icon: Download,
+    title: { ar: 'الاستيراد والتصدير', en: 'Import / export' },
+    body: {
+      ar: 'صدّر نسخة احتياطية واستوردها على جهاز آخر. الملفات التالفة تُرفض.',
+      en: 'Export a backup and import it on another device. Corrupt files are rejected.',
     },
-    icon: Download
   },
   {
     id: 'featured',
+    icon: BadgeCheck,
     title: { ar: 'الأعضاء المميزون', en: 'Featured Members' },
-    content: {
-      ar: 'الدخول كعضو مميز متاح من الإعدادات. أدخل معرّف العضو بالتنسيق user#****. المعرف هو للتعرف فقط وليس كلمة مرور. الأعضاء المميزون يحصلون على الوصول إلى السجل التاريخي ومركز المباريات التاريخي.',
-      en: 'Featured Member access is available from Settings. Enter the member identifier in the format user#****. The identifier is for recognition only, not a password. Featured Members get access to the Historical Archive and Historical Match Center.'
+    body: {
+      ar: 'من الإعدادات أدخل المعرّف user#****. هو للتعرّف وليس كلمة مرور، ويفتح السجل التاريخي للقراءة.',
+      en: 'From Settings, enter the user#**** identifier. It recognizes you; it is not a password. It opens the historical archive for reading.',
     },
-    icon: BadgeCheck
   },
   {
     id: 'notifications',
+    icon: Bell,
     title: { ar: 'الإشعارات', en: 'Notifications' },
-    content: {
-      ar: 'تلقى إشعارات عند تقرب المباريات، بدء المباريات، وانتهائها. يمكنك عرض جميع الإشعارات في مركز الإشعارات. يمكن حذف الإشعارات أو تحديدها كمقروءة. الإشعارات المحلية تُحفظ على جهازك.',
-      en: 'Receive notifications when matches are approaching, starting, or finishing. You can view all notifications in the notification center. Notifications can be deleted or marked as read. Local notifications are stored on your device.'
+    body: {
+      ar: 'يصل تنبيه عند اقتراب المباراة أو بدئها أو انتهائها، ويُحفظ على الجهاز. يمكن تعليمها مقروءة أو حذفها.',
+      en: 'A notice arrives when a match is approaching, starting, or finished, and it stays on this device. Mark it read or delete it.',
     },
-    icon: Bell
+    example: { ar: 'مباراة تقترب خلال 24 ساعة', en: 'Match approaching within 24 hours' },
   },
   {
     id: 'pwa',
-    title: { ar: 'تثبيت TAAMEN', en: 'PWA / Installation' },
-    content: {
-      ar: 'يمكنك تثبيت TAAMEN كتطبيق ويب على هاتفك أو جهازك المحمول. عند التثبيت، يمكنك استخدام TAAMEN دون اتصال. يرجى ملاحظة أن الإشعارات الخلفية محدودة بقدرات المتصفح.',
-      en: 'You can install TAAMEN as a PWA on your phone or mobile device. When installed, you can use TAAMEN without an internet connection. Please note that background notifications are limited by browser capabilities.'
+    icon: Smartphone,
+    title: { ar: 'تثبيت TAAMEN', en: 'Install TAAMEN' },
+    body: {
+      ar: 'أضف TAAMEN إلى الشاشة الرئيسية لفتحه كتطبيق. التنبيهات في الخلفية تبقى محدودة بالمتصفح.',
+      en: 'Add TAAMEN to your home screen to open it like an app. Background alerts stay limited by the browser.',
     },
-    icon: Smartphone
   },
   {
     id: 'email',
-    title: { ar: 'البريد الإلكتروني', en: 'Email' },
-    content: {
-      ar: 'البريد الإلكتروني في ملفك اختياري. يمكنك استخدام صفحة الدعم لإرسال رسائل إلى فريق TAAMEN. سيتم إرسال رد تلقائي تلقائيًا عند استلام رسالتك. التحقق من البريد سيكون متاحًا قريبًا.',
-      en: 'Email in your profile is optional. You can use the Support page to send messages to the TAAMEN team. An auto-reply will be sent automatically when your message is received. Email verification will be available soon.'
+    icon: Mail,
+    title: { ar: 'البريد', en: 'Email' },
+    body: {
+      ar: 'البريد في الملف اختياري. صفحة الدعم ترسل رسالة للفريق ويصل رد تلقائي. التحقق من البريد لاحقًا.',
+      en: 'Profile email is optional. Support sends a message to the team and an auto-reply comes back. Email verification comes later.',
     },
-    icon: Mail
   },
   {
     id: 'reset',
-    title: { ar: 'إعادة ضبط البيانات', en: 'Resetting Data' },
-    content: {
-      ar: 'إعادة ضبط TAAMEN ستحذف جميع بياناتك المحلية بما في ذلك الملف الشخصي، المباريات، السجل، البيانات التكتيكية، والإشعارات. هذا الإجراء لا يمكن التراجع عنه. يجب عليك الانتظار 5 ثوانٍ قبل تنفيذ الحذف.',
-      en: 'Resetting TAAMEN will delete all your local data including your profile, matches, archive, tactical data, and notifications. This action cannot be undone. You must wait 5 seconds before executing the deletion.'
+    icon: RotateCcw,
+    title: { ar: 'إعادة الضبط', en: 'Reset' },
+    body: {
+      ar: 'إعادة الضبط تحذف الملف والمباريات والسجل والخطة والإشعارات من هذا المتصفح. انتظر 5 ثوانٍ قبل التأكيد.',
+      en: 'Reset deletes the profile, matches, archive, tactical plan, and notifications from this browser. Wait 5 seconds before confirming.',
     },
-    icon: RotateCcw
-  }
+    next: { ar: 'لا يمكن التراجع.', en: 'This cannot be undone.' },
+  },
 ];
 
 export default function HowToGuide({ language, open, onClose }: { language: Language; open: boolean; onClose: () => void }) {
   const ar = language === 'ar';
-
   if (!open) return null;
 
   return (
@@ -153,23 +166,25 @@ export default function HowToGuide({ language, open, onClose }: { language: Lang
             <span className="eyebrow">TAAMEN / GUIDE</span>
             <h2>{ar ? 'دليل الاستخدام' : 'How-to Guide'}</h2>
           </div>
-          <button className="icon-button large" onClick={onClose}>
+          <button className="icon-button large" onClick={onClose} aria-label={ar ? 'إغلاق' : 'Close'}>
             <X />
           </button>
         </header>
         <div className="guide-content">
-          {guideSections.map(section => {
+          {guideSections.map((section) => {
             const Icon = section.icon;
             return (
-              <div key={section.id} className="guide-section">
+              <section key={section.id} className="guide-section">
                 <div className="guide-section-header">
-                  <div className="guide-section-icon">
-                    <Icon size={20} />
+                  <div className="guide-section-icon" aria-hidden="true">
+                    <Icon size={18} />
                   </div>
                   <h3>{section.title[language]}</h3>
                 </div>
-                <p className="guide-section-content">{section.content[language]}</p>
-              </div>
+                <p className="guide-section-content">{section.body[language]}</p>
+                {section.example && <p className="guide-example">{section.example[language]}</p>}
+                {section.next && <p className="guide-next">{section.next[language]}</p>}
+              </section>
             );
           })}
         </div>

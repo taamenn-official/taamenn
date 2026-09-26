@@ -55,18 +55,21 @@ async function expectColumnFits(page: Page, dir: 'ltr' | 'rtl') {
 }
 
 async function expectIndicatorCoversActive(nav: Locator) {
-  const pill = nav.locator('.nav-active-indicator');
   const active = nav.locator('.is-active');
-  await expect(pill).toBeVisible();
   await expect(active).toBeVisible();
-  await expect.poll(async () => {
-    const pillBox = await pill.boundingBox();
-    const activeBox = await active.boundingBox();
-    if (!pillBox || !activeBox || activeBox.height === 0) return 0;
-    const x = Math.max(0, Math.min(pillBox.x + pillBox.width, activeBox.x + activeBox.width) - Math.max(pillBox.x, activeBox.x));
-    const y = Math.max(0, Math.min(pillBox.y + pillBox.height, activeBox.y + activeBox.height) - Math.max(pillBox.y, activeBox.y));
-    return (x * y) / (activeBox.width * activeBox.height);
-  }).toBeGreaterThan(0.7);
+  const paint = await active.evaluate((el) => {
+    const style = getComputedStyle(el);
+    const icon = el.querySelector('svg');
+    const iconColor = icon ? getComputedStyle(icon).color : style.color;
+    return { background: style.backgroundColor, color: style.color, iconColor };
+  });
+  expect(paint.background === 'rgba(0, 0, 0, 0)' || paint.background === 'transparent').toBeTruthy();
+  expect(paint.iconColor).toBe(paint.color);
+  const pill = nav.locator('.nav-active-indicator');
+  if (await pill.count()) {
+    const opacity = await pill.evaluate((el) => getComputedStyle(el).opacity);
+    expect(Number(opacity)).toBe(0);
+  }
 }
 
 async function expectTooltipSide(page: Page, dir: 'ltr' | 'rtl') {
@@ -177,7 +180,7 @@ test('preview slots stay on home, stadiums, and archive only', async ({ page }) 
   await page.goto(`${PREVIEW}/share/match/not-a-valid-token`);
   await expect(page.locator('.ad-slot')).toHaveCount(0);
   await page.goto(`${PREVIEW}/#settings`);
-  await page.getByRole('button', { name: 'Notifications' }).click();
+  await page.getByRole('button', { name: 'Notifications', exact: true }).click();
   await expect(page.locator('.notification-drawer .ad-slot')).toHaveCount(0);
   await expectVerificationScriptOnce(page);
 });
@@ -316,7 +319,7 @@ test('the page scrolls while the outer scrollbar is hidden and the drawer still 
   await page.keyboard.press('Home');
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
 
-  await page.getByRole('button', { name: 'Notifications' }).click();
+  await page.getByRole('button', { name: 'Notifications', exact: true }).click();
   const drawer = page.locator('.notification-drawer');
   await expect(drawer).toBeVisible();
   const scrolled = await drawer.evaluate(node => {

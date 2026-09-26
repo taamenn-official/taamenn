@@ -599,11 +599,16 @@ body {
 */
 html[data-theme="light"] {
   color-scheme: light;
-  --bg-0: #f3f7f8;
-  --bg-1: #e7eef0;
-  --bg-2: #d5e3e7;
+  --bg-0: #e7eef0;
+  --bg-1: #e3ebed;
+  --bg-2: #d5e0e4;
   --text-main: #102228;
-  --text-muted: #3d5560;
+  --text-muted: #3c5560;
+  --text: #102228;
+  --muted: #3c5560;
+  --line: rgba(25, 57, 64, .14);
+  --panel: #f4f7f8;
+  --ta-line: rgba(25, 57, 64, .14);
 }
 
 html[data-theme="light"] body {
@@ -642,11 +647,21 @@ html[data-theme="light"] .mobile-branding {
 }
 
 html[data-theme="light"] .access-screen,
-html[data-theme="light"] .access-card,
-html[data-theme="light"] .share-preview-screen,
+html[data-theme="light"] .access-card {
+  background: #193940;
+  color: #f4f8f8;
+}
+
+html[data-theme="light"] .share-preview-screen {
+  background: var(--bg-1);
+  color: #102228;
+}
+
 html[data-theme="light"] .shared-profile-card,
 html[data-theme="light"] .shared-match-card {
-  color: #f4f8f8;
+  background: #f4f7f8;
+  color: #102228;
+  border-color: rgba(25, 57, 64, .12);
 }
 
 html[data-theme="light"] .loading-screen {
@@ -675,8 +690,9 @@ html[data-theme="light"] .acquisition-nav:hover {
 }
 
 html[data-theme="light"] .nav-item.is-active {
-  background: var(--accent);
-  color: #193940;
+  background: transparent;
+  color: #1d6a38;
+  box-shadow: none;
 }
 
 html[data-theme="light"] .app-shell .topbar,
@@ -693,7 +709,9 @@ html[data-theme="light"] .bottom-nav-item {
 html[data-theme="light"] .bottom-nav-item.is-active,
 html[data-theme="light"] .side-nav.has-nav-indicator .nav-item.is-active,
 html[data-theme="light"] .bottom-nav.has-nav-indicator .bottom-nav-item.is-active {
-  color: #193940;
+  color: #1d6a38;
+  background: transparent;
+  box-shadow: none;
 }
 
 html[data-theme="light"] .language-button,
@@ -727,7 +745,130 @@ html[data-theme="light"] .modal-card,
 html[data-theme="light"] .notification-drawer,
 html[data-theme="light"] .archive-modal,
 html[data-theme="light"] .capture-panel,
+html[data-theme="light"] .tooltip,
+html[data-theme="light"] .guide-modal,
+html[data-theme="light"] .image-action-sheet,
+html[data-theme="light"] .image-crop-sheet,
+html[data-theme="light"] .stat-glass,
+html[data-theme="light"] .stadium-card,
+html[data-theme="light"] .archive-lifecycle-section,
+html[data-theme="light"] .notification-card,
+html[data-theme="light"] .notification-toast {
+  background: linear-gradient(180deg, #f7fafb, #eef3f4);
+  color: #102228;
+  border-color: rgba(25, 57, 64, .12);
+  box-shadow: 0 10px 24px rgba(16, 40, 48, .06);
+}
+
 html[data-theme="light"] .tooltip {
+  background: #f7fafb;
+}
+
+html[data-theme="light"] .match-card strong,
+html[data-theme="light"] .match-card h2,
+html[data-theme="light"] .match-card h3,
+html[data-theme="light"] .panel h2,
+html[data-theme="light"] .guide-section-header h3,
+html[data-theme="light"] .stadium-card-main h3 {
+  color: #102228;
+}
+
+html[data-theme="light"] .match-story,
+html[data-theme="light"] .subtitle,
+html[data-theme="light"] .settings-note,
+html[data-theme="light"] .guide-section-content,
+html[data-theme="light"] .guide-next,
+html[data-theme="light"] .stadium-city,
+html[data-theme="light"] .stadium-description {
+  color: #3c5560;
+}
+
+html[data-theme="light"] .match-meta-row span,
+html[data-theme="light"] .match-metrics span {
+  background: rgba(25, 57, 64, .06);
+  color: #234049;
+  border-color: rgba(25, 57, 64, .1);
+}
+
+html[data-theme="light"] .stat-dark {
+  background: #193940;
+  color: #f4f8f8;
+}
+
+html[data-theme="light"] .stat-pale,
+html[data-theme="light"] .home-hero-copy {
+  background: #e7eef0;
+  color: #102228;
+}
+
+html[data-theme="light"] .archive-search,
+html[data-theme="light"] .archive-toolbar .archive-type-select,
+html[data-theme="light"] .search-control,
+html[data-theme="light"] .filter-control,
+html[data-theme="light"] .form-grid input,
+html[data-theme="light"] .form-grid select,
+html[data-theme="light"] .form-grid textarea,
+html[data-theme="light"] .settings-panel input,
+html[data-theme="light"] .settings-panel select,
+html[data-theme="light"] .settings-panel textarea,
+html[data-theme="light"] .modal-card input,
+html[data-theme="light"] .modal-card select,
+html[data-theme="light"] .modal-card textarea,
+html[data-theme="light"] .match-form input,
+html[data-theme="light"] .match-form select,
+html[data-theme="light"] .match-form textarea {
+  background: #e7eef0;
+  color: #102228;
+  border-color: rgba(25, 57, 64, .16);
+  color-scheme: light;
+}
+
+html[data-theme="light"] .filter-control select option,
+html[data-theme="light"] .archive-type-select option {
+  background: #f4f7f8;
+  color: #102228;
+}
+
+html[data-theme="light"] .dark-action {
+  background: #e7eef0;
+  color: #102228;
+  border-color: rgba(25, 57, 64, .16);
+}
+
+html[data-theme="light"] .dark-action:hover {
+  background: #dce8df;
+  color: #102228;
+  border-color: rgba(29, 106, 56, .45);
+}
+
+html[data-theme="light"] .text-button {
+  color: #234049;
+}
+
+html[data-theme="light"] .guide-section {
+  background: #f7fafb;
+  border-color: rgba(25, 57, 64, .1);
+}
+
+html[data-theme="light"] .guide-example {
+  color: #102228;
+  background: rgba(122, 191, 90, .16);
+}
+
+html[data-theme="light"] .notification-toast {
+  border-inline-start-color: #1d6a38;
+}
+
+html[data-theme="light"] .notification-toast p {
+  color: #3c5560;
+}
+
+html[data-theme="light"] .notification-toast-icon {
+  color: #1d6a38;
+  background: rgba(29, 106, 56, .12);
+}
+
+html[data-theme="light"] .tactical-page .pitch {
   color: #f4f8f8;
 }
 
@@ -738,7 +879,7 @@ html[data-theme="light"] .profile-entry {
 
 html[data-theme="light"] .profile-form,
 html[data-theme="light"] .entry-grid {
-  background: #ffffff;
+  background: #f3f6f7;
   color: #102228;
   border-color: rgba(25, 57, 64, .12);
 }
@@ -1080,7 +1221,7 @@ a:active,
   .nav-active-indicator.is-bottom {
     box-shadow: none;
     border-radius: 0;
-    background: var(--accent, #9bf272);
+    background: transparent;
   }
 
   .panel,

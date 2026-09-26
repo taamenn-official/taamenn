@@ -78,12 +78,24 @@ export function notificationLedgerDecision(enabled: boolean, alreadyKnown: boole
   return 'emit';
 }
 
+/** A toast is only for a notification emitOnce actually creates. */
+export function notificationShouldAnnounce(decision: LedgerDecision) {
+  return decision === 'emit';
+}
+
+export function announceNotification(item: AppNotification) {
+  if (typeof window === 'undefined' || typeof CustomEvent === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('taamen-notification', { detail: item }));
+}
+
 async function emitOnce(id:string,payload:Omit<AppNotification,'id'>){
   const ledger=(await getItem<EventLedger>('appState','notificationEvents'))||{id:'notificationEvents',ids:[]};
   const decision=notificationLedgerDecision(await notificationsEnabled(), ledger.ids.includes(id));
-  if(decision!=='emit')return false;
+  if(!notificationShouldAnnounce(decision))return false;
+  const created: AppNotification={id,...payload};
   await putItem('appState',{...ledger,ids:[...ledger.ids.slice(-499),id]});
-  await putItem('notifications',{id,...payload});
+  await putItem('notifications',created);
+  announceNotification(created);
   return true;
 }
 
