@@ -12,6 +12,8 @@ self.addEventListener('fetch',event=>{
   // Other origins (analytics, fonts, future ad hosts) are never cached or required.
   // Do not put future commercial config into CORE or this runtime cache.
   if(url.origin!==location.origin || url.pathname.startsWith('/api/')) return;
+  // Crawler files must stay the network response. Do not cache them or substitute the SPA shell.
+  if(url.pathname==='/ads.txt'||url.pathname==='/sitemap.xml'||url.pathname==='/robots.txt') return;
   // Share tokens are unique URLs. Do not fill Cache Storage with them.
   // Network first, then the SPA shell so React can decode the still-current path.
   if(url.pathname.startsWith('/share/') || url.pathname==='/acquisition'){
