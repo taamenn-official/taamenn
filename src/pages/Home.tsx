@@ -54,15 +54,19 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
     </div>
     {error&&<div className="error-banner" role="alert">{error}</div>}
     <div className="stats-grid home-stats">
-      <article className="stat-card stat-dark" data-ta-motion="card"><span>{ar?'السجل':'Archive'}</span><strong>{total}</strong><small>{featured?(ar?'سجلات تاريخية':'historical records'):(ar?'سجلات متاحة':'available records')}</small></article>
-      <article className="stat-card stat-lime" data-ta-motion="card"><span>{ar?'المواجهات الحاسمة':'Decided matches'}</span><strong>{decided}</strong><small>{ar?'نتيجة غير متعادلة':'non-draw results'}</small></article>
-      <article className="stat-card stat-pale" data-ta-motion="card"><span>{ar?'التعادلات':'Draws'}</span><strong>{draws}</strong><small>{ar?'بدون فائز':'no winner'}</small></article>
-      <button type="button" className="home-venues-card" data-ta-motion="card" onClick={()=>go('stadiums')} aria-label={uiCopy[language].openVenues}>
-        <span className="beta-badge">{uiCopy[language].venuesBeta}</span>
-        <span className="home-venues-icon" data-ta-icons aria-hidden="true"><MapPin size={22}/></span>
+      <button type="button" className="stat-card stat-dark" data-ta-motion="card" onClick={()=>go(featured?'historical-match-center':'archive')}>
+        <span>{ar?'السجل':'Archive'}</span><strong>{total}</strong><small>{featured?(ar?'سجلات تاريخية':'historical records'):(ar?'سجلات متاحة':'available records')}</small>
+      </button>
+      <button type="button" className="stat-card stat-lime" data-ta-motion="card" onClick={()=>go(featured?'historical-match-center':'archive')}>
+        <span>{ar?'المواجهات الحاسمة':'Decided matches'}</span><strong>{decided}</strong><small>{ar?'نتيجة غير متعادلة':'non-draw results'}</small>
+      </button>
+      <button type="button" className="stat-card stat-pale" data-ta-motion="card" onClick={()=>go(featured?'historical-match-center':'archive')}>
+        <span>{ar?'التعادلات':'Draws'}</span><strong>{draws}</strong><small>{ar?'بدون فائز':'no winner'}</small>
+      </button>
+      <button type="button" className="stat-card stat-glass home-venues-card" data-ta-motion="card" onClick={()=>go('stadiums')} aria-label={uiCopy[language].openVenues}>
+        <span className="home-venues-icon" data-ta-icons aria-hidden="true"><MapPin size={18}/></span>
         <strong>{uiCopy[language].venuesTitle}</strong>
         <small>{uiCopy[language].venuesDesc}</small>
-        <span className="home-venues-cta">{uiCopy[language].openVenues}</span>
       </button>
     </div>
     <AdSlot placement="home" />

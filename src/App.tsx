@@ -24,6 +24,7 @@ import { legalDocumentForPath } from './config/publicRoutes';
 import LegalDocument from './pages/LegalDocument';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
+import { NotificationToast } from './components/NotificationToast';
 import { installCopy, uiCopy } from './i18n/translations';
 import { useDisplayMode } from './mobile/useDisplayMode';
 import { RouteSkeleton } from './components/RouteSkeleton';
@@ -129,6 +130,8 @@ function MainShell(props:ShellProps){
   window.addEventListener('focus',onWake);
   window.addEventListener('online',onWake);
   window.addEventListener('taamen-matches-changed',onWake);
+  const onNotification=()=>{void unreadCount().then(count=>{if(!stopped)setUnread(count)})};
+  window.addEventListener('taamen-notification',onNotification);
   return()=>{
    stopped=true;
    window.clearTimeout(boundary);
@@ -137,6 +140,7 @@ function MainShell(props:ShellProps){
    window.removeEventListener('focus',onWake);
    window.removeEventListener('online',onWake);
    window.removeEventListener('taamen-matches-changed',onWake);
+   window.removeEventListener('taamen-notification',onNotification);
   };
  },[]);
  const skipPageRefresh=useRef(true);
@@ -192,8 +196,9 @@ function MainShell(props:ShellProps){
   {scope==='normal'&&<div className="sidebar-footer"><button className="avatar avatar-button" title={labels.profile} onClick={()=>go('profile')}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>{sidebar&&<div className="user-caption"><strong>{profile.firstName} {profile.lastName}</strong><span>{identityCaption}</span></div>}</div>}
   </aside>
   <main className="main-content"><InstallBanner language={language}/><header className="topbar"><div className="mobile-brand"><img className="brand-image" src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={32} height={32} decoding="async"/><strong>TAAMEN 2.0</strong></div><div className="topbar-left">{!ar&&<DateTimeBlock language={language}/>}</div><div className="topbar-actions"><ConnectivityStatus language={language}/>{scope==='normal'&&<button className="avatar topbar-profile" onClick={()=>go('profile')} aria-label={labels.profile}>{profile.avatarData?<img src={profile.avatarData} alt=""/>:profile.firstName.slice(0,1)}</button>}<LanguageSwitch language={language} onLanguage={onLanguage}/><ThemeToggle theme={theme} onTheme={onTheme} language={language}/>{scope==='normal'&&<button className={`notification-button icon-button${bellPulse?' is-pulse':''}`} onClick={()=>setNotifications(true)} aria-label={ar?'الإشعارات':'Notifications'}><Bell size={18}/>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>}</div><div className="topbar-right">{ar&&<DateTimeBlock language={language}/>}</div></header>
-   <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
    <SideProjectorsBadge language={language} variant="float"/>
+   <PageStage page={page}><RouteView {...props} page={page} go={go} registerLeaveGuard={registerLeaveGuard}/></PageStage>
+   <NotificationToast language={language} onOpen={()=>setNotifications(true)}/>
    <nav className="bottom-nav" ref={bottomNavRef} aria-label={ar?'تنقل الهاتف':'Mobile navigation'} hidden={desktopNav===true} aria-hidden={desktopNav===true} inert={desktopNav===true||undefined}><NavActiveIndicator navRef={bottomNavRef} activeKey={page} watch={[language,scope,desktopNav]} introDelay={navIntroDelay.current} className="is-bottom"/>{mobileRoutes.map(r=>{const Icon=r.icon;return <button type="button" className={`bottom-nav-item ${page===r.id?'is-active':''}`} data-route={r.id} key={r.id} aria-label={r.label[language]} aria-current={page===r.id?'page':undefined} onClick={()=>go(r.id)}><Icon size={18}/><span>{r.label[language]}</span></button>})}</nav>
    {/* Mounted only while open so overlay hooks and scroll-lock match other sheets. */}
    {notifications&&<NotificationCenter open={notifications} onClose={()=>setNotifications(false)} language={language} onChanged={()=>unreadCount().then(setUnread)}/>}

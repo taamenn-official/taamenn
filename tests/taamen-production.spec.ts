@@ -120,6 +120,26 @@ test.describe('TAAMEN production path', () => {
     await page.getByRole('textbox', { name: /Team 2/ }).fill('Guests');
     await page.getByRole('textbox', { name: /Stadium/ }).fill('Al Ahli');
     await page.getByRole('textbox', { name: /City/ }).fill('Hebron');
+    // Default kickoff is today 20:00 Asia/Jerusalem for 60 minutes. After 21:00
+    // there, lifecycle moves it out of Match Center before Share can appear.
+    const kickoff = await page.evaluate(() => {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Jerusalem',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }).formatToParts(new Date(Date.now() + 26 * 60 * 60 * 1000));
+      const get = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || '';
+      return { month: `${get('month')} ${get('year')}`, day: get('day') };
+    });
+    await page.getByRole('button', { name: 'Open calendar' }).click();
+    const calendar = page.getByRole('dialog', { name: 'Open calendar' });
+    for (let step = 0; step < 14; step += 1) {
+      const label = await calendar.locator('header strong').innerText();
+      if (label.includes(kickoff.month)) break;
+      await calendar.getByRole('button', { name: 'Next month' }).click();
+    }
+    await calendar.getByRole('button', { name: kickoff.day, exact: true }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('button', { name: 'Share' }).first()).toBeVisible();
     await page.getByRole('button', { name: 'Share' }).first().click();

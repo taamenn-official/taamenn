@@ -3,7 +3,7 @@ import { ChevronLeft, ImagePlus, Trash2, AlertCircle, ChevronDown } from 'lucide
 import { LanguageSwitch, ThemeToggle } from './ShellControls';
 import type { TaamenTheme } from '../theme/theme';
 import type { LocalProfile } from '../services/profileRepository';
-import { imageFileToDataUrl } from '../services/imageProcessing';
+import { ImageCropOverlay } from './ImageCropOverlay';
 import { TAAMEN_LOGO_ALT, TAAMEN_LOGO_SRC } from '../config/branding';
 import PrivacyPolicyModal, { recordConsent } from './PrivacyPolicyModal';
 import { gsap, useGSAP } from '../motion/gsapRuntime';
@@ -25,6 +25,7 @@ export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: {
   const avatarRef = useRef<HTMLInputElement>(null);
   const [imageSheet, setImageSheet] = useState(false);
   const [imageViewer, setImageViewer] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const leaving = useRef(false);
 
@@ -73,12 +74,9 @@ export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: {
 
   const update = (k: keyof Draft, v: string | boolean) => setP(x => ({ ...x, [k]: v }));
   
-  const image = async (file?: File) => {
-    if (!file) return;
-    try {
-      const data = await imageFileToDataUrl(file, { maxWidth: 900, maxHeight: 900, quality: 0.82 });
-      update('avatarData', data);
-    } catch {}
+  const image = (file?: File) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setCropFile(file);
   };
   
   const initials = `${p.firstName.slice(0, 1)}${p.lastName.slice(0, 1)}`.trim().toUpperCase() || '?';
@@ -125,6 +123,15 @@ export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: {
       )}
       {imageViewer && p.avatarData && (
         <ImageViewer src={p.avatarData} alt={ar ? 'الصورة الشخصية' : 'Profile photo'} language={language} onClose={() => setImageViewer(false)} />
+      )}
+      {cropFile && (
+        <ImageCropOverlay
+          file={cropFile}
+          kind="avatar"
+          language={language}
+          onCancel={() => setCropFile(null)}
+          onConfirm={(dataUrl) => { update('avatarData', dataUrl); setCropFile(null); }}
+        />
       )}
       <div className="entry-container">
         <div className="entry-controls">

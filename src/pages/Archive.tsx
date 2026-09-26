@@ -51,7 +51,7 @@ export default function Archive({language}:{language:'ar'|'en'}) {
     <div className="archive-source-note"><span>{copy.sourceLocal}</span><b>{items.length} {copy.records}</b></div>
     <div className="archive-toolbar">
       <label className="archive-search"><Search size={16}/><input value={query} onChange={event=>setQuery(event.target.value)} placeholder={copy.searchArchive}/></label>
-      <select value={type} onChange={event=>setType(event.target.value as 'all'|MatchType)} aria-label={copy.type}>
+      <select className="archive-type-select" value={type} onChange={event=>setType(event.target.value as 'all'|MatchType)} aria-label={copy.type}>
         <option value="all">{copy.allTypes}</option>
         {(['friendly','normal','competitive','tournament','strong'] as MatchType[]).map(value=><option key={value} value={value}>{typeLabel(value)}</option>)}
       </select>
