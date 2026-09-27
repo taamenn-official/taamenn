@@ -94,3 +94,6 @@ The existing PWA manifest and service worker are preserved.
 ## AI
 
 AI Assistant, AI navigation, AI page, AI entry points and AI API routes are removed from the active product.
+
+
+## TAAMEN is now maintained under the official TAAMEN GitHub organization.
