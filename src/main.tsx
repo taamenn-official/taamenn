@@ -4,6 +4,7 @@ import App from './App';
 import { restoreSpaFallbackLocation } from './infrastructure/spaFallback';
 import { applyTheme, readTheme } from './theme/theme';
 import './styles/global.css';
+import './styles/match-schedule.css';
 import './styles/profile-entry.css';
 import './styles/taamen-2.1.css';
 

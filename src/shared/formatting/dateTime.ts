@@ -24,13 +24,13 @@ export function dateISOToKey(date: string): number {
   return DATE_RE.test(value) ? Number(value.replaceAll('-', '')) : 0;
 }
 
-export function todayInTimeZone(timeZone = TZ): string {
+export function todayInTimeZone(timeZone = TZ, now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).formatToParts(new Date());
+  }).formatToParts(now);
   const get = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || '';
   return `${get('year')}-${get('month')}-${get('day')}`;
 }

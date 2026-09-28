@@ -51,11 +51,11 @@ test('decode rejects a private visibility payload', () => {
   assert.equal(decodeMatchShare(token), null);
 });
 
-test('v4 preserves match id and originId while v3 uses a SHARED fingerprint id', () => {
+test('v5 preserves match id and originId while v3 uses a SHARED fingerprint id', () => {
   const token = encodeMatchShare(sample, { allowSave: false });
   const payload = decodeMatchShare(token);
   assert.ok(payload);
-  assert.equal(payload.v, 4);
+  assert.equal(payload.v, 5);
   assert.equal(payload.id, 'LOCAL-1');
   assert.equal(payload.originId, 'LOCAL-1');
   assert.equal(payload.allowSave, false);
@@ -150,6 +150,47 @@ test('match share svg escapes names, scores, and stadium text', () => {
   assert.equal(svg.includes('&lt;A&amp;B&gt;'), true);
   assert.equal(svg.includes('1&lt;2'), true);
   assert.equal(svg.includes('O&apos;Field'), true);
+});
+
+test('v5 shares keep period structure and v4 links stay continuous', () => {
+  const period = encodeMatchShare({
+    ...sample,
+    time: '19:00',
+    durationMinutes: 65,
+    timing: { mode: 'periods', periodCount: 2, periodMinutes: 30, breakMinutes: 5 },
+  }, { allowSave: true });
+  const payload = decodeMatchShare(period);
+  assert.ok(payload);
+  assert.equal(payload.v, 5);
+  assert.equal(payload.timing?.mode, 'periods');
+  if (payload.timing?.mode === 'periods') {
+    assert.equal(payload.timing.periodCount, 2);
+    assert.equal(payload.timing.periodMinutes, 30);
+    assert.equal(payload.timing.breakMinutes, 5);
+  }
+  const saved = materializeSharedMatch(payload);
+  assert.equal(saved.durationMinutes, 65);
+  assert.equal(saved.timing?.mode, 'periods');
+  assert.equal('email' in payload, false);
+  assert.equal('phone' in payload, false);
+
+  const legacy = decodeMatchShare(tokenFrom({
+    v: 4, type: 'friendly', team1: 'A', team2: 'B', score1: 0, score2: 0, status: 'UPCOMING',
+    dateLabel: '', dateKey: 20260101, visibility: 'PUBLIC', allowSave: true, time: '19:00',
+  }));
+  assert.ok(legacy);
+  assert.equal(legacy.timing, undefined);
+  assert.equal(materializeSharedMatch(legacy).durationMinutes, 60);
+
+  const broken = decodeMatchShare(tokenFrom({
+    v: 5, type: 'friendly', team1: 'A', team2: 'B', score1: 0, score2: 0, status: 'UPCOMING',
+    dateLabel: '', dateKey: 20260101, visibility: 'PUBLIC', allowSave: true, time: '19:00',
+    timing: { mode: 'periods', periodCount: 0, periodMinutes: -4, breakMinutes: 'nope' },
+    durationMinutes: 90,
+  }));
+  assert.ok(broken);
+  assert.equal(broken.timing, undefined);
+  assert.equal(materializeSharedMatch(broken).durationMinutes, 90);
 });
 
 test('view-only shares are refused by the application-level save gate', () => {

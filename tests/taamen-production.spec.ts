@@ -198,7 +198,7 @@ test('share tokens work without original React state', async ({ page }) => {
     visibility: 'PUBLIC',
   });
   await page.goto(`/share/match/${matchToken}`);
-  await expect(page.getByRole('button', { name: /Save match|حفظ/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Import match|استيراد المباراة|Save match|حفظ المباراة/ })).toBeVisible();
 
   const profileToken = encodeToken({
     v: 2,

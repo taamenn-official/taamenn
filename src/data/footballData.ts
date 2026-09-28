@@ -32,6 +32,16 @@ export type PlayerContribution = {
   assists: number;
 };
 
+/**
+ * Optional schedule structure. Missing `timing` means a legacy continuous match
+ * whose `durationMinutes` is both playing time and the occupied window.
+ * `durationMinutes` on the match itself stays the occupied window so older
+ * lifecycle code still ends the match at the real finish.
+ */
+export type MatchTiming =
+  | { mode: 'continuous'; durationMinutes: number }
+  | { mode: 'periods'; periodCount: number; periodMinutes: number; breakMinutes: number };
+
 export type Match = {
   createdBy?: string;
   id: string;
@@ -51,6 +61,7 @@ export type Match = {
   time?: string;
   timezone?: string;
   durationMinutes?: number;
+  timing?: MatchTiming;
   visibility?: 'LOCAL'|'PUBLIC'|'PRIVATE';
   createdAt?: number;
   updatedAt?: number;

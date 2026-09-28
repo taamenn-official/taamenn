@@ -6,6 +6,9 @@ import { archiveCopy, matchUiCopy } from '../i18n/translations';
 import { todayInTimeZone, zonedDateTimeToEpoch } from '../shared/formatting/dateTime';
 import TaamenDatePicker from './TaamenDatePicker';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
+import MatchTimingFields from './MatchTimingFields';
+import { blankTimingDraft, timingFromDraft, type TimingDraft } from '../domain/matches/matchTiming';
+import { scheduleCopy } from '../i18n/translations';
 
 type Language = 'ar' | 'en';
 
@@ -28,6 +31,7 @@ export default function AddArchiveModal({ language, onClose }: AddArchiveModalPr
   const [stadium, setStadium] = useState('');
   const [city, setCity] = useState('');
   const [type, setType] = useState<MatchType>('friendly');
+  const [timing, setTiming] = useState<TimingDraft>(blankTimingDraft);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,6 +72,12 @@ export default function AddArchiveModal({ language, onClose }: AddArchiveModalPr
       return;
     }
 
+    const parsedTiming = timingFromDraft(timing);
+    if (!parsedTiming) {
+      setError(scheduleCopy[language].invalidTiming);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -81,6 +91,7 @@ export default function AddArchiveModal({ language, onClose }: AddArchiveModalPr
         stadium: stadium.trim() || undefined,
         city: city.trim() || undefined,
         type,
+        timing: parsedTiming.timing,
       });
       onClose();
     } catch (err) {
@@ -164,6 +175,8 @@ export default function AddArchiveModal({ language, onClose }: AddArchiveModalPr
               </div>
             </label>
           </div>
+
+          <MatchTimingFields language={language} date={date} time={time || '19:00'} draft={timing} onChange={setTiming} />
 
           <div className="form-grid">
             <label>

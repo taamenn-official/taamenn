@@ -13,17 +13,21 @@ import { archiveCopy, matchUiCopy } from '../i18n/translations';
 import { dateISOToKey, formatMatchDate, PALESTINE_TIMEZONE, todayInTimeZone, zonedDateTimeToEpoch } from '../shared/formatting/dateTime';
 import TaamenDatePicker from '../components/TaamenDatePicker';
 import MatchShareModal from '../components/MatchShareModal';
+import MatchScheduleBlock from '../components/MatchScheduleBlock';
+import MatchTimingFields from '../components/MatchTimingFields';
+import { blankTimingDraft, timingDraftFromMatch, timingFromDraft, type TimingDraft } from '../domain/matches/matchTiming';
+import { scheduleCopy } from '../i18n/translations';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
 
-type Draft={title:string;team1:string;team2:string;stadium:string;city:string;date:string;time:string;duration:string;note:string;type:MatchType;visibility:'LOCAL'|'PUBLIC'};
-const blank=():Draft=>({title:'',team1:'TAAMEN',team2:'',stadium:'',city:'',date:todayInTimeZone(),time:'20:00',duration:'60',note:'',type:'normal',visibility:'LOCAL'});
+type Draft={title:string;team1:string;team2:string;stadium:string;city:string;date:string;time:string;timing:TimingDraft;note:string;type:MatchType;visibility:'LOCAL'|'PUBLIC'};
+const blank=():Draft=>({title:'',team1:'TAAMEN',team2:'',stadium:'',city:'',date:todayInTimeZone(),time:'20:00',timing:blankTimingDraft(),note:'',type:'normal',visibility:'LOCAL'});
 
 function MatchEditor({language,initial,onClose,onSaved}:{language:'ar'|'en';initial:Match|null;onClose:()=>void;onSaved:()=>void}){
   const copy=matchUiCopy[language];
   const types=archiveCopy[language];
   const[draft,setDraft]=useState<Draft>(()=>initial?{
     title:initial.title||'',team1:initial.team1,team2:initial.team2,stadium:initial.stadium||'',city:initial.city||'',
-    date:initial.dateISO?.slice(0,10)||'',time:initial.time||'',duration:String(initial.durationMinutes||60),note:initial.story||'',type:initial.type,
+    date:initial.dateISO?.slice(0,10)||'',time:initial.time||'',timing:timingDraftFromMatch(initial),note:initial.story||'',type:initial.type,
     visibility:initial.visibility==='PUBLIC'?'PUBLIC':'LOCAL',
   }:blank());
   const[error,setError]=useState('');
@@ -34,12 +38,14 @@ function MatchEditor({language,initial,onClose,onSaved}:{language:'ar'|'en';init
     event.preventDefault();
     if(!draft.team1.trim()||!draft.team2.trim()||!draft.stadium.trim()||!draft.city.trim()||!draft.date||!draft.time){setError(copy.required);return}
     if(!Number.isFinite(zonedDateTimeToEpoch(draft.date,draft.time,PALESTINE_TIMEZONE))){setError(copy.invalidDate);return}
+    const timing=timingFromDraft(draft.timing);
+    if(!timing){setError(scheduleCopy[language].invalidTiming);return}
     setBusy(true);setError('');
     try{
       if(initial){
         const dateKey=dateISOToKey(draft.date);
-        await updateMatch({...initial,title:draft.title.trim()||`${draft.team1} × ${draft.team2}`,team1:draft.team1.trim(),team2:draft.team2.trim(),stadium:draft.stadium.trim(),city:draft.city.trim(),dateISO:draft.date,dateKey,dateLabel:formatMatchDate(draft.date,dateKey,'en').date,time:draft.time,durationMinutes:Math.max(1,Number(draft.duration)||60),story:draft.note.trim(),type:draft.type,visibility:draft.visibility});
-      }else await createLocalUpcomingMatch({title:draft.title.trim(),team1:draft.team1.trim(),team2:draft.team2.trim(),stadium:draft.stadium.trim(),city:draft.city.trim(),date:draft.date,time:draft.time,durationMinutes:Math.max(1,Number(draft.duration)||60),note:draft.note.trim(),type:draft.type,visibility:draft.visibility});
+        await updateMatch({...initial,title:draft.title.trim()||`${draft.team1} × ${draft.team2}`,team1:draft.team1.trim(),team2:draft.team2.trim(),stadium:draft.stadium.trim(),city:draft.city.trim(),dateISO:draft.date,dateKey,dateLabel:formatMatchDate(draft.date,dateKey,'en').date,time:draft.time,durationMinutes:timing.schedule.scheduledMinutes,timing:timing.timing,story:draft.note.trim(),type:draft.type,visibility:draft.visibility});
+      }else await createLocalUpcomingMatch({title:draft.title.trim(),team1:draft.team1.trim(),team2:draft.team2.trim(),stadium:draft.stadium.trim(),city:draft.city.trim(),date:draft.date,time:draft.time,durationMinutes:timing.schedule.scheduledMinutes,timing:timing.timing,note:draft.note.trim(),type:draft.type,visibility:draft.visibility});
       onSaved();onClose();
     }catch{setError(copy.invalidDate)}finally{setBusy(false)}
   };
@@ -52,7 +58,8 @@ function MatchEditor({language,initial,onClose,onSaved}:{language:'ar'|'en';init
         <label>{copy.matchTitle}<input value={draft.title} onChange={event=>set('title',event.target.value)}/></label>
         <div className="form-grid"><label>{copy.stadium} *<input value={draft.stadium} onChange={event=>set('stadium',event.target.value)} required/></label><label>{copy.city} *<input value={draft.city} onChange={event=>set('city',event.target.value)} required/></label></div>
         <div className="form-grid"><label>{copy.date} *<TaamenDatePicker value={draft.date} onChange={value=>set('date',value)} language={language} required/></label><label>{copy.time} *<input type="time" value={draft.time} onChange={event=>set('time',event.target.value)} required/></label></div>
-        <div className="form-grid"><label>{copy.duration}<input type="number" min="1" max="300" value={draft.duration} onChange={event=>set('duration',event.target.value)}/></label><label>{copy.type}<select value={draft.type} onChange={event=>set('type',event.target.value as MatchType)}>{(['normal','friendly','competitive','tournament','strong'] as MatchType[]).map(value=><option key={value} value={value}>{({normal:types.normal,friendly:types.friendly,competitive:types.competitive,tournament:types.tournament,strong:types.strong})[value]}</option>)}</select></label></div>
+        <MatchTimingFields language={language} date={draft.date} time={draft.time} draft={draft.timing} onChange={value=>set('timing',value)}/>
+        <label>{copy.type}<select value={draft.type} onChange={event=>set('type',event.target.value as MatchType)}>{(['normal','friendly','competitive','tournament','strong'] as MatchType[]).map(value=><option key={value} value={value}>{({normal:types.normal,friendly:types.friendly,competitive:types.competitive,tournament:types.tournament,strong:types.strong})[value]}</option>)}</select></label>
         <label>{copy.visibility}<select value={draft.visibility} onChange={event=>set('visibility',event.target.value as Draft['visibility'])}><option value="LOCAL">{copy.local}</option><option value="PUBLIC">{copy.public}</option></select></label>
         <label className="form-span-2">{copy.note}<textarea rows={3} value={draft.note} onChange={event=>set('note',event.target.value)}/></label>
         {error&&<div className="error-banner" role="alert">{error}</div>}
@@ -96,12 +103,13 @@ export default function Matches({language}:{language:'ar'|'en'}){
   const next=upcoming[0]||active[0];
   const remove=async(match:Match)=>{if(!window.confirm(copy.deleteConfirm))return;await deleteMatch(match.id);setMsg('');await load()};
   const card=(match:Match,hero=false)=>{
-    const date=formatMatchDate(match.dateISO,match.dateKey,language);
     return <article className={`current-match-card${hero?' is-next':''}${canonicalStatus(match.status)==='ACTIVE'?' is-active':''}`} key={match.id}>
-      <div className="current-match-top"><span className={`status-pill ${canonicalStatus(match.status).toLowerCase()}`}>{canonicalStatus(match.status)==='ACTIVE'?copy.active:copy.upcoming}</span><span>{date.weekday} · {date.date} · {match.time}</span></div>
-      <div className="current-match-teams"><strong>{match.team1}</strong><b>VS</b><strong>{match.team2}</strong></div>
-      <p>{match.stadium} · {match.city}</p><Countdown match={match} language={language} now={now}/>
-      <div className="current-match-actions"><button className="dark-action compact" onClick={()=>setEditor({open:true,match})}><Edit3 size={14}/>{copy.edit}</button><button className="dark-action compact" onClick={()=>setShare(match)}><Share2 size={14}/>{copy.share}</button><button className="icon-button danger" onClick={()=>void remove(match)} aria-label={copy.delete}><Trash2 size={15}/></button></div>
+      <div className="current-match-top"><span className={`status-pill ${canonicalStatus(match.status).toLowerCase()}`}>{canonicalStatus(match.status)==='ACTIVE'?copy.active:copy.upcoming}</span></div>
+      <MatchScheduleBlock match={match} language={language} variant="card" showVenue now={new Date(now)}>
+        <div className="current-match-teams"><strong>{match.team1}</strong><b>VS</b><strong>{match.team2}</strong></div>
+      </MatchScheduleBlock>
+      <Countdown match={match} language={language} now={now}/>
+      <div className="current-match-actions"><button className="dark-action compact" onClick={()=>setEditor({open:true,match})}><Edit3 size={14}/>{copy.edit}</button><button className="dark-action compact" onClick={()=>setShare(match)}><Share2 className="icon-share" size={14}/>{copy.share}</button><button className="icon-button danger" onClick={()=>void remove(match)} aria-label={copy.delete}><Trash2 size={15}/></button></div>
     </article>;
   };
   const remaining=matches.filter(match=>match.id!==next?.id);

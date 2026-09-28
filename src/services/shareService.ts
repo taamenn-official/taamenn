@@ -1,9 +1,11 @@
-import type { Match, MatchType, PlayerContribution } from '../data/footballData';
+import type { Match, MatchTiming, MatchType, PlayerContribution } from '../data/footballData';
+import { sanitizeStoredTiming, scheduleFromMatch, scheduleFromTiming, timingFingerprint } from '../domain/matches/matchTiming.ts';
+import { formatClockRange } from '../shared/formatting/matchPresentation.ts';
 import { dateKeyToISO, PALESTINE_TIMEZONE } from '../shared/formatting/dateTime.ts';
 import { canonicalStatus, hasRecordedResult, normalizeMatch } from './matchLifecycle.ts';
 import { emitMatchNotification } from './notificationService.ts';
 
-const VERSION = 4;
+const VERSION = 5;
 const MAX_PAYLOAD = 16 * 1024;
 const MATCH_TYPES: MatchType[] = ['strong', 'normal', 'friendly', 'competitive', 'tournament'];
 const IDENTITY_RE = /^[A-Za-z0-9._:-]{1,80}$/;
@@ -15,7 +17,7 @@ const IDENTITY_RE = /^[A-Za-z0-9._:-]{1,80}$/;
  * authoritative.
  */
 export type MatchSharePayload = {
-  v: 2 | 3 | 4;
+  v: 2 | 3 | 4 | 5;
   id?: string;
   originId?: string;
   allowSave: boolean;
@@ -31,6 +33,10 @@ export type MatchSharePayload = {
   stadium?: string;
   city?: string;
   time?: string;
+  /** Occupied window in minutes. Older links omit it and stay on the legacy 60-minute fallback. */
+  durationMinutes?: number;
+  /** Enough structure to rebuild periods and breaks. Absent on links created before v5. */
+  timing?: MatchTiming;
   story?: string;
   visibility: 'PUBLIC';
   playerContributions?: {
@@ -55,6 +61,11 @@ function clipIdentity(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const clipped = value.trim().slice(0, 80);
   return IDENTITY_RE.test(clipped) ? clipped : undefined;
+}
+
+function shareTiming(match: Match): MatchTiming {
+  return sanitizeStoredTiming(match.timing)
+    ?? { mode: 'continuous', durationMinutes: scheduleFromMatch(match).playingMinutes };
 }
 
 function clipContributions(list: unknown): PlayerContribution[] {
@@ -90,6 +101,8 @@ function safe(m: Match, options: { includeContributions?: boolean; allowSave?: b
     stadium: match.stadium ? String(match.stadium).slice(0, 120) : undefined,
     city: match.city ? String(match.city).slice(0, 120) : undefined,
     time: match.time ? String(match.time).slice(0, 10) : undefined,
+    durationMinutes: scheduleFromMatch(match).scheduledMinutes,
+    timing: shareTiming(match),
     story: match.story ? String(match.story).slice(0, 500) : undefined,
     visibility: 'PUBLIC',
   };
@@ -128,11 +141,12 @@ function fnv1a(value: string) {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-export function sharedMatchFingerprint(payload: Pick<MatchSharePayload, 'team1' | 'team2' | 'dateKey' | 'time' | 'score1' | 'score2' | 'stadium'> & Partial<Pick<MatchSharePayload, 'type' | 'title' | 'status' | 'story' | 'playerContributions'>>): string {
+export function sharedMatchFingerprint(payload: Pick<MatchSharePayload, 'team1' | 'team2' | 'dateKey' | 'time' | 'score1' | 'score2' | 'stadium'> & Partial<Pick<MatchSharePayload, 'type' | 'title' | 'status' | 'story' | 'playerContributions' | 'timing'>>): string {
   const key = JSON.stringify([
     payload.team1, payload.team2, payload.dateKey, payload.time || '', payload.score1, payload.score2,
     payload.stadium || '', payload.type || '', payload.title || '', payload.status || '', payload.story || '',
     payload.playerContributions || null,
+    timingFingerprint(payload.timing),
   ]);
   return `${fnv1a(key)}${fnv1a([...key].reverse().join(''))}`;
 }
@@ -155,6 +169,7 @@ export function contentFingerprint(match: Match): string {
     status: String(canonicalStatus(match.status)),
     story: match.story,
     playerContributions: match.playerContributions,
+    timing: sanitizeStoredTiming(match.timing) ?? undefined,
   });
 }
 
@@ -170,6 +185,20 @@ export function classifySharedImport(incoming: Match, locals: Match[]): SharedIm
   const byId = locals.find((item) => item.id === incoming.id);
   if (byId) return { kind: 'collision', local: byId, incoming };
   return { kind: 'new', incoming };
+}
+
+function explicitDuration(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isInteger(value)) return null;
+  if (value < 1 || value > 1440) return null;
+  return value;
+}
+
+function materializedTiming(payload: MatchSharePayload): { durationMinutes: number; timing?: MatchTiming } {
+  const timing = sanitizeStoredTiming(payload.timing);
+  if (timing) return { timing, durationMinutes: scheduleFromTiming(timing).scheduledMinutes };
+  const durationMinutes = explicitDuration(payload.durationMinutes);
+  if (durationMinutes === null) return { durationMinutes: 60 };
+  return { durationMinutes, timing: { mode: 'continuous', durationMinutes } };
 }
 
 export function materializeSharedMatch(payload: MatchSharePayload): Match {
@@ -200,12 +229,12 @@ export function materializeSharedMatch(payload: MatchSharePayload): Match {
     dateISO: dateKeyToISO(Number(payload.dateKey)),
     dateKey: Number(payload.dateKey),
     timezone: PALESTINE_TIMEZONE,
-    durationMinutes: 60,
     story: payload.story || '',
     title: payload.title,
     stadium: payload.stadium,
     city: payload.city,
     time: payload.time,
+    ...materializedTiming(payload),
     visibility: 'LOCAL',
     source: 'local',
     sharedFingerprint: fingerprint,
@@ -225,9 +254,11 @@ export function decodeMatchShare(payload: string): MatchSharePayload | null {
   try {
     if (!payload || payload.length > MAX_PAYLOAD) return null;
     const x = JSON.parse(decode(payload)) as Partial<MatchSharePayload> & { v?: unknown; visibility?: unknown };
-    if ((x.v !== 2 && x.v !== 3 && x.v !== VERSION) || x.visibility !== 'PUBLIC' || typeof x.team1 !== 'string' || typeof x.team2 !== 'string' || !/^\d{8}$/.test(String(Number(x.dateKey)))) return null;
+    const version = x.v === 2 || x.v === 3 || x.v === 4 || x.v === 5 ? x.v : null;
+    if (version === null || x.visibility !== 'PUBLIC' || typeof x.team1 !== 'string' || typeof x.team2 !== 'string' || !/^\d{8}$/.test(String(Number(x.dateKey)))) return null;
     if (x.team1.length > 120 || x.team2.length > 120) return null;
-    const version = x.v === 2 ? 2 : x.v === 3 ? 3 : 4;
+    const timing = sanitizeStoredTiming(x.timing) ?? undefined;
+    const durationMinutes = explicitDuration(x.durationMinutes) ?? undefined;
     return {
       v: version,
       id: clipIdentity(x.id),
@@ -245,6 +276,8 @@ export function decodeMatchShare(payload: string): MatchSharePayload | null {
       stadium: x.stadium ? String(x.stadium).slice(0, 120) : undefined,
       city: x.city ? String(x.city).slice(0, 120) : undefined,
       time: x.time ? String(x.time).slice(0, 10) : undefined,
+      durationMinutes,
+      timing,
       story: x.story ? String(x.story).slice(0, 500) : undefined,
       visibility: 'PUBLIC',
       playerContributions: x.playerContributions
@@ -291,7 +324,8 @@ export async function shareMatch(m: Match, options?: { includeContributions?: bo
 export function matchShareSvg(m: Match) {
   const title = m.title || `${m.team1} × ${m.team2}`;
   const score = hasRecordedResult(m.status) ? `${escapeXml(String(m.score1))} : ${escapeXml(String(m.score2))}` : 'VS';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#193940"/><stop offset="1" stop-color="#0c2025"/></linearGradient></defs><rect width="1200" height="630" rx="48" fill="url(#g)"/><circle cx="1030" cy="110" r="120" fill="#9BF272" opacity=".08"/><text x="120" y="100" fill="#BAC8D9" font-family="Arial" font-size="28">TAAMEN 2.0</text><text x="600" y="190" text-anchor="middle" fill="#9BF272" font-family="Arial" font-size="34">${escapeXml(String(m.type).toUpperCase())}</text><text x="600" y="300" text-anchor="middle" fill="#fff" font-family="Arial" font-size="56" font-weight="700">${escapeXml(title)}</text><text x="600" y="390" text-anchor="middle" fill="#fff" font-family="Arial" font-size="48">${escapeXml(m.team1)}  ${score}  ${escapeXml(m.team2)}</text><text x="600" y="475" text-anchor="middle" fill="#BAC8D9" font-family="Arial" font-size="28">${escapeXml(m.dateLabel)}${m.time ? ` · ${escapeXml(m.time)}` : ''}${m.stadium ? ` · ${escapeXml(m.stadium)}` : ''}</text><text x="600" y="545" text-anchor="middle" fill="#7ABF5A" font-family="Arial" font-size="22">PUBLIC SHARE</text></svg>`;
+  const when = m.time ? formatClockRange(m.time, scheduleFromMatch(m).scheduledMinutes, 'en') : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#193940"/><stop offset="1" stop-color="#0c2025"/></linearGradient></defs><rect width="1200" height="630" rx="48" fill="url(#g)"/><circle cx="1030" cy="110" r="120" fill="#9BF272" opacity=".08"/><text x="120" y="100" fill="#BAC8D9" font-family="Arial" font-size="28">TAAMEN 2.0</text><text x="600" y="190" text-anchor="middle" fill="#9BF272" font-family="Arial" font-size="34">${escapeXml(String(m.type).toUpperCase())}</text><text x="600" y="300" text-anchor="middle" fill="#fff" font-family="Arial" font-size="56" font-weight="700">${escapeXml(title)}</text><text x="600" y="390" text-anchor="middle" fill="#fff" font-family="Arial" font-size="48">${escapeXml(m.team1)}  ${score}  ${escapeXml(m.team2)}</text><text x="600" y="475" text-anchor="middle" fill="#BAC8D9" font-family="Arial" font-size="28">${escapeXml(m.dateLabel)}${when ? ` · ${escapeXml(when)}` : ''}${m.stadium ? ` · ${escapeXml(m.stadium)}` : ''}</text><text x="600" y="545" text-anchor="middle" fill="#7ABF5A" font-family="Arial" font-size="22">PUBLIC SHARE</text></svg>`;
 }
 
 function escapeXml(s: string) {

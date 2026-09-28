@@ -2,7 +2,7 @@ import type { Match, MatchStatus } from '../data/footballData';
 import type { ReactNode } from 'react';
 import { archiveCopy, matchUiCopy } from '../i18n/translations';
 import { canonicalStatus, hasRecordedResult } from '../services/matchLifecycle';
-import { formatMatchDate } from '../shared/formatting/dateTime';
+import MatchScheduleBlock from './MatchScheduleBlock';
 
 function winnerFor(match: Match): 'team1'|'team2'|'draw' {
   if (match.score1 > match.score2) return 'team1';
@@ -15,11 +15,6 @@ function typeLabel(type: Match['type'], ar: boolean) {
   return ({friendly:t.friendly,normal:t.normal,competitive:t.competitive,tournament:t.tournament,strong:t.strong} as Record<string,string>)[type] || t.other;
 }
 
-function formatDate(match: Match, language: 'ar'|'en') {
-  const date=formatMatchDate(match.dateISO,match.dateKey,language);
-  return `${date.weekday} · ${date.date}`;
-}
-
 export default function MatchCard({match,language,featured=false,onClick,actions}:{match:Match;language:'ar'|'en';featured?:boolean;onClick?:()=>void;actions?:ReactNode}) {
   const ar=language==='ar';
   const status=canonicalStatus(match.status);
@@ -30,17 +25,16 @@ export default function MatchCard({match,language,featured=false,onClick,actions
   const statusCopy:Record<MatchStatus,string>={UPCOMING:matchUiCopy[language].upcoming,ACTIVE:matchUiCopy[language].active,COMPLETED_PENDING_RESULT:matchUiCopy[language].resultPending,COMPLETED_WITH_RESULT:matchUiCopy[language].resultRecorded,ARCHIVED:matchUiCopy[language].archived};
   const meta=[
     match.id ? `#${match.id}` : '',
-    statusCopy[status],
-    match.time ? `${archiveCopy[language].time} ${match.time}` : '',
     match.stadium || '',
     match.city || '',
   ].filter(Boolean);
-  return <article className={`match-card match-card-premium type-${accent} ${recorded?(winner!=='draw'?`has-winner winner-${winner}`:'is-draw'):'result-pending'} ${featured?'is-featured':''}`} onClick={onClick} role={onClick?'button':undefined} tabIndex={onClick?0:undefined} onKeyDown={event=>{if(onClick&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick()}}} aria-label={`${match.team1} ${ar?'مقابل':'vs'} ${match.team2}${recorded?` - ${match.score1}:${match.score2}`:''}`}>
+  return <article className={`match-card match-card-premium type-${accent} ${recorded?(winner!=='draw'?`has-winner winner-${winner}`:'is-draw'):'result-pending'} ${featured?'is-featured':''}`} onClick={onClick} tabIndex={onClick?0:undefined} onKeyDown={event=>{if(onClick&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick()}}} aria-label={`${match.team1} ${ar?'مقابل':'vs'} ${match.team2}${recorded?` - ${match.score1}:${match.score2}`:''}`} >
     {confetti}
     <div className="match-card-top">
       <span className={`match-type ${accent}`}>{typeLabel(match.type,ar)}</span>
-      <span>{formatDate(match,language)}</span>
+      <span>{statusCopy[status]}</span>
     </div>
+    <MatchScheduleBlock match={match} language={language} variant="compact">
     <div className="match-score-layout">
       <div className={`team-block ${recorded&&winner==='team1'?'is-winner':''} ${recorded&&winner==='team2'?'is-loser':''}`}>
         <strong>{match.team1}</strong>
@@ -55,6 +49,7 @@ export default function MatchCard({match,language,featured=false,onClick,actions
         {recorded&&winner==='team2'&&<span className="winner-label">{archiveCopy[language].winner}</span>}
       </div>
     </div>
+    </MatchScheduleBlock>
     {meta.length>0&&<div className="match-meta-row">{meta.map((item,i)=><span key={`${item}-${i}`}>{item}</span>)}</div>}
     {match.story&&<p className="match-story">{match.story}</p>}
     {match.details&&<div className="match-metrics">
