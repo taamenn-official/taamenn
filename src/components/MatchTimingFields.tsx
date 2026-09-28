@@ -124,12 +124,12 @@ export default function MatchTimingFields({
             {preview.rows.map((row) => (
               <p key={`${row.kind}-${row.label}-${row.range}`}>
                 <b>{row.label}</b>
-                <span>{row.range}</span>
+                <span dir="ltr">{row.range}</span>
               </p>
             ))}
             <p className="timing-finish">
               <b>{preview.finishLabel}</b>
-              <span>{preview.finishTime}</span>
+              <span dir="ltr">{preview.finishTime}</span>
             </p>
             <small>{preview.summary}{preview.breakLine ? ` · ${preview.breakLine}` : ''}</small>
           </div>

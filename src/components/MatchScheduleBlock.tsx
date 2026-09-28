@@ -23,7 +23,7 @@ export default function MatchScheduleBlock({
       {view.relativeLabel && <span className="schedule-relative">{view.relativeLabel}</span>}
       <span className="schedule-numeric" dir="ltr">{view.numericDate}</span>
       <span className="schedule-written">{view.writtenDate}</span>
-      <strong className="schedule-time">
+      <strong className="schedule-time" dir="ltr">
         {view.timeParts ? (
           view.timeParts.samePeriod ? (
             <>
