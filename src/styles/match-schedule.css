@@ -8,6 +8,7 @@
   min-width:0;
 }
 .schedule-block.is-share{justify-items:center;text-align:center;gap:4px}
+.schedule-block.is-share .schedule-date,.schedule-block.is-share .schedule-structure-head{justify-content:center}
 .schedule-relative{
   display:inline-flex;
   align-items:center;
@@ -18,6 +19,12 @@
   color:#d7f3ff;
   font-size:10px;
   letter-spacing:.04em;
+}
+.schedule-date{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:2px 8px;
 }
 .schedule-numeric{
   font:11px/1.4 'DM Mono',ui-monospace,monospace;
@@ -47,21 +54,95 @@
 .schedule-dash{white-space:nowrap}
 .schedule-block.is-compact .schedule-time{font-size:clamp(18px,3.4vw,24px)}
 .schedule-block.is-share .schedule-time{justify-content:center;font-size:clamp(26px,6.4vw,42px);margin:6px 0 2px}
-.schedule-summary,.schedule-break,.schedule-playing,.schedule-venue{
+.schedule-summary,.schedule-venue{
   font-size:12px;
   line-height:1.45;
   color:var(--muted,#BAC8D9);
 }
-.schedule-break,.schedule-playing{color:rgba(186,200,217,.82)}
+.schedule-summary{margin:0}
+.summary-short{display:none}
 .schedule-venue{margin-top:4px}
+.schedule-structure{display:grid;gap:6px;margin-top:6px}
+.schedule-structure-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:4px 12px;
+}
+.timing-disclosure{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:32px;
+  padding:0 2px;
+  border:0;
+  background:transparent;
+  color:#9ad7ff;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.timing-disclosure svg{transition:transform 180ms ease}
+.timing-disclosure[aria-expanded="true"] svg{transform:rotate(180deg)}
+.timing-disclosure:focus-visible{
+  outline:2px solid rgba(154,215,255,.85);
+  outline-offset:3px;
+  border-radius:8px;
+}
+.timing-details{
+  display:grid;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(186,200,217,.12);
+  background:rgba(255,255,255,.03);
+  animation:schedule-swap 180ms ease;
+}
+.timing-details ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.timing-details li,.timing-total{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:12px;
+}
+.timing-total{margin:2px 0 0;padding-top:6px;border-top:1px solid rgba(186,200,217,.12);font-weight:700}
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+.timing-collapsed-summary{margin:0}
+.timing-advanced{display:grid;gap:10px;animation:timing-panel-in 200ms cubic-bezier(.22,.61,.36,1)}
+.timing-equation{margin:0;font:13px/1.4 'DM Mono',ui-monospace,monospace;color:#d7f6ff}
+.current-match-card .current-match-teams{margin:12px 0 4px}
 
-.current-match-card .schedule-block{margin:12px 0 4px}
+.current-match-card .schedule-block{margin:4px 0}
 .match-card .schedule-block{margin:8px 0 10px}
 .share-match-preview .schedule-block{margin-top:8px}
 
+@media (max-width:430px){
+  .summary-full{display:none}
+  .summary-short{display:inline}
+}
+@media (min-width:768px){
+  .timing-details ul{display:flex;flex-wrap:wrap;gap:6px}
+  .timing-details li{
+    justify-content:flex-start;
+    padding:4px 8px;
+    border-radius:999px;
+    background:rgba(154,215,255,.08);
+  }
+}
+
 @media (max-width:640px){
   .current-match-card:not(.is-next) .schedule-written,
-  .current-match-card:not(.is-next) .schedule-break,
   .current-match-card:not(.is-next) .schedule-venue{display:none}
 }
 
@@ -120,8 +201,6 @@
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:8px;
-  transform-origin:top center;
-  animation:timing-panel-in 200ms cubic-bezier(.22,.61,.36,1);
 }
 .timing-fields label{display:grid;gap:6px;font-size:12px}
 .timing-input{display:flex;align-items:center;gap:6px}
@@ -259,6 +338,9 @@ html[data-theme="light"] .timing-fields input{background:#e7eef0;color:#102228}
   .current-match-grid .current-match-card,
   .timing-panel,
   .timing-preview-live,
+  .timing-advanced,
+  .timing-details,
+  .timing-disclosure svg,
   .return-home,
   .return-home svg,
   .return-home::after,
@@ -270,6 +352,9 @@ html[data-theme="light"] .timing-fields input{background:#e7eef0;color:#102228}
 html[data-taamen-motion=reduce] .current-match-grid .current-match-card,
 html[data-taamen-motion=reduce] .timing-panel,
 html[data-taamen-motion=reduce] .timing-preview-live,
+html[data-taamen-motion=reduce] .timing-advanced,
+html[data-taamen-motion=reduce] .timing-details,
+html[data-taamen-motion=reduce] .timing-disclosure svg,
 html[data-taamen-motion=reduce] .return-home::after,
 html[data-taamen-motion=reduce] .nav-active-indicator{animation:none;transition:none}
 html[data-taamen-motion=reduce] .return-home:hover svg,

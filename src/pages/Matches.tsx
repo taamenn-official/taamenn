@@ -105,8 +105,9 @@ export default function Matches({language}:{language:'ar'|'en'}){
   const card=(match:Match,hero=false)=>{
     return <article className={`current-match-card${hero?' is-next':''}${canonicalStatus(match.status)==='ACTIVE'?' is-active':''}`} key={match.id}>
       <div className="current-match-top"><span className={`status-pill ${canonicalStatus(match.status).toLowerCase()}`}>{canonicalStatus(match.status)==='ACTIVE'?copy.active:copy.upcoming}</span></div>
-      <MatchScheduleBlock match={match} language={language} variant="card" showVenue now={new Date(now)}/>
-      <div className="current-match-teams"><strong>{match.team1}</strong><b>VS</b><strong>{match.team2}</strong></div>
+      <MatchScheduleBlock match={match} language={language} variant="card" showVenue now={new Date(now)}>
+        <div className="current-match-teams"><strong>{match.team1}</strong><b>VS</b><strong>{match.team2}</strong></div>
+      </MatchScheduleBlock>
       <Countdown match={match} language={language} now={now}/>
       <div className="current-match-actions"><button className="dark-action compact" onClick={()=>setEditor({open:true,match})}><Edit3 size={14}/>{copy.edit}</button><button className="dark-action compact" onClick={()=>setShare(match)}><Share2 className="icon-share" size={14}/>{copy.share}</button><button className="icon-button danger" onClick={()=>void remove(match)} aria-label={copy.delete}><Trash2 size={15}/></button></div>
     </article>;

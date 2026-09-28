@@ -83,14 +83,14 @@ export default function PublicSharePreview({language,kind,token,onHome,onLanguag
     {kind==='profile'&&profile?<div className="shared-profile-card">{profile.bannerData&&<div className="shared-profile-banner" style={{backgroundImage:`url(${profile.bannerData})`}}/>}{profile.avatarData&&<img className="shared-profile-avatar" src={profile.avatarData} alt=""/>}<span className="eyebrow">PUBLIC PROFILE</span><h1>{profile.displayName}</h1>{profile.publicRole&&<span className="status-chip">{profile.publicRole}</span>}<p className="settings-note">{language==='ar'?'هذه معاينة عامة آمنة؛ لا تحتوي البريد أو الهاتف أو بيانات الفريق الخاص.':'Safe public preview. Email, phone and private team data are excluded.'}</p></div>
     :match&&<div className="shared-match-layout">
       <span className="eyebrow">{String(match.type||'normal').toUpperCase()}</span>
-      <h1>{match.title||`${match.team1} × ${match.team2}`}</h1>
-      <MatchScheduleBlock match={match} language={language} variant="share"/>
-      <div className="shared-vs">
-        <strong>{match.team1}</strong>
-        <b>{match.status==='UPCOMING'||match.status==='ACTIVE'?'VS':`${match.score1} : ${match.score2}`}</b>
-        <strong>{match.team2}</strong>
-      </div>
-      {(match.stadium||match.city)&&<p className="schedule-venue">{match.stadium}{match.stadium&&match.city?' · ':''}{match.city}</p>}
+      <MatchScheduleBlock match={match} language={language} variant="share" showVenue>
+        <h1>{match.title||`${match.team1} × ${match.team2}`}</h1>
+        <div className="shared-vs">
+          <strong>{match.team1}</strong>
+          <b>{match.status==='UPCOMING'||match.status==='ACTIVE'?'VS':`${match.score1} : ${match.score2}`}</b>
+          <strong>{match.team2}</strong>
+        </div>
+      </MatchScheduleBlock>
       <span className={`share-mode-badge ${payload?.allowSave?'can-save':'view-only'}`}>{payload?.allowSave?shareCopy.viewAndSave:shareCopy.viewOnly}</span>
       {hasContributions&&<div className="contributions-note"><Trophy size={14} aria-hidden="true"/><span>{shareCopy.includesContributions}</span></div>}
       {canSave&&inspectKind==='new'&&<p className="settings-note">{isArchiveStatus(match.status)?copy.shareArchive:copy.shareMatchCenter}</p>}

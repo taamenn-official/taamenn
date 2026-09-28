@@ -28,13 +28,13 @@ export default function MatchCard({match,language,featured=false,onClick,actions
     match.stadium || '',
     match.city || '',
   ].filter(Boolean);
-  return <article className={`match-card match-card-premium type-${accent} ${recorded?(winner!=='draw'?`has-winner winner-${winner}`:'is-draw'):'result-pending'} ${featured?'is-featured':''}`} onClick={onClick} role={onClick?'button':undefined} tabIndex={onClick?0:undefined} onKeyDown={event=>{if(onClick&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick()}}} aria-label={`${match.team1} ${ar?'مقابل':'vs'} ${match.team2}${recorded?` - ${match.score1}:${match.score2}`:''}`}>
+  return <article className={`match-card match-card-premium type-${accent} ${recorded?(winner!=='draw'?`has-winner winner-${winner}`:'is-draw'):'result-pending'} ${featured?'is-featured':''}`} onClick={onClick} tabIndex={onClick?0:undefined} onKeyDown={event=>{if(onClick&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick()}}} aria-label={`${match.team1} ${ar?'مقابل':'vs'} ${match.team2}${recorded?` - ${match.score1}:${match.score2}`:''}`} >
     {confetti}
     <div className="match-card-top">
       <span className={`match-type ${accent}`}>{typeLabel(match.type,ar)}</span>
       <span>{statusCopy[status]}</span>
     </div>
-    <MatchScheduleBlock match={match} language={language} variant="compact"/>
+    <MatchScheduleBlock match={match} language={language} variant="compact">
     <div className="match-score-layout">
       <div className={`team-block ${recorded&&winner==='team1'?'is-winner':''} ${recorded&&winner==='team2'?'is-loser':''}`}>
         <strong>{match.team1}</strong>
@@ -49,6 +49,7 @@ export default function MatchCard({match,language,featured=false,onClick,actions
         {recorded&&winner==='team2'&&<span className="winner-label">{archiveCopy[language].winner}</span>}
       </div>
     </div>
+    </MatchScheduleBlock>
     {meta.length>0&&<div className="match-meta-row">{meta.map((item,i)=><span key={`${item}-${i}`}>{item}</span>)}</div>}
     {match.story&&<p className="match-story">{match.story}</p>}
     {match.details&&<div className="match-metrics">

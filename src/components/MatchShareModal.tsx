@@ -30,8 +30,9 @@ export default function MatchShareModal({match,language,onClose}:{match:Match;la
       <div className="share-football-motion" aria-hidden="true"><i/><i/><i/><i/><i/></div>
       <section className="share-match-preview">
         <small>{copy.preview}</small>
-        <div><strong>{match.team1}</strong><span>{match.score1} : {match.score2}</span><strong>{match.team2}</strong></div>
-        <MatchScheduleBlock match={match} language={language} variant="compact"/>
+        <MatchScheduleBlock match={match} language={language} variant="compact">
+          <div><strong>{match.team1}</strong><span>{match.score1} : {match.score2}</span><strong>{match.team2}</strong></div>
+        </MatchScheduleBlock>
       </section>
       <label className="share-permission-card">
         <input type="checkbox" checked={allowSave} onChange={event=>setAllowSave(event.target.checked)}/>

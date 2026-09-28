@@ -30,6 +30,12 @@ export type ScheduleRow = {
   range: string;
 };
 
+export type TimingDetailRow = {
+  kind: 'period' | 'break';
+  label: string;
+  duration: string;
+};
+
 export type MatchPresentation = {
   numericDate: string;
   writtenDate: string;
@@ -38,9 +44,13 @@ export type MatchPresentation = {
   relativeLabel: string | null;
   timeRange: string;
   timeParts: ClockRangeParts | null;
-  summary: string;
-  breakLine: string | null;
-  playingLine: string | null;
+  /** Null for a continuous match. The window already says when it is. */
+  summary: string | null;
+  shortSummary: string | null;
+  structureLine: string | null;
+  equation: string | null;
+  occupiedPhrase: string;
+  detailRows: TimingDetailRow[];
   rows: ScheduleRow[];
   finishLabel: string;
   finishTime: string;
@@ -182,27 +192,60 @@ function periodLabel(index: number, count: number, language: Language): string {
   return copy.period.replace('{n}', String(index));
 }
 
-function summaryFor(schedule: MatchSchedule, language: Language): { summary: string; breakLine: string | null; playingLine: string | null } {
-  const copy = scheduleCopy[language];
-  if (schedule.mode === 'continuous') {
-    return {
-      summary: `${copy.continuous} • ${minutePhrase(schedule.playingMinutes, language)}`,
-      breakLine: null,
-      playingLine: null,
-    };
+function shortDuration(count: number, language: Language): string {
+  if (language === 'en') return `${count} min`;
+  return minutePhrase(count, language);
+}
+
+function periodHead(count: number, language: Language): string {
+  if (language === 'en') {
+    if (count === 2) return '2 halves';
+    if (count === 1) return '1 period';
+    return `${count} periods`;
   }
-  const structure = `${schedule.periodCount} × ${minutePhrase(schedule.periodMinutes, language)}`;
-  if (schedule.breakMinutesEach <= 0) {
-    return { summary: structure, breakLine: null, playingLine: minutePhrase(schedule.playingMinutes, language) };
-  }
-  const breakText = schedule.breakCount > 1
-    ? `${copy.break} ${minutePhrase(schedule.breakMinutesEach, language)} ${copy.betweenPeriods}`
-    : `${copy.break} ${minutePhrase(schedule.breakMinutesEach, language)}`;
-  return {
-    summary: structure,
-    breakLine: breakText,
-    playingLine: `${minutePhrase(schedule.playingMinutes, language)} ${copy.playing}`,
-  };
+  if (count === 2) return 'شوطان';
+  if (count === 1) return 'شوط واحد';
+  return `${count} أشواط`;
+}
+
+function breakPhrase(schedule: MatchSchedule, language: Language): string | null {
+  if (schedule.breakMinutesEach <= 0 || schedule.breakCount <= 0) return null;
+  const minutes = shortDuration(schedule.breakMinutesEach, language);
+  if (language === 'en') return schedule.breakCount === 1 ? `${minutes} break` : `${minutes} breaks`;
+  if (schedule.breakCount === 1) return `استراحة ${minutes}`;
+  if (schedule.breakCount === 2) return `استراحتان × ${minutes}`;
+  return `${schedule.breakCount} استراحات × ${minutes}`;
+}
+
+function compactSummary(schedule: MatchSchedule, language: Language, density: 'full' | 'short'): string | null {
+  if (schedule.mode !== 'periods') return null;
+  const duration = shortDuration(schedule.periodMinutes, language);
+  const durationBit = density === 'full'
+    ? (language === 'en' ? `${duration} each` : schedule.periodCount === 2 ? `${duration} لكل شوط` : duration)
+    : duration;
+  const parts = [periodHead(schedule.periodCount, language), durationBit];
+  const breaks = breakPhrase(schedule, language);
+  if (breaks) parts.push(breaks);
+  return parts.join(' · ');
+}
+
+function structureLineFor(schedule: MatchSchedule, language: Language): string | null {
+  if (schedule.mode !== 'periods') return null;
+  const bits = schedule.segments.map((segment) => (
+    segment.kind === 'period'
+      ? shortDuration(schedule.periodMinutes, language)
+      : (language === 'en'
+        ? `${shortDuration(schedule.breakMinutesEach, language)} break`
+        : `استراحة ${shortDuration(schedule.breakMinutesEach, language)}`)
+  ));
+  return bits.join(' · ');
+}
+
+function equationFor(schedule: MatchSchedule): string | null {
+  if (schedule.mode !== 'periods') return null;
+  return schedule.segments.map((segment) => (
+    segment.kind === 'period' ? String(schedule.periodMinutes) : String(schedule.breakMinutesEach)
+  )).join(' + ');
 }
 
 export function presentMatch(match: Pick<Match, 'dateISO' | 'dateKey' | 'time' | 'durationMinutes' | 'timing' | 'stadium' | 'city'>, language: Language, now = new Date()): MatchPresentation {
@@ -213,7 +256,8 @@ export function presentMatch(match: Pick<Match, 'dateISO' | 'dateKey' | 'time' |
   const timeRange = timeParts ? formatClockRange(match.time!, schedule.scheduledMinutes, language) : '—';
   const finish = match.time ? addClockMinutes(match.time, schedule.scheduledMinutes) : null;
   const finishTime = finish ? `${clockFace(finish.minutesOfDay)} ${periodWord(finish.minutesOfDay, language)}` : '—';
-  const text = summaryFor(schedule, language);
+  const summary = compactSummary(schedule, language, 'full');
+  const shortSummary = compactSummary(schedule, language, 'short');
   const rows: ScheduleRow[] = match.time
     ? schedule.segments.map((segment) => ({
       kind: segment.kind,
@@ -221,14 +265,24 @@ export function presentMatch(match: Pick<Match, 'dateISO' | 'dateKey' | 'time' |
       range: formatOffsetRange(match.time!, segment, language),
     }))
     : [];
-  const aria = [date.relativeLabel, date.numericDate, date.writtenDate, timeRange, text.summary, text.breakLine].filter(Boolean).join(' · ');
+  const detailRows: TimingDetailRow[] = schedule.mode === 'periods'
+    ? schedule.segments.map((segment) => ({
+      kind: segment.kind,
+      label: segment.kind === 'period' ? periodLabel(segment.index, schedule.periodCount, language) : copy.break,
+      duration: shortDuration(segment.kind === 'period' ? schedule.periodMinutes : schedule.breakMinutesEach, language),
+    }))
+    : [];
+  const aria = [date.relativeLabel, timeRange, date.writtenDate, summary].filter(Boolean).join(' · ');
   return {
     ...date,
     timeRange,
     timeParts,
-    summary: text.summary,
-    breakLine: text.breakLine,
-    playingLine: text.playingLine,
+    summary,
+    shortSummary,
+    structureLine: structureLineFor(schedule, language),
+    equation: equationFor(schedule),
+    occupiedPhrase: shortDuration(schedule.scheduledMinutes, language),
+    detailRows,
     rows: schedule.mode === 'periods' ? rows : [],
     finishLabel: copy.expectedFinish,
     finishTime,
@@ -241,5 +295,6 @@ export function presentMatch(match: Pick<Match, 'dateISO' | 'dateKey' | 'time' |
 export function notificationWhen(match: Pick<Match, 'dateISO' | 'dateKey' | 'time' | 'durationMinutes' | 'timing'>, language: Language, now = new Date()): string {
   const view = presentMatch(match, language, now);
   const day = view.relativeLabel || view.numericDate;
-  return `${day} · ${view.timeRange}`;
+  const window = `${day} · ${view.timeRange}`;
+  return view.shortSummary ? `${window} · ${view.shortSummary}` : window;
 }
