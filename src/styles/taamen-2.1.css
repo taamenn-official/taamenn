@@ -1221,7 +1221,7 @@ a:active,
   .nav-active-indicator.is-bottom {
     box-shadow: none;
     border-radius: 99px;
-    background: #9BF272;
+    background: transparent;
   }
 
   .panel,

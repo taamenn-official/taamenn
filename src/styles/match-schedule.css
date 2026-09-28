@@ -307,17 +307,15 @@ button:hover .icon-import{transform:translateY(2px)}
   width:3px;
   height:22px;
   border-radius:99px;
-  background:#9BF272;
-  box-shadow:0 0 12px rgba(155,242,114,.28);
+  background:transparent;
+  box-shadow:none;
   pointer-events:none;
-  visibility:visible;
+  visibility:hidden;
   opacity:0;
   z-index:2;
-  transition:transform 220ms cubic-bezier(.22,.61,.36,1),opacity 180ms ease;
+  transition:transform 220ms cubic-bezier(.22,.61,.36,1);
 }
 .nav-active-indicator.is-bottom{width:18px;height:3px;border-radius:99px}
-.side-nav.has-nav-indicator .nav-active-indicator,
-.bottom-nav.has-nav-indicator .nav-active-indicator{opacity:1}
 
 @media (max-width:900px){
   .timing-panel{grid-template-columns:1fr}

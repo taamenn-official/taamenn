@@ -13,9 +13,9 @@ type NavActiveIndicatorProps = {
 };
 
 /**
- * A fixed-size marker that only translates. Sidebar uses a short edge bar;
- * the bottom nav uses a short underline. Physical coordinates stay in viewport
- * space so RTL is handled explicitly.
+ * Positions a marker with transform only. The marker stays unpainted so it
+ * does not cover the active item; the item's own color is the visible state.
+ * Physical coordinates stay in viewport space so RTL is handled explicitly.
  */
 export default function NavActiveIndicator({
   navRef,
@@ -65,7 +65,7 @@ export default function NavActiveIndicator({
       const reduce = !animate || prefersReducedMotion();
       el.style.transition = reduce ? 'none' : '';
       el.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
-      el.style.opacity = '1';
+      el.style.opacity = '0';
     };
 
     const show = (animate: boolean) => {
