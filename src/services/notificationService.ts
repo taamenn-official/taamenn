@@ -1,4 +1,5 @@
 import type { Match } from '../data/footballData';
+import { notificationWhen } from '../shared/formatting/matchPresentation.ts';
 import { getAll, putItem, deleteItem, getItem } from './localDb.ts';
 
 export type AppNotification = {
@@ -102,11 +103,12 @@ async function emitOnce(id:string,payload:Omit<AppNotification,'id'>){
 function notificationCopy(match:Match,event:MatchNotificationEvent){
   const teams=`${match.team1} × ${match.team2}`;
   const score=`${match.score1}:${match.score2}`;
+  const when={en:notificationWhen(match,'en'),ar:notificationWhen(match,'ar')};
   const rows:Record<MatchNotificationEvent,{title:string;titleAr:string;body:string;bodyAr:string;type:AppNotification['type'];kind:AppNotification['kind']}>={
-    created:{title:'Match created',titleAr:'تم إنشاء المباراة',body:`${teams} was added to Match Center.`,bodyAr:`تمت إضافة ${teams} إلى مركز المباريات.`,type:'match',kind:'match'},
-    edited:{title:'Match updated',titleAr:'تم تحديث المباراة',body:`${teams} was updated.`,bodyAr:`تم تحديث ${teams}.`,type:'match',kind:'match'},
-    approaching:{title:'Match approaching',titleAr:'المباراة تقترب',body:`${teams} starts within 24 hours.`,bodyAr:`تبدأ ${teams} خلال 24 ساعة.`,type:'match',kind:'match'},
-    started:{title:'Match started',titleAr:'بدأت المباراة',body:`${teams} is now active.`,bodyAr:`بدأت الآن ${teams}.`,type:'match',kind:'match'},
+    created:{title:'Match created',titleAr:'تم إنشاء المباراة',body:`${teams} was added to Match Center. ${when.en}`,bodyAr:`تمت إضافة ${teams} إلى مركز المباريات. ${when.ar}`,type:'match',kind:'match'},
+    edited:{title:'Match updated',titleAr:'تم تحديث المباراة',body:`${teams} was updated. ${when.en}`,bodyAr:`تم تحديث ${teams}. ${when.ar}`,type:'match',kind:'match'},
+    approaching:{title:'Match approaching',titleAr:'المباراة تقترب',body:`${teams}. ${when.en}`,bodyAr:`${teams}. ${when.ar}`,type:'match',kind:'match'},
+    started:{title:'Match started',titleAr:'بدأت المباراة',body:`${teams} is now active. ${when.en}`,bodyAr:`بدأت الآن ${teams}. ${when.ar}`,type:'match',kind:'match'},
     'result-pending':{title:'Match finished',titleAr:'انتهت المباراة',body:`${teams} ended. Enter the final result.`,bodyAr:`انتهت ${teams}. أدخل النتيجة النهائية.`,type:'match',kind:'match'},
     'result-recorded':{title:'Result recorded',titleAr:'تم تسجيل النتيجة',body:`${teams} — ${score}`,bodyAr:`${teams} — ${score}`,type:'match',kind:'match'},
     archived:{title:'Match archived',titleAr:'تمت أرشفة المباراة',body:`${teams} is in the Archive.`,bodyAr:`تمت إضافة ${teams} إلى السجل.`,type:'archive',kind:'system'},

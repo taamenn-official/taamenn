@@ -2,7 +2,7 @@ import { X, Share2, Trophy, Calendar, MapPin, Shield } from 'lucide-react';
 import type { Match, PlayerContribution } from '../data/footballData';
 import { matchUiCopy } from '../i18n/translations';
 import { hasRecordedResult } from '../services/matchLifecycle';
-import { formatMatchDate } from '../shared/formatting/dateTime';
+import MatchScheduleBlock from './MatchScheduleBlock';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
 
 type Language = 'ar' | 'en';
@@ -27,7 +27,6 @@ export default function ArchiveDetailModal({ match, language, featured = false, 
   const hasContributions = match.playerContributions &&
     (match.playerContributions.team1.length > 0 || match.playerContributions.team2.length > 0);
   const shareable = !featured && match.visibility !== 'PRIVATE' && Boolean(onShare);
-  const date = formatMatchDate(match.dateISO, match.dateKey, language);
   const { backdropRef, panelRef, requestClose } = useOverlayPresence<HTMLButtonElement, HTMLElement>('modal', onClose);
 
   return (
@@ -74,9 +73,9 @@ export default function ArchiveDetailModal({ match, language, featured = false, 
           </div>
 
           <div className="match-meta">
-            <div className="meta-item">
+            <div className="meta-item schedule-meta">
               <Calendar size={16} />
-              <span>{date.date}{match.time ? ` · ${match.time}` : ''}</span>
+              <MatchScheduleBlock match={match} language={language} variant="compact" />
             </div>
             {match.stadium && (
               <div className="meta-item">

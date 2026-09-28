@@ -1,4 +1,5 @@
 import type { Match, MatchStatus } from '../data/footballData';
+import { legacyDurationMinutes, sanitizeStoredTiming, scheduleFromTiming } from '../domain/matches/matchTiming.ts';
 import {
   dateISOToKey,
   dateKeyToISO,
@@ -29,7 +30,11 @@ export function normalizeMatch(record: Match): Match {
   const status = canonicalStatus(record.status);
   const score1 = Math.max(0, Math.trunc(Number(record.score1) || 0));
   const score2 = Math.max(0, Math.trunc(Number(record.score2) || 0));
-  return {
+  const timing = sanitizeStoredTiming(record.timing);
+  const durationMinutes = timing
+    ? scheduleFromTiming(timing).scheduledMinutes
+    : legacyDurationMinutes(record.durationMinutes);
+  const normalized: Match = {
     ...record,
     dateISO,
     dateKey,
@@ -37,7 +42,7 @@ export function normalizeMatch(record: Match): Match {
     score2,
     status,
     timezone: record.timezone || PALESTINE_TIMEZONE,
-    durationMinutes: Math.max(1, Math.trunc(Number(record.durationMinutes) || 60)),
+    durationMinutes,
     visibility: record.visibility || 'LOCAL',
     source: record.source || 'local',
     originId: record.originId || record.id,
@@ -45,6 +50,9 @@ export function normalizeMatch(record: Match): Match {
       ? record.resultRecordedAt || record.updatedAt || record.createdAt
       : undefined,
   };
+  if (timing) normalized.timing = timing;
+  else delete normalized.timing;
+  return normalized;
 }
 
 export function matchStartTime(match: Match): number {
@@ -57,7 +65,8 @@ export function matchStartTime(match: Match): number {
 }
 
 export function matchEndTime(match: Match): number {
-  return matchStartTime(match) + (normalizeMatch(match).durationMinutes || 60) * 60_000;
+  const normalized = normalizeMatch(match);
+  return matchStartTime(normalized) + (normalized.durationMinutes || 60) * 60_000;
 }
 
 export function projectedStatus(match: Match, now = Date.now()): MatchStatus {

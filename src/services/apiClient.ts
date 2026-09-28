@@ -1,4 +1,5 @@
 import type { Match } from '../data/footballData';
+import { sanitizeStoredTiming } from '../domain/matches/matchTiming.ts';
 
 /**
  * HTTP layer for remaining TAAMEN server features:
@@ -146,6 +147,8 @@ function toMatch(record: Record<string, unknown>): Match {
     stadium: typeof record.stadium === 'string' ? record.stadium : undefined,
     city: typeof record.city === 'string' ? record.city : undefined,
     time: typeof record.time === 'string' ? record.time : undefined,
+    durationMinutes: typeof record.durationMinutes === 'number' ? record.durationMinutes : undefined,
+    timing: sanitizeStoredTiming(record.timing) ?? undefined,
     visibility: 'PRIVATE',
     source: 'legacy',
     details: record.details as Match['details'],

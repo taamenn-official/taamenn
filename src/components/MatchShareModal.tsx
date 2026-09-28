@@ -4,7 +4,7 @@ import type { Match } from '../data/footballData';
 import { shareUiCopy, type Language } from '../i18n/translations';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
 import { shareMatch } from '../services/shareService';
-import { formatMatchDate } from '../shared/formatting/dateTime';
+import MatchScheduleBlock from './MatchScheduleBlock';
 
 export default function MatchShareModal({match,language,onClose}:{match:Match;language:Language;onClose:()=>void}){
   const copy=shareUiCopy[language];
@@ -23,7 +23,6 @@ export default function MatchShareModal({match,language,onClose}:{match:Match;la
       setStatus({kind:'ok',text:result.method==='shared'?copy.shared:result.method==='copied'?copy.copied:copy.linkReady});
     }catch{setStatus({kind:'err',text:copy.failed})}finally{setBusy(false)}
   };
-  const date=formatMatchDate(match.dateISO,match.dateKey,language);
   return <div className="overlay match-share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-match-title">
     <button ref={backdropRef} className="overlay-backdrop" onClick={requestClose} aria-label={copy.returnHome}/>
     <aside ref={panelRef} className="modal-card match-share-modal">
@@ -32,7 +31,7 @@ export default function MatchShareModal({match,language,onClose}:{match:Match;la
       <section className="share-match-preview">
         <small>{copy.preview}</small>
         <div><strong>{match.team1}</strong><span>{match.score1} : {match.score2}</span><strong>{match.team2}</strong></div>
-        <p>{date.weekday} · {date.date}{match.time?` · ${match.time}`:''}</p>
+        <MatchScheduleBlock match={match} language={language} variant="compact"/>
       </section>
       <label className="share-permission-card">
         <input type="checkbox" checked={allowSave} onChange={event=>setAllowSave(event.target.checked)}/>

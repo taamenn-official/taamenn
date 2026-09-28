@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Match } from '../data/footballData.ts';
 import { dateISOToKey, zonedDateTimeToEpoch } from '../shared/formatting/dateTime.ts';
-import { canonicalStatus, hasRecordedResult, normalizeMatch, projectedStatus, statusAfterResult } from './matchLifecycle.ts';
+import { canonicalStatus, hasRecordedResult, matchEndTime, normalizeMatch, projectedStatus, statusAfterResult } from './matchLifecycle.ts';
 
 const fixture=(patch:Partial<Match>={}):Match=>{
   const base:Match={
@@ -35,6 +35,24 @@ test('pending scores are not recorded results, and recording does not demote arc
   assert.equal(hasRecordedResult('ARCHIVED'),true);
   assert.equal(statusAfterResult('COMPLETED_PENDING_RESULT'),'COMPLETED_WITH_RESULT');
   assert.equal(statusAfterResult('ARCHIVED'),'ARCHIVED');
+});
+
+test('period breaks extend full time without counting as playing time', () => {
+  const match = fixture({
+    time: '19:00',
+    durationMinutes: 60,
+    timing: { mode: 'periods', periodCount: 2, periodMinutes: 30, breakMinutes: 5 },
+  });
+  const normalized = normalizeMatch(match);
+  assert.equal(normalized.durationMinutes, 65);
+  assert.equal(normalized.timing?.mode, 'periods');
+  const start = zonedDateTimeToEpoch('2026-09-15', '19:00', 'Asia/Jerusalem');
+  assert.equal(matchEndTime(match) - start, 65 * 60_000);
+  assert.equal(projectedStatus(match, start + 60 * 60_000), 'ACTIVE');
+  assert.equal(projectedStatus(match, start + 65 * 60_000), 'COMPLETED_PENDING_RESULT');
+  const legacy = normalizeMatch(fixture({ durationMinutes: 60, timing: undefined }));
+  assert.equal(legacy.durationMinutes, 60);
+  assert.equal(legacy.timing, undefined);
 });
 
 test('recorded and archived states never regress during reconciliation',()=>{

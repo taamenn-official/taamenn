@@ -1,4 +1,5 @@
-import type { Match, MatchType } from '../data/footballData';
+import type { Match, MatchTiming, MatchType } from '../data/footballData';
+import { sanitizeStoredTiming, scheduleFromTiming, legacyDurationMinutes } from '../domain/matches/matchTiming';
 import { getAll, getItem, putItem, deleteItem } from './localDb';
 import { emitMatchNotification } from './notificationService';
 import {
@@ -69,10 +70,12 @@ export async function listMatches():Promise<Match[]>{
     .sort((a,b)=>(b.dateKey-a.dateKey)||(Number(b.createdAt||0)-Number(a.createdAt||0)));
 }
 
-export async function createLocalUpcomingMatch(input:{title?:string;team1:string;team2:string;stadium:string;city:string;date:string;time:string;durationMinutes?:number;note?:string;type?:MatchType;visibility?:'LOCAL'|'PUBLIC'}) {
+export async function createLocalUpcomingMatch(input:{title?:string;team1:string;team2:string;stadium:string;city:string;date:string;time:string;durationMinutes?:number;timing?:MatchTiming;note?:string;type?:MatchType;visibility?:'LOCAL'|'PUBLIC'}) {
   const dateKey=dateISOToKey(input.date); if(!dateKey)throw new Error('Invalid date/time');
+  const timing=input.timing?sanitizeStoredTiming(input.timing):sanitizeStoredTiming({mode:'continuous',durationMinutes:legacyDurationMinutes(input.durationMinutes)});
+  if(!timing)throw new Error('invalid-timing');
   const now=Date.now(); const id=`LOCAL-${now}-${Math.random().toString(36).slice(2,9)}`;
-  const match:Match={id,originId:id,type:input.type||'normal',team1:input.team1||'TAAMEN',team2:input.team2||'Opponent',score1:0,score2:0,status:'UPCOMING',dateLabel:formatMatchDate(input.date,dateKey,'en').date,dateISO:input.date,dateKey,story:input.note||'',title:input.title||`${input.team1} × ${input.team2}`,stadium:input.stadium,city:input.city,time:input.time,timezone:PALESTINE_TIMEZONE,durationMinutes:input.durationMinutes||60,visibility:input.visibility||'LOCAL',source:'local',createdAt:now,updatedAt:now};
+  const match:Match={id,originId:id,type:input.type||'normal',team1:input.team1||'TAAMEN',team2:input.team2||'Opponent',score1:0,score2:0,status:'UPCOMING',dateLabel:formatMatchDate(input.date,dateKey,'en').date,dateISO:input.date,dateKey,story:input.note||'',title:input.title||`${input.team1} × ${input.team2}`,stadium:input.stadium,city:input.city,time:input.time,timezone:PALESTINE_TIMEZONE,durationMinutes:scheduleFromTiming(timing).scheduledMinutes,timing,visibility:input.visibility||'LOCAL',source:'local',createdAt:now,updatedAt:now};
   const value=await putCanonical(match);
   await emitMatchNotification(value,'created',now);
   return value;

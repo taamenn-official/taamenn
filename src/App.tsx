@@ -207,7 +207,16 @@ function MainShell(props:ShellProps){
 }
 
 export default function App(){
- const pathName=(window.location.pathname.replace(/\/+$/, '')||'/');
+ const [pathName,setPathName]=useState(()=>(window.location.pathname.replace(/\/+$/, '')||'/'));
+ useEffect(()=>{
+  const sync=()=>setPathName(window.location.pathname.replace(/\/+$/, '')||'/');
+  window.addEventListener('popstate',sync);
+  return()=>window.removeEventListener('popstate',sync);
+ },[]);
+ const returnHome=useCallback(()=>{
+  history.pushState({taamen:'home'},'','/#home');
+  setPathName('/');
+ },[]);
  const sharePath=pathName.match(/^\/share\/(match|profile)\/(.+)$/);
  const isAcquisition=pathName==='/acquisition';
  const legalDocument=legalDocumentForPath(pathName);
@@ -267,7 +276,7 @@ export default function App(){
 
  if(legalDocument)return <ErrorBoundary language={language} label={legalDocument}><LegalDocument language={language} onLanguage={toggle} documentId={legalDocument}/></ErrorBoundary>;
  if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="boot-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/></div>}><Acquisition language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme}/></Suspense></ErrorBoundary>;
- if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])}/>;
+ if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])} onHome={returnHome} onLanguage={toggle}/>;
  if(boot)return <div className="boot-screen" role="status"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={70} height={70}/></div>;
  /* One persistent atmosphere host. Keeping it first in both branches means the
     profile setup screen hands over to Home without the background cutting. */

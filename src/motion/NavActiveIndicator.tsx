@@ -13,9 +13,9 @@ type NavActiveIndicatorProps = {
 };
 
 /**
- * Kept so navigation geometry still resolves in physical coordinates.
- * The active state is the lime icon and label, so this marker stays invisible.
- * Physical coordinates stay in viewport space so RTL does not mirror them.
+ * A fixed-size marker that only translates. Sidebar uses a short edge bar;
+ * the bottom nav uses a short underline. Physical coordinates stay in viewport
+ * space so RTL is handled explicitly.
  */
 export default function NavActiveIndicator({
   navRef,
@@ -38,7 +38,9 @@ export default function NavActiveIndicator({
       if (!nav || !el) return;
 
       const active = nav.querySelector<HTMLElement>('.is-active');
-      if (!active || !active.offsetParent) {
+      const bottom = el.classList.contains('is-bottom');
+      const hidden = !active || active.getClientRects().length === 0;
+      if (hidden) {
         nav.classList.remove('has-nav-indicator');
         el.style.opacity = '0';
         return;
@@ -47,45 +49,43 @@ export default function NavActiveIndicator({
       const navBox = nav.getBoundingClientRect();
       const itemBox = active.getBoundingClientRect();
       const navStyle = getComputedStyle(nav);
-      // Absolute children sit against the padding box, so borders are removed
-      // here rather than assuming offsetLeft/offsetTop. Works in RTL too.
-      const x = itemBox.left - navBox.left - parseFloat(navStyle.borderLeftWidth || '0');
-      const y = itemBox.top - navBox.top - parseFloat(navStyle.borderTopWidth || '0');
+      const borderLeft = parseFloat(navStyle.borderLeftWidth || '0');
+      const borderTop = parseFloat(navStyle.borderTopWidth || '0');
+      const rtl = document.documentElement.dir === 'rtl';
+      const x = bottom
+        ? itemBox.left - navBox.left - borderLeft + (itemBox.width - 18) / 2
+        : rtl
+          ? itemBox.right - navBox.left - borderLeft - 3
+          : itemBox.left - navBox.left - borderLeft;
+      const y = bottom
+        ? itemBox.bottom - navBox.top - borderTop - 5
+        : itemBox.top - navBox.top - borderTop + (itemBox.height - 22) / 2;
 
-      nav.classList.remove('has-nav-indicator');
+      nav.classList.add('has-nav-indicator');
       const reduce = !animate || prefersReducedMotion();
-      if (reduce) el.style.transition = 'none';
-      el.style.width = '0px';
-      el.style.height = '0px';
-      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      el.style.background = 'transparent';
-      el.style.boxShadow = 'none';
-      el.style.opacity = '0';
-      el.style.visibility = 'hidden';
-      el.style.pointerEvents = 'none';
-      if (reduce) {
-        requestAnimationFrame(() => {
-          if (pill.current) pill.current.style.transition = '';
-        });
-      }
+      el.style.transition = reduce ? 'none' : '';
+      el.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+      el.style.opacity = '1';
     };
 
-    if (!settled.current) {
+    const show = (animate: boolean) => {
+      window.clearTimeout(introTimer);
+      if (!settled.current && introDelay > 0 && !prefersReducedMotion()) {
+        introTimer = window.setTimeout(() => place(false), introDelay);
+      } else {
+        place(animate);
+      }
       settled.current = true;
-      place(false);
-    } else {
-      place(true);
-      if (pill.current) pill.current.style.opacity = '0';
-      // The sidebar width transition finishes after this effect, so re-measure.
-      sidebarTimer = window.setTimeout(() => place(false), 340);
-    }
+    };
+
+    show(!settled.current ? false : true);
+    sidebarTimer = window.setTimeout(() => place(false), 340);
 
     const onResize = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => place(false));
     };
-    const onDirection = () => place(false);
-    const direction = new MutationObserver(onDirection);
+    const direction = new MutationObserver(() => place(false));
     direction.observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
     window.addEventListener('resize', onResize);
     return () => {
