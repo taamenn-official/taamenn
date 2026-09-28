@@ -119,8 +119,12 @@ export async function finishMatch(id:string,score1:number,score2:number,story=''
   return recordMatchResult(id,score1,score2,story);
 }
 
-export async function createArchivedMatch(input:{team1:string;team2:string;score1:number;score2:number;date:string;time:string;stadium?:string;city?:string;type?:MatchType}){
+export async function createArchivedMatch(input:{team1:string;team2:string;score1:number;score2:number;date:string;time:string;stadium?:string;city?:string;type?:MatchType;timing?:MatchTiming}){
   if(!validScore(input.score1)||!validScore(input.score2)||!dateISOToKey(input.date))throw new Error('invalid-archive-match');
+  const timing=input.timing===undefined
+    ? {mode:'continuous' as const,durationMinutes:60}
+    : sanitizeStoredTiming(input.timing);
+  if(!timing)throw new Error('invalid-timing');
   const now=Date.now();
   const id=`LOCAL-${now}-${Math.random().toString(36).slice(2,9)}`;
   const match:Match={
@@ -137,7 +141,8 @@ export async function createArchivedMatch(input:{team1:string;team2:string;score
     dateLabel:formatMatchDate(input.date,dateISOToKey(input.date),'en').date,
     time:input.time,
     timezone:PALESTINE_TIMEZONE,
-    durationMinutes:60,
+    durationMinutes:scheduleFromTiming(timing).scheduledMinutes,
+    timing,
     stadium:input.stadium,
     city:input.city,
     story:'',

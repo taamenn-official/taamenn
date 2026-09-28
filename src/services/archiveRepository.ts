@@ -1,6 +1,7 @@
 import type { Match } from '../data/footballData';
 import { createArchivedMatch, deleteMatch, listMatches } from './matchRepository';
 import { canonicalStatus, isArchiveStatus } from './matchLifecycle';
+import { legacyDurationMinutes, sanitizeStoredTiming } from '../domain/matches/matchTiming';
 import { dateKeyToISO } from '../shared/formatting/dateTime';
 
 /** Archive is a projection of the canonical local Match collection. */
@@ -25,6 +26,7 @@ export async function addMatchToArchive(match: Match): Promise<Match> {
     stadium:match.stadium,
     city:match.city,
     type:match.type,
+    timing:sanitizeStoredTiming(match.timing)??{mode:'continuous',durationMinutes:legacyDurationMinutes(match.durationMinutes)},
   });
 }
 
