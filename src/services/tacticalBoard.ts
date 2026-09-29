@@ -131,3 +131,75 @@ export function endDrag(drag: Drag | null, pointerId: number): { drag: Drag | nu
   if (!ownsDrag(drag, pointerId)) return { drag, settled: false, before: null };
   return { drag: null, settled: true, before: drag!.before };
 }
+
+/** How far the player centre sits from the pointer at grab time. Keeps the token from jumping under the finger. */
+export type GrabOffset = { dx: number; dy: number };
+export type SnapMode = 'off' | 'soft';
+
+export function grabOffset(player: PitchPoint, pointer: PitchPoint): GrabOffset {
+  return {
+    dx: clampToPitch(player.x) - clampToPitch(pointer.x),
+    dy: clampToPitch(player.y) - clampToPitch(pointer.y),
+  };
+}
+
+/**
+ * Place the player so the original grab point stays under the pointer, then clamp to the pitch.
+ * Soft snap pulls a point onto a 5% grid only when it is already close, and never forces a landing.
+ */
+export function pointWithGrab(pointer: PitchPoint, grab: GrabOffset, mode: SnapMode = 'off'): PitchPoint {
+  return snapPoint({ x: pointer.x + grab.dx, y: pointer.y + grab.dy }, mode);
+}
+
+export function snapPoint(point: PitchPoint, mode: SnapMode): PitchPoint {
+  const raw = { x: clampToPitch(point.x), y: clampToPitch(point.y) };
+  if (mode !== 'soft') return raw;
+  const grid = 5;
+  const threshold = 1.5;
+  const axis = (value: number) => {
+    const nearest = Math.round(value / grid) * grid;
+    return Math.abs(nearest - value) <= threshold ? clampToPitch(nearest) : value;
+  };
+  return { x: axis(raw.x), y: axis(raw.y) };
+}
+
+export function samePoint(a: PitchPoint, b: PitchPoint, epsilon = 0.05): boolean {
+  return Math.abs(a.x - b.x) <= epsilon && Math.abs(a.y - b.y) <= epsilon;
+}
+
+/** Keyboard nudge in pitch percentages. The pitch stays physical: left decreases x. */
+export function nudgePlayer(players: TacticalPlayer[], playerId: string, dx: number, dy: number): TacticalPlayer[] {
+  const player = players.find(item => item.id === playerId);
+  if (!player) return players;
+  return movePlayerTo(players, playerId, { x: player.x + dx, y: player.y + dy });
+}
+
+export function renamePlayer(players: TacticalPlayer[], playerId: string, name: string, fallback: string): TacticalPlayer[] {
+  const next = name.trim() || fallback;
+  return players.map(player => player.id === playerId ? { ...player, name: next } : player);
+}
+
+/** Older or partial plans must not wipe the board. Unknown fields fall back; bad rows are skipped. */
+export function readStoredPlayers(value: unknown, fallback: TacticalPlayer[]): TacticalPlayer[] {
+  if (!Array.isArray(value) || value.length === 0) return fallback;
+  const parsed: TacticalPlayer[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Partial<TacticalPlayer>;
+    if (typeof row.id !== 'string' || !row.id.trim()) continue;
+    if (row.team !== 'home' && row.team !== 'away') continue;
+    const x = Number(row.x);
+    const y = Number(row.y);
+    parsed.push({
+      id: row.id,
+      team: row.team,
+      name: typeof row.name === 'string' && row.name.trim() ? row.name : fallback[0]?.name || 'Player',
+      x: clampToPitch(x),
+      y: clampToPitch(y),
+      teamRole: typeof row.teamRole === 'string' ? row.teamRole : '',
+      instruction: typeof row.instruction === 'string' ? row.instruction : '',
+      captain: row.captain === true,
+    });
+  }
+  return parsed.length ? parsed : fallback;
+}

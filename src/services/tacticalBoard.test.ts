@@ -4,7 +4,8 @@ import { formations, genericTacticalPlayers } from '../data/tacticalPresets.ts';
 import type { TacticalPlayer } from '../data/footballData.ts';
 import {
   applyFormation, beginDrag, clampToPitch, derivedPosition, dragTo, endDrag,
-  movePlayerTo, ownsDrag, PITCH_MAX, PITCH_MIN, pointerToPitchPercent, setCaptain,
+  grabOffset, movePlayerTo, nudgePlayer, ownsDrag, PITCH_MAX, PITCH_MIN, pointWithGrab,
+  pointerToPitchPercent, readStoredPlayers, renamePlayer, samePoint, setCaptain, snapPoint,
 } from './tacticalBoard.ts';
 
 const rect = { left: 100, top: 200, width: 400, height: 300 };
@@ -129,6 +130,50 @@ test('ending a drag settles once and returns the undo snapshot', () => {
 
   // lostpointercapture arriving after pointerup must not settle a second time.
   assert.deepEqual(endDrag(done.drag, 4), { drag: null, settled: false, before: null });
+});
+
+test('a grab keeps the player centre offset from the pointer', () => {
+  const player = { x: 22, y: 40 };
+  const pointer = { x: 30, y: 48 };
+  const grab = grabOffset(player, pointer);
+  assert.deepEqual(grab, { dx: -8, dy: -8 });
+  assert.deepEqual(pointWithGrab(pointer, grab), player, 'the token does not jump on pickup');
+  assert.deepEqual(pointWithGrab({ x: 10, y: 70 }, grab), { x: 2, y: 62 });
+  assert.deepEqual(pointWithGrab({ x: 0, y: 0 }, grab), { x: 0, y: 0 }, 'the edge clamps without throwing the player outside');
+});
+
+test('soft snap only pulls a point that is already close to the grid', () => {
+  assert.deepEqual(snapPoint({ x: 12.2, y: 40 }, 'off'), { x: 12.2, y: 40 });
+  assert.deepEqual(snapPoint({ x: 19.2, y: 40.4 }, 'soft'), { x: 20, y: 40 });
+  assert.deepEqual(snapPoint({ x: 12.2, y: 40 }, 'soft'), { x: 12.2, y: 40 });
+});
+
+test('keyboard nudges stay inside the pitch and leave other players alone', () => {
+  const before = squad();
+  const nudged = nudgePlayer(before, 'H1', -50, 3);
+  assert.equal(find(nudged, 'H1').x, 0);
+  assert.equal(find(nudged, 'H1').y, find(before, 'H1').y + 3);
+  assert.equal(nudgePlayer(before, 'missing', 1, 1), before);
+});
+
+test('rename trims the name and falls back when the field is empty', () => {
+  const renamed = renamePlayer(squad(), 'H2', '  سالم  ', 'Player');
+  assert.equal(find(renamed, 'H2').name, 'سالم');
+  assert.equal(find(renamePlayer(squad(), 'H2', '   ', 'لاعب'), 'H2').name, 'لاعب');
+});
+
+test('a broken stored plan falls back instead of clearing the board', () => {
+  const fallback = squad();
+  assert.equal(readStoredPlayers(null, fallback), fallback);
+  assert.equal(readStoredPlayers([], fallback), fallback);
+  assert.equal(readStoredPlayers([{ id: '', team: 'home' }], fallback), fallback);
+  const loaded = readStoredPlayers([{ id: 'H9', team: 'home', name: '  ', x: 140, y: -4, captain: true }], fallback);
+  assert.equal(loaded.length, 1);
+  assert.equal(loaded[0].x, 100);
+  assert.equal(loaded[0].y, 0);
+  assert.equal(loaded[0].captain, true);
+  assert.equal(loaded[0].name, fallback[0].name);
+  assert.equal(samePoint({ x: 10, y: 10 }, { x: 10.04, y: 9.97 }), true);
 });
 
 test('a cancelled drag keeps the applied position and still yields one undo entry', () => {
