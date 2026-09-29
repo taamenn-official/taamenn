@@ -5,11 +5,71 @@
    --ta-deep, --ta-pale, or the football surfaces.
    ========================================================= */
 
+/* Local Thmanyah files. Weights match the file names.
+   Light and unused serif weights are not loaded. */
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("./fonts/thmanyah/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("./fonts/thmanyah/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("./fonts/thmanyah/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("./fonts/thmanyah/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("./fonts/thmanyah/thmanyahserifdisplay-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("./fonts/thmanyah/thmanyahserifdisplay-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("./fonts/thmanyah/thmanyahseriftext-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Text";
+  src: url("./fonts/thmanyah/thmanyahseriftext-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Existing palette, named once for the phase brief. */
-  --font-main: Tajawal, Manrope, sans-serif;
-  --font-display: Tajawal, Manrope, sans-serif;
-  --font-title: Tajawal, Manrope, sans-serif;
+  --font-main: "Thmanyah Sans", sans-serif;
+  --font-display: "Thmanyah Serif Display", "Thmanyah Sans", serif;
+  --font-title: "Thmanyah Sans", sans-serif;
+  --font-text: "Thmanyah Serif Text", "Thmanyah Sans", serif;
   --bg-0: #071316;
   --bg-1: #193940;
   --bg-2: #0e2328;
@@ -147,9 +207,10 @@ body {
 }
 
 .page-heading h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
+  font-weight: 700;
   font-size: var(--display);
-  line-height: 1.15;
+  line-height: 1.25;
   letter-spacing: -0.03em;
 }
 
@@ -168,7 +229,13 @@ body {
 [dir="rtl"] .home-hero-copy h1,
 [dir="rtl"] .hero-command h2,
 [dir="rtl"] .branding-headline,
-[dir="rtl"] .acquisition-hero h1 {
+[dir="rtl"] .acquisition-hero h1,
+[dir="rtl"] .entry-intro h1,
+[dir="rtl"] .featured-entry h1,
+[dir="rtl"] .access-heading h1,
+[dir="rtl"] .acquisition-main h2,
+[dir="rtl"] .guide-modal h2,
+[dir="rtl"] .legal-modal h1 {
   letter-spacing: 0;
   line-height: 1.25;
 }
@@ -1312,4 +1379,204 @@ a:active,
   .share-football-motion i {
     animation: none;
   }
+}
+
+/* ---------- Typography hierarchy ----------
+   Loaded weights: Sans 400/500/700/900, Serif Display 700/900,
+   Serif Text 400/700. Roles that used 600 or 800 are named here
+   so they do not snap to a heavier file. DM Mono technical text
+   is left on its own shorthand. */
+body {
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+.panel h2,
+.page-heading h1,
+.guide-modal h2,
+.legal-modal h1,
+.notification-drawer h2,
+.privacy-headline,
+.section-header h2,
+.privacy-content h2,
+.guide-section-header h3,
+.stadium-card-main h3,
+.team-name,
+.team-block strong,
+.notification-card strong,
+.acquisition-faq summary {
+  font-family: var(--font-title);
+  font-weight: 700;
+}
+
+.home-hero-copy h1,
+.entry-intro h1,
+.branding-headline,
+.acquisition-hero h1,
+.hero-command h2,
+.access-heading h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1.28;
+  letter-spacing: 0;
+}
+
+.legal-section p,
+.guide-section-content,
+.acquisition-main p:not(.eyebrow):not(.settings-note) {
+  font-family: var(--font-text);
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+.legal-section strong,
+.legal-section b,
+.guide-section-content strong,
+.guide-section-content b,
+.acquisition-main p strong,
+.acquisition-main p b {
+  font-family: var(--font-text);
+  font-weight: 700;
+}
+
+.nav-item,
+.bottom-nav-item,
+.acquisition-nav,
+.acquisition-toc a,
+.doc-tab,
+.toc-item,
+.nav-section-label,
+.language-button,
+.topbar-actions .language-button,
+.mobile-language,
+.language-switch-label,
+.dark-action,
+.text-button,
+.mini-action,
+.formation-picker button,
+.stadiums-action,
+.add-photo-button,
+.back-button-large,
+.support-action,
+.venue-admin-link,
+.return-home,
+.timing-disclosure,
+.acquisition-quiet-link,
+.datetime-weekday,
+.brand-version,
+.contributions-header span,
+.policy-link,
+.policy-link-compact,
+.form-label,
+.profile-form label,
+.archive-form label,
+.form-grid label,
+.access-card label,
+.profile-edit-panel label,
+.support-card label,
+.timing-fields legend {
+  font-weight: 500;
+}
+
+input,
+textarea,
+select {
+  font-weight: 400;
+}
+
+.featured-code-label input {
+  font-weight: 700;
+}
+
+.nav-item.is-active,
+.bottom-nav-item.is-active,
+.doc-tab.is-active,
+.toc-item.is-active,
+.legal-document-switch a.is-active {
+  font-weight: 700;
+}
+
+.primary-action,
+.mobile-submit,
+.verified-cta,
+.whatsapp-button,
+.danger-action {
+  font-weight: 700;
+}
+
+.brand-name,
+.brand-identity .brand-name,
+.profile-entry .brand-name,
+.acquisition-brand,
+.legal-document-top .acquisition-brand,
+.mobile-brand strong {
+  font-weight: 700;
+}
+
+.avatar,
+.avatar-circle,
+.profile-cover-avatar,
+.profile-avatar-button span,
+.setup-avatar.avatar-large,
+.player-token span,
+.date-picker-days button.is-selected,
+.result-score-grid input,
+.featured-code-label,
+.timing-preview-live .timing-finish span {
+  font-weight: 700;
+}
+
+.stat-card strong,
+.score,
+.score-block b,
+.scoreline b,
+.readiness-summary strong,
+.archive-count strong,
+.plan-stat strong,
+.share-match-preview > div span,
+.schedule-time bdi {
+  font-family: var(--font-main);
+  font-weight: 900;
+}
+
+.stat-card span,
+.match-metrics small {
+  font-weight: 500;
+}
+
+.stat-card small {
+  font-weight: 400;
+}
+
+.match-type,
+.winner-label,
+.result-label,
+.winner-banner,
+.scope-chip,
+.experimental-badge,
+.pending-chip {
+  font-weight: 700;
+}
+
+.subtitle,
+.home-hero-copy > p,
+.settings-note,
+.form-note,
+.empty-state,
+.match-card p,
+.notification-card p,
+.contributions-note,
+.stadiums-action small {
+  font-weight: 400;
+}
+
+.schedule-time {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.schedule-time bdi {
+  letter-spacing: -0.02em;
 }
