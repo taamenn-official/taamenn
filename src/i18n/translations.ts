@@ -13,8 +13,9 @@ export const tacticalCopy={
   drag:'اسحب اللاعب',tap:'انقر للاختيار',changeFormation:'غيّر التشكيل',useFocus:'ركّز الملعب عند الحاجة',
   editPlayer:'تعديل اللاعب',closeEditor:'إغلاق محرر اللاعب',playerName:'اسم اللاعب',autoPosition:'المركز التلقائي',
   positionHelp:'يُحسب من موقع اللاعب على الملعب',role:'الدور التكتيكي',instruction:'التعليمات',captain:'القائد',
-  savePlan:'حفظ الخطة',share:'مشاركة',selectPlayer:'اختر لاعبًا',selectHelp:'اضغط مطولًا واسحب اللاعب، أو انقر مرتين لتحريره.',
-  reset:'إعادة الخطة',saved:'تم الحفظ محليًا',player:'لاعب',shareTitle:'خطة TAAMEN التكتيكية',
+  savePlan:'حفظ الخطة',share:'مشاركة',selectPlayer:'اختر لاعبًا',selectHelp:'اضغط للاختيار، اسحب للتحريك، ثم عدّل الاسم من هنا.',
+  reset:'إعادة الخطة',saved:'حُفظت على هذا الجهاز',player:'لاعب',shareTitle:'خطة TAAMEN التكتيكية',
+  snap:'المحاذاة',snapOff:'حر',snapSoft:'خفيف',editName:'تعديل الاسم',saveName:'حفظ الاسم',cancelName:'إلغاء',
   roles:{captain:'قائد',playmaker:'صانع ألعاب',defensiveLeader:'قائد دفاعي',freePlayer:'لاعب حر',attackLeader:'قائد الهجوم'},
   instructions:{pressForward:'ضغط للأمام',coverDepth:'تغطية العمق',stayWide:'البقاء على الطرف',dropBack:'التراجع',betweenLines:'التحرك بين الخطوط'},
   formations:{
@@ -32,8 +33,9 @@ export const tacticalCopy={
   drag:'Drag player',tap:'Tap to select',changeFormation:'Change formation',useFocus:'Use focus view when needed',
   editPlayer:'Edit player',closeEditor:'Close player editor',playerName:'Player name',autoPosition:'Auto position',
   positionHelp:'Derived from the player location on the pitch',role:'Tactical role',instruction:'Instruction',captain:'Captain',
-  savePlan:'Save plan',share:'Share',selectPlayer:'Select a player',selectHelp:'Press and hold to drag, or double-click to edit.',
-  reset:'Reset plan',saved:'Saved locally',player:'Player',shareTitle:'TAAMEN Tactical Plan',
+  savePlan:'Save plan',share:'Share',selectPlayer:'Select a player',selectHelp:'Tap to select, drag to move, then edit the name here.',
+  reset:'Reset plan',saved:'Saved on this device',player:'Player',shareTitle:'TAAMEN Tactical Plan',
+  snap:'Snap',snapOff:'Free',snapSoft:'Soft',editName:'Edit name',saveName:'Save name',cancelName:'Cancel',
   roles:{captain:'Captain',playmaker:'Playmaker',defensiveLeader:'Defensive leader',freePlayer:'Free player',attackLeader:'Attack leader'},
   instructions:{pressForward:'Press forward',coverDepth:'Cover depth',stayWide:'Stay wide',dropBack:'Drop back',betweenLines:'Move between the lines'},
   formations:{

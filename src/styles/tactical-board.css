@@ -1,0 +1,207 @@
+/* Tactical board interaction. The pitch keeps physical left/top percentages.
+   Drag and formation travel use transform only, and only on the tokens. */
+
+.tactical-page .pitch {
+  touch-action: none;
+}
+
+.tactical-page .page-heading {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.tactical-page .tactical-toolbar {
+  flex: 1 1 280px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.formation-picker {
+  align-items: stretch;
+}
+
+.formation-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.formation-mark {
+  width: 42px;
+  height: 26px;
+  flex: 0 0 42px;
+  border-radius: 4px;
+  background: rgba(14, 48, 42, .55);
+  border: 1px solid rgba(186, 200, 217, .28);
+}
+
+.formation-mark circle {
+  fill: #9bf272;
+}
+
+.formation-mark .is-away {
+  fill: #bac8d9;
+}
+
+.tactical-save {
+  min-height: 18px;
+  color: var(--ta-lime, #9bf272);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tactical-snap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+}
+
+.tactical-snap button {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border: 1px solid var(--ta-line, rgba(186, 200, 217, .2));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tactical-snap button[aria-pressed="true"] {
+  background: rgba(155, 242, 114, .14);
+  border-color: rgba(155, 242, 114, .4);
+  color: var(--ta-lime, #9bf272);
+}
+
+.player-token.is-dragging,
+.player-token.is-moving {
+  z-index: 8;
+  transition: none;
+  cursor: grabbing;
+}
+
+.player-token.is-keeper span {
+  box-shadow: inset 0 0 0 2px rgba(186, 200, 217, .7);
+}
+
+.player-inspector input[dir="auto"] {
+  font-weight: 400;
+}
+
+.tactical-mobile-bar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .tactical-page .page-heading {
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .tactical-page .page-heading > div,
+  .tactical-page .tactical-toolbar,
+  .tactical-page .formation-picker {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .tactical-page .subtitle {
+    display: none;
+  }
+
+  .tactical-page .tactical-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .tactical-page .formation-picker {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+    max-width: 100%;
+    padding-bottom: 2px;
+  }
+
+  .tactical-page .formation-option {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .tactical-page .tactical-snap {
+    width: max-content;
+  }
+
+  .tactical-page .pitch {
+    min-height: 0;
+    width: 100%;
+    max-height: calc(100dvh - var(--ta-topbar-height, 64px) - var(--bottom-nav-height, 68px) - 210px);
+  }
+
+  .tactical-page:has(.tactical-mobile-bar) {
+    padding-bottom: calc(var(--bottom-nav-height, 68px) + env(safe-area-inset-bottom, 0px) + 84px);
+  }
+
+  .tactical-mobile-bar {
+    position: fixed;
+    z-index: 36;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    inset-inline: 10px;
+    bottom: calc(var(--bottom-nav-height, 68px) + env(safe-area-inset-bottom, 0px) + 8px);
+    padding: 8px;
+    border: 1px solid var(--ta-line, rgba(186, 200, 217, .2));
+    border-radius: 14px;
+    background: rgba(7, 19, 22, .94);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+  }
+
+  .tactical-page.is-landscape .tactical-mobile-bar {
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tactical-mobile-bar strong,
+  .tactical-mobile-bar input {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .tactical-mobile-bar input {
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--ta-line, rgba(186, 200, 217, .24));
+    background: rgba(5, 16, 20, .8);
+    color: inherit;
+  }
+
+  .tactical-mobile-bar .dark-action,
+  .tactical-mobile-bar .text-button {
+    margin: 0;
+    min-height: 40px;
+    flex: 0 0 auto;
+  }
+}
+
+@media (pointer: coarse) {
+  .player-token {
+    min-width: 52px;
+    min-height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-token,
+  .player-token.is-dragging,
+  .player-token span {
+    transition: none;
+  }
+}
