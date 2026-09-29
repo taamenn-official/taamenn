@@ -1420,6 +1420,7 @@ h3,
   font-family: var(--font-display);
   font-weight: 900;
   line-height: 1.28;
+  letter-spacing: 0;
 }
 
 .legal-section p,
