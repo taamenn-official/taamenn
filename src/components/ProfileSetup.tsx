@@ -177,7 +177,7 @@ export function ProfileSetup({ language, onSave, onLanguage, theme, onTheme }: {
                   <Trash2 size={14} />
                 </button>
               )}
-              <input ref={avatarRef} hidden type="file" accept="image/*" onChange={e => image(e.target.files?.[0])} />
+              <input ref={avatarRef} hidden type="file" accept="image/*" onChange={e => { image(e.target.files?.[0]); e.target.value = ''; }} />
             </div>
             <label className="form-label">
               {ar ? 'الاسم الأول' : 'First name'}

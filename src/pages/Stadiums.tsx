@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MapPin, Phone, ChevronDown, ChevronUp, X, MessageCircle } from 'lucide-react';
+import { Search, MapPin, Phone, ChevronDown, ChevronUp, X, MessageCircle, Landmark } from 'lucide-react';
 import { searchStadiums } from '../data/stadiums';
 import { WHATSAPP_URL } from '../config/support';
 import { uiCopy } from '../i18n/translations';
@@ -36,9 +36,9 @@ export default function Stadiums({ language }: { language: Language }) {
           <p className="eyebrow">TAAMEN 2.0 / STADIUMS</p>
           <h1>{ar ? 'الملاعب' : 'Stadiums'}</h1>
           <p className="subtitle">
-            {ar 
-              ? 'تصفح قائمة الملاعب المتاحة وتفاصيل المواقع.' 
-              : 'Browse the list of available stadiums and location details.'}
+            {ar
+              ? 'مكتبة الملاعب المتاحة على هذا الجهاز. اختر ملعبًا لعرض موقعه، أو استخدمه عند إنشاء مباراة.'
+              : 'The venue library on this device. Open a stadium for its location, or use it when you create a match.'}
           </p>
         </div>
       </div>
@@ -86,6 +86,7 @@ export default function Stadiums({ language }: { language: Language }) {
                   aria-expanded={isExpanded}
                 >
                   <div className="stadium-card-main">
+                    <Landmark size={18} aria-hidden="true" />
                     <h3>{name}</h3>
                     <span className="stadium-city">{city}</span>
                   </div>
@@ -111,6 +112,7 @@ export default function Stadiums({ language }: { language: Language }) {
                     {description && (
                       <p className="stadium-description">{description}</p>
                     )}
+                    <a className="dark-action stadium-use" href="/#match-center">{ar ? 'استخدمه في مباراة' : 'Use in a match'}</a>
                     {contact && (
                       <button
                         className="whatsapp-button"

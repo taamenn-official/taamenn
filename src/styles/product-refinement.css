@@ -1,0 +1,174 @@
+/* Cross-page layout refinement. Tokens already live in the shell styles. */
+
+.settings-page .settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+
+.settings-page .settings-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+}
+
+.settings-page .settings-panel > .primary-action,
+.settings-page .settings-panel > .danger-action,
+.settings-page .settings-panel > .dark-action,
+.settings-page .settings-panel > .backup-actions,
+.settings-page .settings-panel > .settings-note:last-child {
+  margin-top: auto;
+}
+
+.profile-edit-panel .form-grid {
+  align-items: stretch;
+}
+
+.profile-edit-panel .form-grid > label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-edit-panel .form-grid > label input {
+  margin-top: auto;
+  min-height: 44px;
+}
+
+.app-shell .bottom-nav-item,
+.app-shell .side-nav .nav-item {
+  align-items: center;
+}
+
+.app-shell .bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.app-shell .bottom-nav-item svg,
+.app-shell .side-nav .nav-item svg {
+  flex: 0 0 18px;
+}
+
+.archive-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.archive-disclosure > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.archive-lifecycle-section.is-pending:not(.is-open) .archive-grid,
+.archive-lifecycle-section.is-pending:not(.is-open) .empty-state {
+  display: none;
+}
+
+.official-contact-grid .official-contact,
+.support-grid .support-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100%;
+}
+
+.official-action,
+.support-action {
+  margin-top: auto;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .16);
+}
+
+.stadium-card-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stadium-use {
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.primary-action.is-sent {
+  background: #7abf5a;
+}
+
+html[data-theme="light"] .panel,
+html[data-theme="light"] .settings-panel,
+html[data-theme="light"] .match-card,
+html[data-theme="light"] .stadium-card,
+html[data-theme="light"] .support-card,
+html[data-theme="light"] .archive-lifecycle-section {
+  background: #f7faf8;
+  color: #102228;
+  border: 1px solid #1a2c30;
+  box-shadow: 0 8px 18px rgba(16, 34, 40, .06);
+}
+
+html[data-theme="light"] .settings-panel input:not([type="checkbox"]),
+html[data-theme="light"] .settings-panel textarea,
+html[data-theme="light"] .settings-panel select,
+html[data-theme="light"] .profile-edit-panel input,
+html[data-theme="light"] .support-contact-form input,
+html[data-theme="light"] .support-contact-form textarea,
+html[data-theme="light"] .search-control input {
+  background: #fff;
+  color: #102228;
+  border: 1px solid #24383d;
+}
+
+html[data-theme="light"] .app-shell .dark-action,
+html[data-theme="light"] .settings-page .dark-action,
+html[data-theme="light"] .support-page .dark-action,
+html[data-theme="light"] .stadiums-page .dark-action,
+html[data-theme="light"] .archive-page .dark-action,
+html[data-theme="light"] .text-button,
+html[data-theme="light"] .app-shell .icon-button {
+  color: #102228;
+  border-color: #24383d;
+}
+
+html[data-theme="light"] .acquisition-shell .dark-action,
+html[data-theme="light"] .acquisition-shell .text-button {
+  color: #f4f8f8;
+}
+
+html[data-theme="light"] .primary-action {
+  color: #102218;
+  border: 1px solid #1d4a28;
+}
+
+html[data-theme="light"] .nav-item,
+html[data-theme="light"] .bottom-nav-item {
+  color: #1c3338;
+}
+
+@media (max-width: 900px) {
+  .settings-page .settings-grid,
+  .profile-edit-panel .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-action.is-sent {
+    transition: none;
+  }
+}

@@ -7,6 +7,7 @@ import './styles/global.css';
 import './styles/match-schedule.css';
 import './styles/profile-entry.css';
 import './styles/taamen-2.1.css';
+import './styles/product-refinement.css';
 
 applyTheme(readTheme());
 restoreSpaFallbackLocation();

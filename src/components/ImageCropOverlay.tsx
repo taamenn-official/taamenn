@@ -36,6 +36,7 @@ export function ImageCropOverlay({
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const drag = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
 
@@ -44,13 +45,14 @@ export function ImageCropOverlay({
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setFailed(false);
+    setLoadFailed(false);
     const img = new Image();
     img.onload = () => {
       if (cancelled) return;
       setNatural({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 });
     };
     img.onerror = () => {
-      if (!cancelled) setFailed(true);
+      if (!cancelled) setLoadFailed(true);
     };
     img.src = url;
     return () => {
@@ -133,7 +135,13 @@ export function ImageCropOverlay({
           {previewUrl && <img src={previewUrl} alt="" style={imageStyle} draggable={false} />}
         </div>
         <p className="settings-note">{copy.cropHint}</p>
-        <div className="image-crop-zoom">
+        <div
+          className="image-crop-zoom"
+          onWheel={(event) => {
+            event.preventDefault();
+            nudgeZoom(event.deltaY < 0 ? 0.08 : -0.08);
+          }}
+        >
           <button type="button" className="icon-button" onClick={() => nudgeZoom(-0.2)} aria-label={copy.cropZoomOut}><Minus size={16} /></button>
           <input
             type="range"
@@ -145,11 +153,12 @@ export function ImageCropOverlay({
             onChange={(event) => setZoom(Number(event.target.value))}
           />
           <button type="button" className="icon-button" onClick={() => nudgeZoom(0.2)} aria-label={copy.cropZoomIn}><Plus size={16} /></button>
+          <button type="button" className="text-button" onClick={() => { setZoom(1); setPanX(0); setPanY(0); }}>{copy.cropReset}</button>
         </div>
-        {failed && <p className="error-banner" role="alert">{copy.imageProcessFailed}</p>}
+        {(failed || loadFailed) && <p className="error-banner" role="alert">{loadFailed ? copy.imageLoadFailed : copy.imageProcessFailed}</p>}
         <footer>
           <button type="button" className="dark-action" onClick={requestClose} disabled={busy}>{copy.cropCancel}</button>
-          <button type="button" className="primary-action" onClick={() => void confirm()} disabled={busy || failed || !previewUrl}>
+          <button type="button" className="primary-action" onClick={() => void confirm()} disabled={busy || failed || loadFailed || !previewUrl}>
             <Check size={15} />
             {copy.cropConfirm}
           </button>

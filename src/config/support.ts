@@ -8,6 +8,7 @@
 
 export const OFFICIAL_SUPPORT_PHONE = '+970594054750';
 export const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbDL3R2I1rcpDnMnlQ09';
+export const INSTAGRAM_URL = 'https://www.instagram.com/taamenn.official/';
 
 export function whatsAppUrlFromPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '');
