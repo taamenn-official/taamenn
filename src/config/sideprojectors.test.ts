@@ -14,12 +14,12 @@ test('SideProjectors listing points at the official TAAMEN 2.0 project', () => {
   assert.match(badge, /SIDEPROJECTORS_LISTING_URL/);
 });
 
-test('SideProjectors copy is the safe listed-for-sale claim only', () => {
-  assert.equal(sideprojectorsCopy.ar.label, 'معروض للبيع على SideProjectors');
-  assert.equal(sideprojectorsCopy.en.label, 'Listed for sale on SideProjectors');
-  assert.equal(sideprojectorsCopy.en.kicker, 'FOR SALE');
-  assert.equal(sideprojectorsCopy.ar.kicker, 'للبيع');
-  assert.equal(sideprojectorsCopy.en.name, 'SideProjectors');
-  const combined = `${sideprojectorsCopy.ar.label} ${sideprojectorsCopy.en.label} ${sideprojectorsCopy.en.kicker}`;
-  assert.doesNotMatch(combined, /MRR|revenue|users|subscribers/i);
+test('SideProjectors copy is a calm acquisition label, not a sales claim', () => {
+  assert.match(sideprojectorsCopy.ar.label, /SideProjectors/);
+  assert.match(sideprojectorsCopy.en.label, /SideProjectors/);
+  assert.equal(sideprojectorsCopy.ar.title, 'تأمين متاح للاستحواذ');
+  assert.equal(sideprojectorsCopy.en.title, 'TAAMEN for acquisition');
+  assert.equal(sideprojectorsCopy.en.hint, 'Official listing');
+  const combined = `${sideprojectorsCopy.ar.label} ${sideprojectorsCopy.en.label} ${sideprojectorsCopy.en.title}`;
+  assert.doesNotMatch(combined, /MRR|revenue|users|subscribers|guaranteed/i);
 });

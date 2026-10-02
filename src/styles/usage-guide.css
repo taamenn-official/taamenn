@@ -1,0 +1,124 @@
+.guide-modal {
+  width: min(860px, calc(100vw - 24px));
+  max-height: min(860px, calc(100dvh - 24px));
+}
+
+.guide-lead {
+  margin: 6px 0 0;
+  max-width: 46rem;
+  color: var(--muted, #bac8d9);
+  line-height: 1.6;
+}
+
+.guide-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 18px 10px;
+}
+
+.guide-nav button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ta-line, rgba(186, 200, 217, .2));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.guide-nav button.is-active {
+  background: rgba(155, 242, 114, .14);
+  border-color: rgba(155, 242, 114, .45);
+  color: var(--ta-lime, #9bf272);
+}
+
+.guide-purpose {
+  margin: 2px 0 0;
+  color: var(--muted, #bac8d9);
+}
+
+.guide-content h4 {
+  margin: 14px 0 6px;
+  font-size: 14px;
+}
+
+.guide-steps {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  display: grid;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.guide-example {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(155, 242, 114, .22);
+  background: rgba(155, 242, 114, .06);
+}
+
+.guide-example p {
+  margin: 6px 0 0;
+  line-height: 1.65;
+}
+
+.guide-wants {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.guide-wants li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--ta-line, rgba(186, 200, 217, .16));
+}
+
+.guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--ta-line, rgba(186, 200, 217, .16));
+}
+
+.guide-footer .dark-action,
+.guide-footer .primary-action {
+  margin: 0;
+}
+
+html[data-theme="light"] .guide-nav button.is-active {
+  color: #14532d;
+}
+
+html[data-theme="light"] .guide-example {
+  border-color: #1a2c30;
+  background: #fff;
+}
+
+@media (max-width: 700px) {
+  .guide-modal {
+    width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .guide-footer {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-nav button,
+  .guide-footer button {
+    transition: none;
+  }
+}

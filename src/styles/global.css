@@ -2257,35 +2257,40 @@ html[data-taamen-motion="reduce"] .acquisition-nav{
    when scaled, so this stays vector text, in the content flow, and links to
    the official listing. */
 .sideprojectors-badge{
-  color:inherit;
-  text-decoration:none;
-  max-width:100%;
-}
-.sideprojectors-mark{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  width:max-content;
-  max-width:min(210px, calc(100vw - 28px));
-  padding:4px 8px;
+  gap:8px;
+  max-width:min(280px, calc(100vw - 28px));
+  padding:7px 10px;
   border:1px solid rgba(155,242,114,.28);
-  border-radius:999px;
-  background:rgba(16,34,40,.72);
+  border-radius:14px;
+  background:rgba(16,34,40,.88);
   color:#f4f7f8;
-  backdrop-filter:blur(12px);
-  box-shadow:none;
+  text-decoration:none;
+  box-shadow:0 8px 18px rgba(0,0,0,.16);
+}
+.sideprojectors-mark{
+  display:grid;
+  gap:2px;
+  min-width:0;
 }
 .sideprojectors-mark-kicker{
-  font:700 9px/1 'DM Mono', ui-monospace, monospace;
-  letter-spacing:.06em;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.2;
   color:#9BF272;
 }
 .sideprojectors-mark-name{
-  font:700 11px/1.1 var(--font-main);
+  font-size:13px;
+  font-weight:700;
+  line-height:1.25;
   letter-spacing:0;
 }
-.sideprojectors-badge:hover .sideprojectors-mark{
-  border-color:rgba(155,242,114,.45);
+.sideprojectors-badge:hover{
+  border-color:rgba(155,242,114,.5);
+}
+.sideprojectors-badge:active{
+  transform:translateY(1px);
 }
 .sideprojectors-badge:focus-visible{
   outline:2px solid var(--ta-lime, #9BF272);
@@ -2296,9 +2301,10 @@ html[data-taamen-motion="reduce"] .acquisition-nav{
   position:relative;
   z-index:2;
   display:flex;
-  justify-content:flex-end;
-  margin:8px var(--page-gutter, 16px) 0;
-  max-width:100%;
+  width:max-content;
+  max-width:min(280px, calc(100vw - 28px));
+  margin-block:8px 0;
+  margin-inline:auto var(--page-gutter, 16px);
 }
 .sideprojectors-badge--inline{
   display:inline-flex;
@@ -2314,14 +2320,25 @@ html[data-taamen-motion="reduce"] .acquisition-nav{
   .sideprojectors-badge{
     transition:none;
   }
+  .sideprojectors-badge:active{
+    transform:none;
+  }
 }
 html[data-taamen-motion="reduce"] .sideprojectors-badge{
   transition:none;
 }
-html[data-theme="light"] .sideprojectors-mark{
+html[data-theme="light"] .sideprojectors-badge{
   background:#f7f4ee;
   color:#102228;
-  border-color:rgba(25,57,64,.16);
+  border-color:#1a2c30;
+  box-shadow:0 8px 16px rgba(16,34,40,.08);
+}
+html[data-theme="light"] .sideprojectors-mark-kicker{
+  color:#1d6a38;
+}
+body:has(.guide-modal) .sideprojectors-badge--float{
+  visibility:hidden;
+  pointer-events:none;
 }
 
 
