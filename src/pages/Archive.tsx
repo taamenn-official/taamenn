@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Clock3, Plus, Search, Share2, Trophy } from 'lucide-react';
 import type { Match, MatchType } from '../data/footballData';
 import { listCurrentArchive } from '../services/archiveRepository';
@@ -11,6 +11,7 @@ import ResultEntryModal from '../components/ResultEntryModal';
 import MatchShareModal from '../components/MatchShareModal';
 import AdSlot from '../components/monetization/AdSlot';
 import { RouteSkeleton } from '../components/RouteSkeleton';
+import { pendingSectionStartsOpen } from './archivePending';
 
 export default function Archive({language}:{language:'ar'|'en'}) {
   const copy=matchUiCopy[language];
@@ -36,6 +37,12 @@ export default function Archive({language}:{language:'ar'|'en'}) {
   }),[items,query,type]);
   const pending=filtered.filter(match=>canonicalStatus(match.status)==='COMPLETED_PENDING_RESULT');
   const recorded=filtered.filter(match=>canonicalStatus(match.status)!=='COMPLETED_PENDING_RESULT');
+  const pendingDismissed=useRef(false);
+  const [pendingOpen,setPendingOpen]=useState(false);
+  useEffect(()=>{
+    if(!ready||pendingDismissed.current)return;
+    setPendingOpen(pendingSectionStartsOpen(pending.length, false));
+  },[ready,pending.length]);
   const typeLabel=(value:MatchType)=>({friendly:types.friendly,normal:types.normal,competitive:types.competitive,tournament:types.tournament,strong:types.strong})[value];
   if(!ready)return <RouteSkeleton page="archive"/>;
   const grid=(matches:Match[],empty:string,pendingResult=false)=>matches.length?<div className="archive-grid">{matches.map(match=><MatchCard key={match.id} match={match} language={language} onClick={()=>setSelected(match)} actions={<>
@@ -56,9 +63,20 @@ export default function Archive({language}:{language:'ar'|'en'}) {
         {(['friendly','normal','competitive','tournament','strong'] as MatchType[]).map(value=><option key={value} value={value}>{typeLabel(value)}</option>)}
       </select>
     </div>
-    <section className="archive-lifecycle-section is-pending">
-      <header><div><Clock3 size={19}/><span><h2>{copy.pendingSection}</h2><p>{copy.pendingBody}</p></span></div><b>{pending.length}</b></header>
-      {grid(pending,copy.noPending,true)}
+    <section className={`archive-lifecycle-section is-pending${pendingOpen?' is-open':''}`}>
+      <header>
+        <button type="button" className="archive-disclosure" aria-expanded={pendingOpen} onClick={()=>{
+          setPendingOpen(open=>{
+            const next=!open;
+            if(!next)pendingDismissed.current=true;
+            return next;
+          });
+        }}>
+          <div><Clock3 size={19}/><span><h2>{copy.pendingSection}</h2><p>{pending.length?copy.pendingBody:copy.noPending}</p></span></div>
+          <b>{pending.length}</b>
+        </button>
+      </header>
+      {pendingOpen&&grid(pending,copy.noPending,true)}
     </section>
     <section className="archive-lifecycle-section is-recorded">
       <header><div><Trophy size={19}/><span><h2>{copy.recordedSection}</h2><p>{copy.recordedBody}</p></span></div><b>{recorded.length}</b></header>

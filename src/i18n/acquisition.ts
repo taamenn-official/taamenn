@@ -62,7 +62,7 @@ export const acquisitionCopy = {
     thesisBody: 'أدوات كرة القدم الهاوية مجزأة: دردشة للمجموعة، جداول للمباريات، صور للخطط، ومجلدات للنتائج. TAAMEN يضع دورة حياة واحدة داخل مساحة عمل واحدة: خطّط، نظّم، العب، سجّل، راجع، شارك.',
     flowLabel: 'تدفق المنتج',
     flow: [
-      { step: 'خطّط', maps: 'الملعب التكتيكي، التشكيلات، حفظ الخطة محلياً' },
+      { step: 'خطّط', maps: 'الملاعب، ومكان المباراة عند الإنشاء' },
       { step: 'نظّم', maps: 'مركز المباريات، الملاعب، الملف المحلي' },
       { step: 'العب', maps: 'دورة المباراة: قادمة → نشطة' },
       { step: 'سجّل', maps: 'إدخال النتيجة ومساهمات اللاعبين الاختيارية' },
@@ -73,7 +73,7 @@ export const acquisitionCopy = {
     ecosystemIntro: 'ستة أسطح موجودة في التطبيق الحي. التحليلات المتقدّمة ليست لوحة شحن؛ أي توسّع إحصائي يُعلَّم مستقبلياً.',
     ecosystem: [
       { title: 'مركز المباريات', body: 'إنشاء ومتابعة المباريات القادمة والنشطة على هذا الجهاز.' },
-      { title: 'الملعب التكتيكي', body: 'لوح 5 ضد 5 محلي: تشكيلات، سحب، حفظ، ومشاركة وصف الخطة.' },
+      { title: 'الملاعب', body: 'مكتبة ملاعب حقيقية بعناوين ومدن. ليست وجهة تكتيكية في التنقل اليومي.' },
       { title: 'طبقة اللاعب', body: 'ملف محلي، إشعارات دورة المباراة، وإعدادات الجهاز.' },
       { title: 'السجل', body: 'المباريات المكتملة في سجل واحد مشتق من المباريات الأساسية.' },
       { title: 'المشاركة', body: 'روابط عامة يمكن فكّها في تبويب جديد. ترميز، لا تشفير.' },
@@ -84,8 +84,8 @@ export const acquisitionCopy = {
     analyticsNote: 'حقول الإحصائيات الاختيارية موجودة في نموذج المباراة، لكن لا توجد لوحة تحليلات شُحنت كمنتج. أي تحليلات متقدّمة توسّع مستقبلي.',
     howTitle: 'كيف يعمل',
     howBody: 'المستخدم العادي ينشئ ملفاً محلياً بلا حساب. المباريات والخطط والإشعارات تُكتب في IndexedDB. العضو المميز مسار اختياري على الخادم: معرّف يفتح سجلاً تاريخياً للقراءة فقط. رسائل الدعم تُرسل عبر الخادم نفسه.',
-    tacticalTitle: 'الملعب التكتيكي',
-    tacticalBody: 'اللوح الحقيقي في التطبيق لوحة محلية بنسبة مئوية على ملعب CSS. الإحداثيات x/y هي مصدر الموقع، والمركز يُشتق منها. التشكيلات (ماسة، مربع، هرم، ضغط Y، مرتدة) تطبَّق على عشرة لاعبين. الحفظ في IndexedDB. المشاركة ترسل وصفاً نصياً أو لقطة PNG عبر محفظة الالتقاط. اللقطة أدناه من المنتج الحي. الشكل الهندسي الذي يليها يعيد استخدام هندسة الملعب الحالية — ليس لقطة مخترعة.',
+    tacticalTitle: 'لوح تكتيكي — ليس في التنقل الأساسي',
+    tacticalBody: 'اللوح موجود في الكود ويُفتح بالمسار المباشر، لكنه ليس وجهة في التنقل العادي. الإحداثيات x/y نسب مئوية على ملعب CSS، والتشكيلات تُحفظ محلياً. اللقطة أدناه من المنتج، وليست وعداً بأن اللوح جزء من الاستخدام اليومي.',
     tacticalCaption: 'معاينة هندسية من لوح التكتيك الحي (تشكيلة الماسة). ليست لقطة شاشة تسويقية.',
     shotArchiveNote: 'لا توجد لقطة لشاشة السجل في هذه المجموعة. مركز المباريات يُعرض لإدارة المباريات، وليس بديلاً عن السجل. السجل يبقى إسقاطاً للمباريات المكتملة كما هو موصوف في النص.',
     shots: {
@@ -111,7 +111,7 @@ export const acquisitionCopy = {
       },
       mobile: {
         alt: 'الرئيسية على الجوال في TAAMEN 2.0 لملف محلي باسم alex، مع شريط سفلي: الرئيسية والسجل ومركز المباريات والملعب التكتيكي والملف والإعدادات.',
-        caption: 'PWA على الجوال: الرئيسية مع التنقل السفلي (الرئيسية، السجل، مركز المباريات، الملعب التكتيكي، الملف، الإعدادات). الاستحواذ ليس في هذا الشريط.',
+        caption: 'لقطة أقدم للشريط السفلي كانت تتضمن الملعب التكتيكي. التنقل الحالي يعرض الملاعب في هذا الموضع. الاستحواذ ليس في هذا الشريط.',
       },
       stadiums: {
         alt: 'شاشة الملاعب في TAAMEN 2.0 تعرض ملاعب في الخليل مع حقل بحث: القصراوي، الأهلي، سيدات الخليل، الشريف، والسلام.',
@@ -146,7 +146,7 @@ export const acquisitionCopy = {
     ],
     implementedTitle: 'ما هو منفَّذ الآن',
     implemented: [
-      'تجربة عامة: الرئيسية، الملف، مركز المباريات، السجل، الملعب التكتيكي، الملاعب، الإعدادات، الدعم.',
+      'تجربة عامة: الرئيسية، الملف، مركز المباريات، السجل، الملاعب، الإعدادات، الدعم. اللوح التكتيكي موجود في الكود وليس في التنقل الأساسي.',
       'دورة حياة المباراة الأساسية مع إدخال النتيجة ومساهمات اختيارية.',
       'مشاركة عامة للملف والمباراة من الرابط؛ البريد والهاتف مستبعدان من الحمولة.',
       'عضو مميز: جلسة خادم للقراءة فقط على السجل التاريخي.',
@@ -324,7 +324,7 @@ export const acquisitionCopy = {
     thesisBody: 'Amateur football tools are fragmented: a group chat for the squad, a spreadsheet for fixtures, photos for tactics, folders for results. TAAMEN puts one lifecycle in one workspace: plan, organize, play, record, review, share.',
     flowLabel: 'Product flow',
     flow: [
-      { step: 'Plan', maps: 'Tactical Playground, formations, locally saved plans' },
+      { step: 'Plan', maps: 'Stadiums, and the venue chosen when a match is created' },
       { step: 'Organize', maps: 'Match Center, venues, local profile' },
       { step: 'Play', maps: 'Match lifecycle: upcoming → active' },
       { step: 'Record', maps: 'Result entry and optional player contributions' },
@@ -335,7 +335,7 @@ export const acquisitionCopy = {
     ecosystemIntro: 'Six surfaces that already exist in the live app. Advanced analytics is not a shipped dashboard; any stats expansion is labelled future.',
     ecosystem: [
       { title: 'Match Center', body: 'Create and follow upcoming and active fixtures on this device.' },
-      { title: 'Tactical', body: 'Local 5v5 board: formations, drag, save, and share a plan description.' },
+      { title: 'Stadiums', body: 'A real venue library with places and cities. Not a tactical destination in daily navigation.' },
       { title: 'Player layer', body: 'Local profile, match-lifecycle notices, and device settings.' },
       { title: 'Archive', body: 'Completed matches in one archive projected from canonical matches.' },
       { title: 'Sharing', body: 'Public links that decode in a new tab. Encoding, not encryption.' },
@@ -346,8 +346,8 @@ export const acquisitionCopy = {
     analyticsNote: 'Optional stats fields exist on the match model, but no analytics dashboard shipped as a product. Advanced analytics is a future expansion.',
     howTitle: 'How it works',
     howBody: 'A normal user creates a local profile with no account. Matches, plans, and notices write to IndexedDB. Featured Member is an optional server path: an identifier opens a read-only historical record. Support messages post through the same-origin Worker.',
-    tacticalTitle: 'Tactical Playground',
-    tacticalBody: 'The real board is a local, percentage-based pitch built in CSS. x/y coordinates are the source of position; role labels are derived from them. Formations (diamond, square, pyramid, Y press, counter) apply to ten players. Plans persist in IndexedDB. Sharing sends a text description or a PNG via Capture Wallet. The product screenshot below is the live Tactical Board. The geometric figure after it reuses the live pitch geometry — it is not a fabricated screenshot.',
+    tacticalTitle: 'Tactical board — not in primary navigation',
+    tacticalBody: 'The board remains in the product and can be opened by its direct route. It is not a destination in normal navigation. Positions are pitch percentages, and formations stay on the device. The screenshot below is from the product; it is not a claim that the board is part of everyday use.',
     tacticalCaption: 'Geometric preview from the live tactical board (diamond formation). Not a marketing screenshot.',
     shotArchiveNote: 'There is no Archive screenshot in this set. Match Center is shown for match management, not as a stand-in for Archive. Archive remains a projection of completed matches, described in the text.',
     shots: {
@@ -373,7 +373,7 @@ export const acquisitionCopy = {
       },
       mobile: {
         alt: 'TAAMEN 2.0 mobile Home for a local profile named alex, with bottom navigation: Home, Archive, Match Center, Tactical Playground, Profile, and Settings.',
-        caption: 'Mobile PWA: Home with bottom navigation (Home, Archive, Match Center, Tactical Playground, Profile, Settings). Acquisition is not in this bar.',
+        caption: 'An earlier screenshot of the bottom bar included Tactical Playground. Current navigation shows Stadiums in that place. Acquisition is not in this bar.',
       },
       stadiums: {
         alt: 'TAAMEN 2.0 Stadiums list of Hebron venues with a search field: Al Qasrawi, Al Ahli, Hebron Women, Al Shareef, and Al Salam.',
@@ -408,7 +408,7 @@ export const acquisitionCopy = {
     ],
     implementedTitle: 'Currently implemented',
     implemented: [
-      'General experience: Home, Profile, Match Center, Archive, Tactical Playground, Stadiums, Settings, Support.',
+      'General experience: Home, Profile, Match Center, Archive, Stadiums, Settings, Support. The tactical board remains in the code and is not in primary navigation.',
       'Canonical match lifecycle with result entry and optional contributions.',
       'Public profile and match sharing from the URL; email and phone are excluded from payloads.',
       'Featured Member: server session for a read-only historical record.',

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
-import { Mail, MessageCircle, Radio, Send, X } from 'lucide-react';
-import { WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
+import { AtSign, Check, Mail, MessageCircle, Radio, Send, X } from 'lucide-react';
+import { INSTAGRAM_URL, WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError, type ContactResult } from '../services/apiClient';
 import { uiCopy } from '../i18n/translations';
 import { useFormEntrance } from '../motion/useFormEntrance';
@@ -69,8 +69,6 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
       lastSent.current=fingerprint;
       setSent(true);
       setStatus(result.autoReplySent===false ? copy.contactPartial : copy.contactSent);
-      if(!hasProfileEmail)setEmail('');
-      setMessage('');
       queueMicrotask(celebrateSuccess);
     }catch(error){
       setFailed(true);
@@ -91,8 +89,16 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
   return <section className="page-content support-page" ref={pageRef}>
     <div className="page-heading"><div><p className="eyebrow">TAAMEN 2.0 / SUPPORT</p><h1>{ar?'الدعم':'Support'}</h1><p className="subtitle">{ar?'طرق مباشرة للوصول إلى دعم TAAMEN.':'Direct ways to reach TAAMEN support.'}</p></div>{onBack&&<button className="dark-action" onClick={onBack}><X size={15}/>{copy.closeViewer}</button>}</div>
     {status&&<div ref={statusRef} className={`${failed?'error-banner':sent?'success-banner contact-sent':'contact-status'}`} role={failed?'alert':'status'} aria-live="polite">{status}</div>}
-    <div className="content-grid support-grid">
-      {WHATSAPP_URL&&<section className="panel support-card">
+    <div className="content-grid support-grid official-contact-grid">
+      <section className="panel support-card official-contact">
+        <AtSign size={22} aria-hidden="true"/>
+        <div>
+          <h2>{copy.officialInstagramTitle}</h2>
+          <p>{copy.officialInstagramBody}</p>
+        </div>
+        <a className="support-action official-action" href={INSTAGRAM_URL} target="_blank" rel="noreferrer noopener">{copy.officialHandle}</a>
+      </section>
+      {WHATSAPP_URL&&<section className="panel support-card official-contact">
         <MessageCircle size={22} aria-hidden="true"/>
         <div>
           <h2>{copy.supportWhatsAppTitle}</h2>
@@ -115,8 +121,9 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
             ? <p className="settings-note">{copy.contactUsingProfileEmail} <strong>{profileEmail}</strong></p>
             : <label>{copy.contactEmailLabel}<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@example.com" maxLength={254} autoComplete="email" disabled={busy}/></label>}
           <label>{copy.contactMessageLabel}<textarea rows={6} value={message} onChange={e=>setMessage(e.target.value)} placeholder={copy.contactMessagePlaceholder} maxLength={2000} disabled={busy}/></label>
-          <button className="primary-action" type="submit" disabled={busy} aria-busy={busy}>
-            <Send size={15}/>{busy?copy.contactSending:failed?copy.contactRetry:copy.contactSend}
+          <button className={`primary-action${sent&&!failed?' is-sent':''}`} type="submit" disabled={busy|| (sent&&!failed)} aria-busy={busy}>
+            {sent&&!failed?<Check size={15}/>:<Send size={15}/>}
+            {busy?copy.contactSending:sent&&!failed?copy.contactSentAction:failed?copy.contactRetry:copy.contactSend}
           </button>
         </form>
       </section>
