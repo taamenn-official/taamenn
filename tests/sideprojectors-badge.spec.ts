@@ -55,8 +55,8 @@ test.describe('SideProjectors listing badge', () => {
     await expect(badge).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(badge).toHaveAttribute('aria-label', /SideProjectors/);
     await expect(badge.locator('img')).toHaveCount(0);
-    await expect(badge).toContainText('SideProjectors');
-    await expect(badge).toContainText('للبيع');
+    await expect(badge).toContainText('تأمين متاح للاستحواذ');
+    await expect(badge).toContainText('القائمة الرسمية');
     await expect(page.locator('a.sideprojectors-badge--inline')).toHaveCount(0);
   });
 

@@ -8,13 +8,13 @@ export const SIDEPROJECTORS_LISTING_URL = 'https://www.sideprojectors.com/projec
  */
 export const sideprojectorsCopy = {
   ar: {
-    label: 'معروض للبيع على SideProjectors',
-    kicker: 'للبيع',
-    name: 'SideProjectors',
+    label: 'تأمين متاح للاستحواذ. يفتح قائمة SideProjectors الرسمية في تبويب جديد.',
+    title: 'تأمين متاح للاستحواذ',
+    hint: 'القائمة الرسمية',
   },
   en: {
-    label: 'Listed for sale on SideProjectors',
-    kicker: 'FOR SALE',
-    name: 'SideProjectors',
+    label: 'TAAMEN is available for acquisition. Opens the official SideProjectors listing in a new tab.',
+    title: 'TAAMEN for acquisition',
+    hint: 'Official listing',
   },
 } as const;
