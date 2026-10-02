@@ -2,6 +2,7 @@ import { emptyProductionDataset } from './kvMigration.mjs';
 import { applyEnv } from './config.mjs';
 import { createKvJsonFile } from './kvStore.mjs';
 import { setStores } from './runtime.mjs';
+import { emptyPushDocument, setPushStore, validatePushDocument } from './pushStore.mjs';
 import { validateData, store } from './store.mjs';
 import { validateSessions } from './sessions.mjs';
 import { syncFeaturedMembers } from './featuredMembers.mjs';
@@ -39,6 +40,12 @@ export function initWorkerRuntime(env, exampleData) {
         createFallback: async () => ({ records: {} }),
       }),
     });
+    setPushStore(createKvJsonFile({
+      kv,
+      key: 'push',
+      validate: validatePushDocument,
+      createFallback: async () => emptyPushDocument(),
+    }));
     await store.load();
     await store.update(data => { syncFeaturedMembers(data); });
   })();

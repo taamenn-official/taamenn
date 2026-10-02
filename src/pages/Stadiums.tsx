@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MapPin, Phone, ChevronDown, ChevronUp, X, MessageCircle, Landmark } from 'lucide-react';
+import { Search, MapPin, Phone, ChevronDown, ChevronUp, X, MessageCircle, Goal } from 'lucide-react';
 import { searchStadiums } from '../data/stadiums';
 import { WHATSAPP_URL } from '../config/support';
 import { uiCopy } from '../i18n/translations';
@@ -34,7 +34,7 @@ export default function Stadiums({ language }: { language: Language }) {
       <div className="page-heading">
         <div>
           <p className="eyebrow">TAAMEN 2.0 / STADIUMS</p>
-          <h1>{ar ? 'الملاعب' : 'Stadiums'}</h1>
+          <h1><Goal size={28} aria-hidden="true" />{ar ? 'الملاعب' : 'Stadiums'}</h1>
           <p className="subtitle">
             {ar
               ? 'مكتبة الملاعب المتاحة على هذا الجهاز. اختر ملعبًا لعرض موقعه، أو استخدمه عند إنشاء مباراة.'
@@ -86,7 +86,7 @@ export default function Stadiums({ language }: { language: Language }) {
                   aria-expanded={isExpanded}
                 >
                   <div className="stadium-card-main">
-                    <Landmark size={18} aria-hidden="true" />
+                    <Goal size={18} aria-hidden="true" />
                     <h3>{name}</h3>
                     <span className="stadium-city">{city}</span>
                   </div>

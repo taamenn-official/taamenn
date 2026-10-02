@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  Archive, ArrowLeft, ArrowRight, Bell, BookOpen, ClipboardList, Home, Landmark,
+  Archive, ArrowLeft, ArrowRight, Bell, BookOpen, ClipboardList, Home, Goal,
   LifeBuoy, Settings, Share2, UserRound, X, type LucideIcon,
 } from 'lucide-react';
 import type { Language } from '../i18n/translations';
@@ -34,8 +34,8 @@ const sections: GuideSection[] = [
       en: ['Think of TAAMEN as your team’s digital match workspace.', 'Home summarizes what is nearby.', 'Match Center, Archive, Stadiums, Profile, Settings, and Support are the daily destinations.'],
     },
     example: {
-      ar: 'قبل مباراة الجمعة تفتح الرئيسية، تتأكد من الموعد والملعب، ثم تشارك التفاصيل مع الزملاء.',
-      en: 'Before Friday’s match you open Home, confirm the time and venue, then share the details with teammates.',
+      ar: 'مثال مباراة: الفريق أ × الفريق ب، الجمعة 19:00، مباراة عادية، ملعب. مثال سجل: ريال مدريد 3 × 2 برشلونة، نتيجة مسجّلة ومؤرشفة.',
+      en: 'Team A × Team B, Friday 19:00, normal match, stadium. Real Madrid 3 × 2 Barcelona, recorded, archived.',
     },
   },
   {
@@ -89,8 +89,8 @@ const sections: GuideSection[] = [
       en: ['Create a match with both teams, kickoff, and stadium.', 'Before kickoff, review the time and place.', 'When it ends, enter the result.', 'It then belongs in the archive as a recorded result.'],
     },
     example: {
-      ar: 'الجمعة 20:00، الفريق أ ضد الفريق ب، في ملعب محفوظ. قبل المباراة تراجع التفاصيل وتشاركها. بعدها تدخل النتيجة حتى لا تبقى معلّقة.',
-      en: 'Friday 20:00, Team A versus Team B, at a saved stadium. Before kickoff you review and share the details. Afterward you enter the score so it does not stay pending.',
+      ar: 'الفريق أ × الفريق ب، الجمعة 19:00، مباراة عادية، ملعب. تنشئها من مركز المباريات، تتابعها وهي قادمة ثم نشطة، ثم تدخل النتيجة حتى لا تبقى معلّقة.',
+      en: 'Team A × Team B, Friday 19:00, normal match, stadium. You create it in Match Center, follow it while it is upcoming and then live, and enter the score so it does not stay pending.',
     },
     tip: { ar: 'النتيجة المعلّقة ليست ضياعًا للمباراة. هي تذكير بإدخال الرقم النهائي.', en: 'A pending result is not a lost match. It is a reminder to enter the final score.' },
   },
@@ -108,14 +108,14 @@ const sections: GuideSection[] = [
       en: ['Search for the team or stadium.', 'If the pending-result section shows a count, open it.', 'Choose Enter result and record both scores.', 'After saving, the match moves to recorded results.'],
     },
     example: {
-      ar: 'مباراة الجمعة انتهت ولم تُكتب النتيجة. السجل يُبقيها ظاهرة في «النتيجة معلّقة» حتى تدخل 2–1، ثم تجدها مع النتائج المسجّلة.',
-      en: 'Friday’s match ended without a score. Archive keeps it under Finished — result pending until you enter 2–1, then you find it with the recorded results.',
+      ar: 'ريال مدريد 3 × 2 برشلونة، نتيجة مسجّلة ومؤرشفة. البحث بالفريق يجدها. إذا انتهت مباراة بلا رقم تبقى تحت «النتيجة معلّقة» حتى تدخل النتيجة.',
+      en: 'Real Madrid 3 × 2 Barcelona, recorded, archived. Search by team finds that completed result. A match that ended without a score stays under Finished — result pending until you enter one.',
     },
     tip: { ar: 'إذا أغلقت القسم بنفسك يبقى مغلقًا في هذه الزيارة.', en: 'If you close that section yourself, it stays closed for this visit.' },
   },
   {
     id: 'stadiums',
-    icon: Landmark,
+    icon: Goal,
     title: { ar: 'الملاعب', en: 'Stadiums' },
     purpose: { ar: 'أماكن اللعب المعروفة، بلا إعادة كتابة كل مرة.', en: 'Known places to play, without retyping them.' },
     what: {
@@ -173,8 +173,8 @@ const sections: GuideSection[] = [
     title: { ar: 'الإشعارات', en: 'Notifications' },
     purpose: { ar: 'تذكير بالمباراة على هذا الجهاز.', en: 'A match reminder on this device.' },
     what: {
-      ar: 'يصل تنبيه عند اقتراب المباراة أو بدئها أو انتهائها. تُحفظ محليًا. من زر الجرس تعلّمها مقروءة أو تحذفها.',
-      en: 'A notice arrives when a match is approaching, starting, or finished. Notices stay on this device. From the bell you mark them read or delete them.',
+      ar: 'الجرس يعرض تنبيهات محلية عند إنشاء المباراة أو اقترابها أو انتهائها. من الإعدادات يمكن تفعيل تذكير الدفع بعد إذنك، فيصل حتى لو كان TAAMEN مغلقًا على الأجهزة التي تدعم Web Push. على iOS يلزم إضافة التطبيق إلى الشاشة الرئيسية. TAAMEN لا يبقى يعمل في الخلفية.',
+      en: 'The bell shows local notices when a match is created, approaching, or finished. Settings can enable push reminders after you allow them, so a reminder can arrive even when TAAMEN is closed on browsers that support Web Push. On iOS the app needs to be on the Home Screen. TAAMEN does not keep running in the background.',
     },
     steps: {
       ar: ['افتح الجرس من الشريط العلوي.', 'اقرأ التنبيه.', 'علّمه مقروءًا أو احذفه.', 'الإشعارات لا تُرسل إلى حساب سحابي.'],
@@ -254,7 +254,7 @@ export default function HowToGuide({ language, open, onClose }: { language: Lang
   if (!open) return null;
 
   return (
-    <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+    <div className="overlay" role="dialog" aria-modal="true" aria-label={ar ? 'دليل الاستخدام' : 'How-to Guide'}>
       <button className="overlay-backdrop" aria-label={ar ? 'إغلاق' : 'Close'} onClick={onClose} />
       <aside className="guide-modal">
         <header>

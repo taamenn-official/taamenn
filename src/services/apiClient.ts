@@ -197,4 +197,24 @@ export const api = {
     const payload = await request<Record<string, unknown>>('/public/contact', { method: 'POST', body: input });
     return asContactResult(payload);
   },
+
+  pushConfig() {
+    return request<{ configured: boolean; publicKey: string | null }>('/push/config');
+  },
+
+  savePushSubscription(body: unknown) {
+    return request<{ ok: true; subscriptionId: string; enabled: boolean; configured: boolean }>('/push/subscribe', { method: 'POST', body });
+  },
+
+  disablePushSubscription(subscriptionId: string) {
+    return request<{ ok: true; found: boolean; disabled: boolean }>('/push/unsubscribe', { method: 'POST', body: { subscriptionId } });
+  },
+
+  schedulePush(body: unknown) {
+    return request<{ ok: true; queued: number; configured: boolean }>('/push/schedule', { method: 'POST', body });
+  },
+
+  sendTestPush(subscriptionId: string) {
+    return request<{ ok: boolean; sent: number; duplicate: boolean }>('/push/test', { method: 'POST', body: { subscriptionId } });
+  },
 };

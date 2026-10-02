@@ -18,6 +18,9 @@ const ENV_KEYS = [
   'TAAMEN_EXAMPLE_DATA_FILE',
   'TAAMEN_SESSION_FILE',
   'TAAMEN_LEGACY_FILE',
+  'VAPID_PUBLIC_KEY',
+  'VAPID_PRIVATE_KEY',
+  'VAPID_SUBJECT',
 ];
 
 function parseOrigins(raw) {
@@ -110,6 +113,16 @@ export function buildConfig(source = {}) {
     },
 
     maxBodyBytes: 64 * 1024,
+
+    /**
+     * Web Push. The private key is a Worker secret and must never be returned
+     * to the browser. Absent keys mean push delivery is not configured.
+     */
+    vapid: {
+      publicKey: env('VAPID_PUBLIC_KEY') || '',
+      privateKey: env('VAPID_PRIVATE_KEY') || '',
+      subject: env('VAPID_SUBJECT') || 'mailto:support@taamenn.com',
+    },
   };
 }
 

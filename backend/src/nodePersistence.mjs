@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { config } from './config.mjs';
 import { createJsonFile } from './jsonFile.mjs';
 import { setStores, resetStores } from './runtime.mjs';
+import { createMemoryDocument, setPushStore } from './pushStore.mjs';
 import { validateData, store } from './store.mjs';
 import { validateSessions } from './sessions.mjs';
 import { inspectCanonicalSource, normalizeMatch } from './kvMigration.mjs';
@@ -40,6 +41,7 @@ export function initNodeRuntime() {
       createFallback: async () => ({ records: {} }),
     }),
   });
+  setPushStore(createMemoryDocument());
   initialized = true;
 }
 
