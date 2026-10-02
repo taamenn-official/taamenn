@@ -89,31 +89,21 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
   return <section className="page-content support-page" ref={pageRef}>
     <div className="page-heading"><div><p className="eyebrow">TAAMEN 2.0 / SUPPORT</p><h1>{ar?'الدعم':'Support'}</h1><p className="subtitle">{ar?'طرق مباشرة للوصول إلى دعم TAAMEN.':'Direct ways to reach TAAMEN support.'}</p></div>{onBack&&<button className="dark-action" onClick={onBack}><X size={15}/>{copy.closeViewer}</button>}</div>
     {status&&<div ref={statusRef} className={`${failed?'error-banner':sent?'success-banner contact-sent':'contact-status'}`} role={failed?'alert':'status'} aria-live="polite">{status}</div>}
+    <div className="contact-actions" role="group" aria-label={ar ? 'طرق التواصل' : 'Contact actions'}>
+      <a className="contact-action" href={INSTAGRAM_URL} target="_blank" rel="noreferrer noopener">
+        <span className="contact-action-icon" aria-hidden="true"><AtSign size={18} /></span>
+        <span className="contact-action-copy"><strong>{copy.officialInstagramTitle}</strong><small>{copy.officialHandle}</small></span>
+      </a>
+      {WHATSAPP_URL && <a className="contact-action" href={WHATSAPP_URL} target="_blank" rel="noreferrer noopener">
+        <span className="contact-action-icon" aria-hidden="true"><MessageCircle size={18} /></span>
+        <span className="contact-action-copy"><strong>{ar ? 'واتساب' : 'WhatsApp'}</strong><small>{copy.openWhatsApp}</small></span>
+      </a>}
+      <a className="contact-action" href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer noopener">
+        <span className="contact-action-icon" aria-hidden="true"><Radio size={18} /></span>
+        <span className="contact-action-copy"><strong>{ar ? 'القناة الرسمية' : 'Official channel'}</strong><small>{copy.openWhatsAppChannel}</small></span>
+      </a>
+    </div>
     <div className="content-grid support-grid official-contact-grid">
-      <section className="panel support-card official-contact">
-        <AtSign size={22} aria-hidden="true"/>
-        <div>
-          <h2>{copy.officialInstagramTitle}</h2>
-          <p>{copy.officialInstagramBody}</p>
-        </div>
-        <a className="support-action official-action" href={INSTAGRAM_URL} target="_blank" rel="noreferrer noopener">{copy.officialHandle}</a>
-      </section>
-      {WHATSAPP_URL&&<section className="panel support-card official-contact">
-        <MessageCircle size={22} aria-hidden="true"/>
-        <div>
-          <h2>{copy.supportWhatsAppTitle}</h2>
-          <p>{copy.supportWhatsAppBody}</p>
-        </div>
-        <a className="support-action whatsapp-action" href={WHATSAPP_URL} target="_blank" rel="noreferrer noopener">{copy.openWhatsApp}</a>
-      </section>}
-      <section className="panel support-card">
-        <Radio size={22} aria-hidden="true"/>
-        <div>
-          <h2>{copy.supportChannelTitle}</h2>
-          <p>{copy.supportChannelBody}</p>
-        </div>
-        <a className="support-action whatsapp-action" href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer noopener">{copy.openWhatsAppChannel}</a>
-      </section>
       <section className="panel support-card support-contact">
         <div className="panel-heading"><div><p className="eyebrow">CONTACT TAAMEN</p><h2>{copy.contactTitle}</h2></div><Mail size={18}/></div>
         <form className="support-contact-form" onSubmit={submit} noValidate>

@@ -9,6 +9,8 @@ import { createRateLimiter } from './rateLimit.mjs';
 import { requiredEmail, requiredString } from './validate.mjs';
 import { historicalMatchDto, sessionMemberDto } from './dto.mjs';
 import { contactConfigured, sendContactMessage } from './contact.mjs';
+import { pushPublicConfig, pushSchedule, pushSubscribe, pushTest, pushUnsubscribe } from './pushHttp.mjs';
+import { vapidConfigured } from './webPush.mjs';
 
 const recognitionLimiter = createRateLimiter();
 const contactLimiter = createRateLimiter({ maxAttempts: 3, windowMs: 10 * 60_000, cooldownMs: 30 * 60_000 });
@@ -80,6 +82,7 @@ const routes = [
       ok: true,
       service: 'taamen-api',
       emailConfigured: contactConfigured(),
+      pushConfigured: vapidConfigured(),
     }),
   },
 
@@ -164,6 +167,32 @@ const routes = [
         autoReplySent: result.autoReplySent === true,
       });
     },
+  },
+
+  {
+    method: 'GET',
+    path: '/api/push/config',
+    handler: ({ request }) => pushPublicConfig(request),
+  },
+  {
+    method: 'POST',
+    path: '/api/push/subscribe',
+    handler: ({ request, ip }) => pushSubscribe(request, ip),
+  },
+  {
+    method: 'POST',
+    path: '/api/push/unsubscribe',
+    handler: ({ request, ip }) => pushUnsubscribe(request, ip),
+  },
+  {
+    method: 'POST',
+    path: '/api/push/schedule',
+    handler: ({ request, ip }) => pushSchedule(request, ip),
+  },
+  {
+    method: 'POST',
+    path: '/api/push/test',
+    handler: ({ request, ip }) => pushTest(request, ip),
   },
 ];
 

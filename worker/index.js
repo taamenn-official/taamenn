@@ -1,6 +1,7 @@
 import exampleData from '../backend/data.example.json';
 import { handleFetch } from '../backend/src/routes.mjs';
 import { initWorkerRuntime } from '../backend/src/workerAdapter.mjs';
+import { processDuePushJobs } from '../backend/src/pushDispatch.mjs';
 
 /**
  * Cloudflare Worker adapter.
@@ -41,5 +42,16 @@ export default {
       ip,
       encrypted: url.protocol === 'https:',
     });
+  },
+
+  /**
+   * Match reminders. The page does not stay open. A cron tick sends due Web
+   * Push jobs and skips anything already marked sent.
+   */
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil((async () => {
+      await initWorkerRuntime(env, exampleData);
+      await processDuePushJobs(Date.now());
+    })());
   },
 };

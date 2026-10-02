@@ -1,4 +1,4 @@
-import { Archive, ChevronRight, UserRound, MapPin } from 'lucide-react';
+import { Archive, ChevronRight, UserRound, Goal } from 'lucide-react';
 import type { Match } from '../data/footballData';
 import type { RouteId } from '../config/routes';
 import MatchCard from '../components/MatchCard';
@@ -64,7 +64,7 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
         <span>{ar?'التعادلات':'Draws'}</span><strong>{draws}</strong><small>{ar?'بدون فائز':'no winner'}</small>
       </button>
       <button type="button" className="stat-card stat-glass home-venues-card" data-ta-motion="card" onClick={()=>go('stadiums')} aria-label={uiCopy[language].openVenues}>
-        <span className="home-venues-icon" data-ta-icons aria-hidden="true"><MapPin size={18}/></span>
+        <span className="home-venues-icon" data-ta-icons aria-hidden="true"><Goal size={18}/></span>
         <strong>{uiCopy[language].venuesTitle}</strong>
         <small>{uiCopy[language].venuesDesc}</small>
       </button>

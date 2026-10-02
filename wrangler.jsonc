@@ -12,7 +12,12 @@
     "run_worker_first": ["/api/*"]
   },
   // Confirmed existing Cloudflare KV namespace. Do not create another one.
-  // Worker keys remain `data` (historical/operator document) and `sessions`.
+  // Worker keys: `data` (historical/operator document), `sessions`, and `push`
+  // (subscription + reminder jobs only). VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY,
+  // and VAPID_SUBJECT are Worker secrets. Never put the private key here.
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
   "kv_namespaces": [
     {
       "binding": "TAAMEN_KV",
@@ -46,6 +51,9 @@
           "id": "7698f62403814e81b6f2ca13a8eb9cbc"
         }
       ],
+      "triggers": {
+        "crons": ["*/5 * * * *"]
+      },
       "vars": {
         "EMAILJS_SERVICE_ID": "service_13mkb9h",
         "EMAILJS_CONTACT_TEMPLATE_ID": "template_jsugxta",

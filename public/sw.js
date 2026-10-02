@@ -1,4 +1,4 @@
-const VERSION='v8';
+const VERSION='v9';
 const SHELL=`taamen-shell-${VERSION}`;
 const RUNTIME=`taamen-runtime-${VERSION}`;
 const CORE=['/','/manifest.webmanifest','/assets/taamen-brand-mark.png'];
@@ -33,5 +33,51 @@ self.addEventListener('fetch',event=>{
       if(response.ok){const copy=response.clone();caches.open(RUNTIME).then(c=>c.put(event.request,copy)).catch(()=>{});}
       return response;
     }catch{return cached || caches.match('/') || new Response('TAAMEN offline',{status:503,headers:{'Content-Type':'text/plain'}})}
+  })());
+});
+
+function pushDestination(raw){
+  if(raw==='/#archive' || raw==='/#match-center' || raw==='/#stadiums' || raw==='/#settings') return raw;
+  return '/#match-center';
+}
+
+self.addEventListener('push',event=>{
+  let payload={title:'TAAMEN',body:'',url:'/#match-center',tag:'taamen'};
+  try{ if(event.data) payload={...payload,...event.data.json()}; }catch{ /* keep the safe fallback */ }
+  const title=String(payload.title||'TAAMEN').slice(0,80);
+  const body=String(payload.body||'').slice(0,180);
+  const url=pushDestination(payload.url);
+  const tag=String(payload.tag||'taamen').slice(0,120);
+  event.waitUntil((async()=>{
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const visible=windows.some(client=>client.visibilityState==='visible');
+    if(visible){
+      for(const client of windows) client.postMessage({type:'taamen-push',payload:{title,body,url,tag}});
+      return;
+    }
+    await self.registration.showNotification(title,{
+      body,
+      icon:'/assets/taamen-brand-mark.png',
+      badge:'/assets/taamen-brand-mark.png',
+      tag,
+      data:{url},
+    });
+  })());
+});
+
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const url=pushDestination(event.notification.data&&event.notification.data.url);
+  event.waitUntil((async()=>{
+    const target=new URL(url,self.location.origin).href;
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of windows){
+      if('navigate' in client){
+        await client.focus();
+        await client.navigate(target);
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
   })());
 });

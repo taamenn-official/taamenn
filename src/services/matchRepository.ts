@@ -63,6 +63,10 @@ export async function initMatchRepository(){
   }
 }
 
+function queuePush(match: Match, event: 'created' | 'updated' | 'result-pending' | 'sync') {
+  void import('./pushScheduleClient.ts').then(mod => mod.scheduleMatchPush(match, event)).catch(() => undefined);
+}
+
 export async function listMatches():Promise<Match[]>{
   await ensureMatchRepositoryReady();
   return (await getAll<Match>('matches'))
@@ -78,12 +82,14 @@ export async function createLocalUpcomingMatch(input:{title?:string;team1:string
   const match:Match={id,originId:id,type:input.type||'normal',team1:input.team1||'TAAMEN',team2:input.team2||'Opponent',score1:0,score2:0,status:'UPCOMING',dateLabel:formatMatchDate(input.date,dateKey,'en').date,dateISO:input.date,dateKey,story:input.note||'',title:input.title||`${input.team1} × ${input.team2}`,stadium:input.stadium,city:input.city,time:input.time,timezone:PALESTINE_TIMEZONE,durationMinutes:scheduleFromTiming(timing).scheduledMinutes,timing,visibility:input.visibility||'LOCAL',source:'local',createdAt:now,updatedAt:now};
   const value=await putCanonical(match);
   await emitMatchNotification(value,'created',now);
+  queuePush(value,'created');
   return value;
 }
 
 export async function updateMatch(match:Match){
   const value=await putCanonical({...match,updatedAt:Date.now()});
   await emitMatchNotification(value,'edited');
+  queuePush(value,'updated');
   return value;
 }
 
@@ -91,6 +97,7 @@ export async function deleteMatch(id:string){
   await deleteItem('matches',id);
   await deleteItem('archive',id);
   announceChange();
+  void import('./pushScheduleClient.ts').then(mod => mod.cancelMatchPush(id)).catch(() => undefined);
 }
 
 export async function archiveMatch(id:string){
@@ -177,7 +184,7 @@ export async function reconcileMatchLifecycle(now=Date.now()){
       });
       changed=true;
       if(next==='ACTIVE')await emitMatchNotification(value,'started',now);
-      if(next==='COMPLETED_PENDING_RESULT')await emitMatchNotification(value,'result-pending',now);
+      if(next==='COMPLETED_PENDING_RESULT'){await emitMatchNotification(value,'result-pending',now);queuePush(value,'result-pending');}
       roster.push(value);
     } else roster.push(match);
   }

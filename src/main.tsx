@@ -10,6 +10,24 @@ import './styles/taamen-2.1.css';
 import './styles/product-refinement.css';
 
 applyTheme(readTheme());
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+    const data = event.data;
+    if (!data || data.type !== 'taamen-push' || !data.payload?.title) return;
+    window.dispatchEvent(new CustomEvent('taamen-notification', {
+      detail: {
+        id: String(data.payload.tag || `push-${Date.now()}`),
+        type: 'match',
+        kind: 'match',
+        event: 'approaching',
+        title: String(data.payload.title),
+        body: String(data.payload.body || ''),
+        createdAt: Date.now(),
+        read: false,
+      },
+    }));
+  });
+}
 restoreSpaFallbackLocation();
 createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);
 if('serviceWorker' in navigator && import.meta.env.PROD){
