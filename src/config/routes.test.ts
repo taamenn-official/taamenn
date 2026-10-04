@@ -11,6 +11,13 @@ test('tactical stays in the registry but leaves normal navigation', () => {
   assert.equal(routesForDesktopNav('normal').some((route) => route.id === 'tactical'), false);
 });
 
+test('primary navigation is Home, Match Center, Archive, Stadiums, Profile', () => {
+  const primary = routesForMobileNav('normal').map((route) => route.id).filter((id) => id !== 'settings');
+  assert.deepEqual(primary, ['home', 'match-center', 'archive', 'stadiums', 'profile']);
+  const desktop = routesForDesktopNav('normal').map((route) => route.id).filter((id) => id !== 'support' && id !== 'settings');
+  assert.deepEqual(desktop, ['home', 'match-center', 'archive', 'stadiums', 'profile']);
+});
+
 test('stadiums is a mobile and desktop destination', () => {
   const stadiums = routeRegistry.find((route) => route.id === 'stadiums');
   assert.equal(stadiums?.showInMobileNav, true);

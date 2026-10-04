@@ -158,7 +158,7 @@ if (!fs.existsSync(swPath)) {
   if (!/url\.pathname\.startsWith\('\/share\/'\)/.test(sw)) {
     fail('public/sw.js must not cache unique /share/ token URLs');
   }
-  if (!/taamen-shell-v10/.test(sw) && !/VERSION='v10'/.test(sw)) {
+  if (!/taamen-shell-v11/.test(sw) && !/VERSION='v11'/.test(sw)) {
     fail('public/sw.js cache version must stay pinned after the shell manifest bump');
   }
   const precache = sw.match(/const PRECACHE\s*=\s*\[(.*?)\]/s);
@@ -258,7 +258,7 @@ if (!fs.existsSync(wranglerPath)) {
 //     Update this digest only when the product owner replaces that official asset.
 // ---------------------------------------------------------------------------
 const logoPath = path.join(root, 'public/assets/taamen-brand-mark.png');
-const EXPECTED_LOGO_SHA256 = 'a3f2ebfd5f796c0f3646b51176b4ec3225052b3663d53aba41d4a5c8c1c07c77';
+const EXPECTED_LOGO_SHA256 = 'be96fd7400c6013efd5a53c4246e57286585a46fb0c3bc8fdbfd7c7c671ae251';
 if (!fs.existsSync(logoPath)) {
   fail('public/assets/taamen-brand-mark.png is missing');
 } else {

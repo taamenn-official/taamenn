@@ -10,7 +10,6 @@ function emptyContribution(): PlayerContribution { return { playerName: '', goal
 
 export default function ResultEntryModal({ match, language, onClose, onSaved }: { match: Match; language: Language; onClose: () => void; onSaved: () => void }) {
   const copy = matchUiCopy[language];
-  const ar = language === 'ar';
   const [score1, setScore1] = useState('');
   const [score2, setScore2] = useState('');
   const [story, setStory] = useState(match.story || '');
@@ -67,14 +66,14 @@ export default function ResultEntryModal({ match, language, onClose, onSaved }: 
         <label>{copy.team2Score}<input type="number" inputMode="numeric" min="0" max="99" value={score2} onChange={event => setScore2(event.target.value)} /></label>
       </div>
       <fieldset className="match-format-field">
-        <legend>{ar ? 'نوع المباراة' : 'Match format'}</legend>
+        <legend>{copy.matchFormat}</legend>
         <div className="match-format-row">
-          <div className="match-format-choice" role="radiogroup" aria-label={ar ? 'نوع المباراة' : 'Match format'}>
+          <div className="match-format-choice" role="radiogroup" aria-label={copy.matchFormat}>
             {(['5v5', '7v7'] as MatchFormat[]).map(option => (
               <button key={option} type="button" role="radio" aria-checked={format === option} className={format === option ? 'is-selected' : ''} onClick={() => setFormat(option)}>{option}</button>
             ))}
           </div>
-          <button type="button" className="text-button" onClick={() => setWhyOpen(true)}>{ar ? 'لماذا؟' : 'Why?'}</button>
+          <button type="button" className="text-button" onClick={() => setWhyOpen(true)}>{copy.formatWhy}</button>
         </div>
       </fieldset>
       <label>{copy.note}<textarea rows={3} value={story} onChange={event => setStory(event.target.value)} /></label>
@@ -85,11 +84,9 @@ export default function ResultEntryModal({ match, language, onClose, onSaved }: 
     {whyOpen && <div className="overlay format-why-overlay" role="dialog" aria-modal="true" aria-labelledby="format-why-title">
       <button ref={why.backdropRef} className="overlay-backdrop" aria-label={copy.cancel} onClick={why.requestClose} />
       <aside ref={why.panelRef} className="modal-card format-why-modal">
-        <header className="panel-heading"><h2 id="format-why-title">{ar ? 'لماذا يسأل نظام TAAMEN عن نوع اللعبة؟' : 'Why does TAAMEN ask for the match format?'}</h2><button className="icon-button" onClick={why.requestClose} aria-label={copy.cancel}><X /></button></header>
-        <p>{ar
-          ? 'لأن عدد اللاعبين يختلف حسب نوع المباراة. يساعد هذا الاختيار TAAMEN على معرفة عدد اللاعبين الذين تريد إضافتهم إلى منطقة اللاعبين المساهمين، حتى تكون قائمة المساهمين مناسبة لعدد لاعبي المباراة.'
-          : 'Because the number of players differs by match format. This helps TAAMEN know how many player-contribution slots to provide, so the contribution list matches the number of players in the game.'}</p>
-        <button type="button" className="primary-action" onClick={why.requestClose}>{ar ? 'حسنًا' : 'OK'}</button>
+        <header className="panel-heading"><h2 id="format-why-title">{copy.formatWhyTitle}</h2><button className="icon-button" onClick={why.requestClose} aria-label={copy.cancel}><X /></button></header>
+        <p>{copy.formatWhyBody}</p>
+        <button type="button" className="primary-action" onClick={why.requestClose}>{copy.formatOk}</button>
       </aside>
     </div>}
   </div>;

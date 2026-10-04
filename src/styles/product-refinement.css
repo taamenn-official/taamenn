@@ -383,12 +383,71 @@ html[data-theme="light"] .contact-action-icon {
   }
 }
 
-.brand-image,
-.boot-screen img,
-.install-banner-mark,
-.acquisition-brand img {
-  background: #f4f7f2;
-  border-radius: 8px;
+.support-disclosure {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.support-disclosure span {
+  flex: 1;
+}
+
+.support-disclosure svg:last-child {
+  transition: transform 160ms ease;
+}
+
+.support-disclosure svg.is-open {
+  transform: rotate(180deg);
+}
+
+.support-message-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.archive-lifecycle-section.is-pending {
+  margin: 12px 0;
+}
+
+.archive-lifecycle-section.is-pending > header {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+}
+
+.archive-lifecycle-section.is-pending h2 {
+  font-size: 16px;
+}
+
+.archive-lifecycle-section.is-pending p {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.archive-page .is-pending .match-card {
+  padding: 10px 12px;
+}
+
+.archive-page .is-pending .match-card .match-story {
+  -webkit-line-clamp: 1;
+}
+
+.archive-page .is-pending .match-card-actions {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.archive-page .is-pending .match-card-top {
+  margin-bottom: 8px;
 }
 
 .match-card {
@@ -475,7 +534,6 @@ html[data-theme="light"] .contact-action-icon {
 }
 
 .match-format-row,
-.match-format-choice,
 .stadium-actions {
   display: flex;
   flex-wrap: wrap;
@@ -483,9 +541,58 @@ html[data-theme="light"] .contact-action-icon {
   align-items: center;
 }
 
-.match-format-choice button,
-.timing-presets button {
-  min-height: 40px;
+.match-format-choice {
+  display: inline-flex;
+  min-width: 0;
+  border: 1px solid rgba(186, 200, 217, .28);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(7, 19, 22, .55);
+}
+
+.match-format-choice button {
+  min-height: 42px;
+  min-width: 76px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f4f7f2;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.match-format-choice button + button {
+  border-inline-start: 1px solid rgba(186, 200, 217, .28);
+}
+
+.match-format-choice button.is-selected {
+  background: var(--ta-lime, #9bf272);
+  color: #12251b;
+}
+
+.match-format-choice button:focus-visible {
+  outline: 2px solid var(--ta-lime, #9bf272);
+  outline-offset: -3px;
+}
+
+html[data-theme="light"] .match-format-choice {
+  background: #fff;
+  border-color: #1a2c30;
+}
+
+html[data-theme="light"] .match-format-choice button {
+  color: #102228;
+}
+
+html[data-theme="light"] .match-format-choice button + button {
+  border-inline-start-color: #1a2c30;
+}
+
+html[data-theme="light"] .match-format-choice button.is-selected {
+  background: #1a2c30;
+  color: #f7faf8;
 }
 
 .match-format-chip {
