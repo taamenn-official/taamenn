@@ -81,6 +81,7 @@ test.describe('TAAMEN production path', () => {
     await useEnglish(page);
     await page.goto('/#support');
     await expect(page.getByRole('heading', { name: 'Support', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'How do I send a support message?' }).click();
     await page.getByRole('button', { name: 'Send message' }).click();
     await expect(page.getByRole('alert')).toContainText(/check the entered information/i);
     await page.getByPlaceholder('name@example.com').fill('person@example.com');

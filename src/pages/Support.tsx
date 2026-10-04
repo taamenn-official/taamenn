@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { AtSign, Check, Mail, MessageCircle, Radio, Send, X } from 'lucide-react';
+import { AtSign, Check, ChevronDown, Mail, MessageCircle, Radio, Send, X } from 'lucide-react';
 import { INSTAGRAM_URL, WHATSAPP_CHANNEL_URL, WHATSAPP_URL } from '../config/support';
 import { api, ApiError, type ContactResult } from '../services/apiClient';
 import { uiCopy } from '../i18n/translations';
@@ -29,6 +29,7 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
   const [status,setStatus]=useState('');
   const [failed,setFailed]=useState(false);
   const [sent,setSent]=useState(false);
+  const [formOpen,setFormOpen]=useState(false);
 
   const replyEmail=useMemo(()=>hasProfileEmail?profileEmail:email.trim(),[hasProfileEmail,profileEmail,email]);
 
@@ -92,29 +93,34 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
     <div className="contact-actions" role="group" aria-label={ar ? 'طرق التواصل' : 'Contact actions'}>
       <a className="contact-action" href={INSTAGRAM_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><AtSign size={18} /></span>
-        <span className="contact-action-copy"><strong>{ar ? 'إنستغرام TAAMEN الرسمي' : 'Official TAAMEN Instagram'}</strong><small>{copy.officialHandle}</small></span>
+        <span className="contact-action-copy"><strong>{copy.officialInstagramAction}</strong><small>{copy.officialHandle}</small></span>
       </a>
       {WHATSAPP_URL && <a className="contact-action" href={WHATSAPP_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><MessageCircle size={18} /></span>
-        <span className="contact-action-copy"><strong>{ar ? 'واتساب TAAMEN الرسمي' : 'Official TAAMEN WhatsApp'}</strong><small>{copy.openWhatsApp}</small></span>
+        <span className="contact-action-copy"><strong>{copy.officialWhatsAppAction}</strong><small>{copy.openWhatsApp}</small></span>
       </a>}
       <a className="contact-action" href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><Radio size={18} /></span>
-        <span className="contact-action-copy"><strong>{ar ? 'قناة واتساب TAAMEN الرسمية' : 'Official TAAMEN WhatsApp Channel'}</strong><small>{copy.openWhatsAppChannel}</small></span>
+        <span className="contact-action-copy"><strong>{copy.officialChannelAction}</strong><small>{copy.openWhatsAppChannel}</small></span>
       </a>
     </div>
     <div className="content-grid support-grid official-contact-grid">
       <section className="panel support-card support-contact">
-        <div className="panel-heading"><div><p className="eyebrow">CONTACT TAAMEN</p><h2>{ar ? 'كيف تستخدم الدعم' : 'How to use Support'}</h2></div><Mail size={18}/></div>
+        <button type="button" className="support-disclosure" aria-expanded={formOpen} aria-controls="support-message-panel" onClick={()=>setFormOpen(open=>!open)}>
+          <Mail size={18} aria-hidden="true"/>
+          <span>{copy.supportAsk}</span>
+          <ChevronDown size={16} aria-hidden="true" className={formOpen?'is-open':''}/>
+        </button>
+        {formOpen&&<div id="support-message-panel" className="support-message-panel">
         <div className="support-guide">
-          <p>{ar ? 'أرسل لفريق TAAMEN المشكلة، وأين حدثت، وماذا كنت تفعل حينها. كلما كان السياق أوضح كان التحقق أسهل.' : 'Send the TAAMEN team the problem, where it happened, and what you were doing when it happened. The more useful the context, the easier it is to investigate.'}</p>
+          <p>{copy.supportGuideLead}</p>
           <ol>
-            <li>{ar ? 'صف صفحة TAAMEN المعنية.' : 'Describe the relevant TAAMEN page.'}</li>
-            <li>{ar ? 'صف ما كنت تحاول فعله.' : 'Describe what you were trying to do.'}</li>
-            <li>{ar ? 'صف ما حدث فعلًا.' : 'Describe what actually happened.'}</li>
-            <li>{ar ? 'أرسل الرسالة وراقب حالة التسليم.' : 'Send the message and watch the delivery state.'}</li>
+            <li>{copy.supportStepPage}</li>
+            <li>{copy.supportStepTrying}</li>
+            <li>{copy.supportStepHappened}</li>
+            <li>{copy.supportStepSend}</li>
           </ol>
-          <div className="support-example"><strong>{ar ? 'مثال لتقرير مفيد' : 'Example of a useful report'}</strong><p>{ar ? 'بعد أن أدخلت نتيجة مباراة الجمعة في السجل، لم تظهر المباراة ضمن النتائج المسجّلة.' : 'After I entered Friday’s match result in Archive, the match did not appear under recorded results.'}</p></div>
+          <div className="support-example"><strong>{copy.supportExampleTitle}</strong><p>{copy.supportExampleBody}</p></div>
         </div>
         <form className="support-contact-form" onSubmit={submit} noValidate>
           {hasProfileEmail
@@ -126,6 +132,7 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
             {busy?copy.contactSending:sent&&!failed?copy.contactSentAction:failed?copy.contactRetry:copy.contactSend}
           </button>
         </form>
+        </div>}
       </section>
     </div>
   </section>;
