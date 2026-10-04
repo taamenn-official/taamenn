@@ -42,6 +42,9 @@ export type MatchTiming =
   | { mode: 'continuous'; durationMinutes: number }
   | { mode: 'periods'; periodCount: number; periodMinutes: number; breakMinutes: number };
 
+/** Optional. Missing values stay legacy and are treated as 5v5 when a format is needed. */
+export type MatchFormat = '5v5' | '7v7';
+
 export type Match = {
   createdBy?: string;
   id: string;
@@ -62,6 +65,7 @@ export type Match = {
   timezone?: string;
   durationMinutes?: number;
   timing?: MatchTiming;
+  matchFormat?: MatchFormat;
   visibility?: 'LOCAL'|'PUBLIC'|'PRIVATE';
   createdAt?: number;
   updatedAt?: number;

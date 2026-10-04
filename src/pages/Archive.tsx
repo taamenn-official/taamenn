@@ -83,6 +83,7 @@ export default function Archive({language}:{language:'ar'|'en'}) {
       {grid(recorded,query?copy.trySearch:copy.noRecorded)}
     </section>
     <AdSlot placement="archive" />
+    {recorded.length >= 3 && <AdSlot placement="archive-follow" />}
     {selected&&<ArchiveDetailModal match={selected} language={language} onClose={()=>setSelected(null)} onShare={()=>{setShareMatch(selected);setSelected(null)}}/>}
     {resultMatch&&<ResultEntryModal match={resultMatch} language={language} onClose={()=>setResultMatch(null)} onSaved={load}/>}
     {shareMatch&&<MatchShareModal match={shareMatch} language={language} onClose={()=>setShareMatch(null)}/>}

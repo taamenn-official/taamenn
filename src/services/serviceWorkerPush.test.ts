@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 test('the service worker keeps caching and adds push delivery', () => {
   const sw = fs.readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8');
-  assert.match(sw, /VERSION='v9'/);
+  assert.match(sw, /VERSION='v10'/);
   assert.match(sw, /url\.pathname\.startsWith\('\/api\/'\)/);
   assert.match(sw, /url\.pathname\.startsWith\('\/share\/'\)/);
   assert.match(sw, /ads\.txt/);

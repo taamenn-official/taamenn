@@ -65,6 +65,7 @@ test('deep links stay on the hash router and the existing public paths', () => {
   assert.deepEqual(parseAppDeepLink('https://taamenn.com/'), { kind: 'route', route: 'home' });
   assert.equal(parseAppDeepLink('/share/match/abc%20d').kind, 'share');
   assert.deepEqual(parseAppDeepLink('/acquisition'), { kind: 'acquisition' });
+  assert.deepEqual(parseAppDeepLink('/trophy?src=instagram'), { kind: 'trophy' });
   assert.deepEqual(parseAppDeepLink('/privacy'), { kind: 'legal', document: 'privacy' });
   assert.deepEqual(parseAppDeepLink('/terms'), { kind: 'legal', document: 'terms' });
 });

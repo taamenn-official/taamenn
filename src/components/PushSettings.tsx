@@ -7,7 +7,7 @@ import { listMatches } from '../services/matchRepository';
 
 type StatusCopy = { title: string; detail: string };
 
-function describe(language: 'ar' | 'en', support: PushSupport, active: boolean, sync: PushSyncState, denied: boolean): StatusCopy {
+function describe(language: 'ar' | 'en', support: PushSupport, active: boolean, sync: PushSyncState, denied: boolean, note = ''): StatusCopy {
   const ar = language === 'ar';
   if (!support.secure || support.permission === 'unsupported') {
     return {
@@ -27,16 +27,16 @@ function describe(language: 'ar' | 'en', support: PushSupport, active: boolean, 
       detail: ar ? 'الإشعارات محظورة من إعدادات المتصفح أو الجهاز.' : 'Notifications are blocked by your browser or device settings.',
     };
   }
+  if (sync === 'not-configured' || note === 'not-configured') {
+    return {
+      title: ar ? 'الإذن ممنوح' : 'Permission granted',
+      detail: ar ? 'تم السماح بالإشعارات على جهازك، لكن تذكيرات TAAMEN الخلفية غير جاهزة حاليًا.' : 'Notifications are allowed on this device, but TAAMEN background reminders are not ready yet.',
+    };
+  }
   if (!active) {
     return {
       title: ar ? 'الإشعارات متوقفة' : 'Notifications are disabled',
       detail: ar ? 'استلم تذكير المباراة حتى عندما لا يكون TAAMEN مفتوحًا.' : 'Receive match reminders even when TAAMEN is not open.',
-    };
-  }
-  if (sync === 'not-configured') {
-    return {
-      title: ar ? 'الاشتراك محفوظ' : 'Subscription saved',
-      detail: ar ? 'الخادم لم يُعد بعد بمفاتيح الإرسال. لن يُرسل تذكير حتى تُضاف.' : 'The server does not have push keys yet. A reminder is not sent until they are set.',
     };
   }
   if (sync === 'waiting') {
@@ -117,7 +117,7 @@ export function PushSettings({ language }: { language: 'ar' | 'en' }) {
     if (active) void flushPushOutbox().then(setSync);
   };
 
-  const status = describe(language, support, active, sync, note === 'denied');
+  const status = describe(language, support, active, sync, note === 'denied', note);
   const permission = support.permission === 'granted' ? (ar ? 'مسموح' : 'Granted') : support.permission === 'denied' ? (ar ? 'مرفوض' : 'Denied') : support.permission === 'unsupported' ? (ar ? 'غير مدعوم' : 'Unsupported') : (ar ? 'لم يُطلب' : 'Default');
   const background = !support.supported ? (support.ios && !support.standalone ? (ar ? 'يلزم التثبيت' : 'Requires installation') : (ar ? 'غير مدعوم' : 'Unsupported')) : support.permission !== 'granted' ? (ar ? 'يلزم الإذن' : 'Requires permission') : active ? (ar ? 'جاهز' : 'Ready') : (ar ? 'غير مفعّل' : 'Not active');
 
@@ -163,8 +163,7 @@ export function PushSettings({ language }: { language: 'ar' | 'en' }) {
         <button type="button" className="dark-action" onClick={test} disabled={busy || !active}>{ar ? 'إشعار تجريبي' : 'Test notification'}</button>
       </div>
       {note === 'server-pending' && <p className="settings-note" role="alert">{ar ? 'أُوقف الاشتراك على هذا الجهاز. حذف سجل الخادم لم يكتمل بعد.' : 'This device is unsubscribed. The server record was not fully removed yet.'}</p>}
-      {note === 'not-configured' && <p className="settings-note" role="status">{ar ? 'هذا المتصفح يستطيع طلب الإذن، لكن خادم الإرسال غير مهيأ.' : 'This browser can ask for permission, but the push server is not configured.'}</p>}
-      {note === 'tested' && <p className="settings-note" role="status">{ar ? 'أُرسل إشعار تجريبي عبر خادم الدفع.' : 'A test notification was sent through the push server.'}</p>}
+      {note === 'tested' && <p className="settings-note" role="status">{ar ? 'طُلب الإشعار التجريبي بنجاح.' : 'Test notification requested successfully.'}</p>}
       {note === 'test-failed' && <p className="settings-note" role="alert">{ar ? 'لم يُسلَّم الإشعار التجريبي.' : 'The test notification was not delivered.'}</p>}
       {note === 'failed' && <p className="settings-note" role="alert">{ar ? 'تعذّر تسجيل الاشتراك.' : 'The subscription could not be registered.'}</p>}
     </section>

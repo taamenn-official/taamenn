@@ -19,7 +19,8 @@ export function placementEnabled(_placement: FuturePlacement): boolean {
   return PHASE1_MONETIZATION_ENABLED;
 }
 
-export const AD_PLACEMENTS = ['home', 'stadiums', 'archive'] as const;
+export const AD_PLACEMENTS = ['home', 'home-follow', 'stadiums', 'stadiums-follow', 'archive', 'archive-follow'] as const;
+const PREVIEW_PLACEMENTS = new Set<AdPlacement>(['home', 'stadiums', 'archive']);
 export type AdPlacement = (typeof AD_PLACEMENTS)[number];
 
 /** Surfaces that must never mount an ad slot. */
@@ -42,6 +43,7 @@ export const RESTRICTED_AD_SURFACES = [
   'share',
   'acquisition',
   'support',
+  'trophy',
 ] as const;
 
 export type AdConfig = {
@@ -55,14 +57,20 @@ export type AdEnv = {
   VITE_ADSENSE_ENABLED?: string;
   VITE_ADSENSE_CLIENT_ID?: string;
   VITE_ADSENSE_HOME_SLOT?: string;
+  VITE_ADSENSE_HOME_FOLLOW_SLOT?: string;
   VITE_ADSENSE_STADIUMS_SLOT?: string;
+  VITE_ADSENSE_STADIUMS_FOLLOW_SLOT?: string;
   VITE_ADSENSE_ARCHIVE_SLOT?: string;
+  VITE_ADSENSE_ARCHIVE_FOLLOW_SLOT?: string;
 };
 
 const SLOT_ENV: Record<AdPlacement, keyof AdEnv> = {
   home: 'VITE_ADSENSE_HOME_SLOT',
+  'home-follow': 'VITE_ADSENSE_HOME_FOLLOW_SLOT',
   stadiums: 'VITE_ADSENSE_STADIUMS_SLOT',
+  'stadiums-follow': 'VITE_ADSENSE_STADIUMS_FOLLOW_SLOT',
   archive: 'VITE_ADSENSE_ARCHIVE_SLOT',
+  'archive-follow': 'VITE_ADSENSE_ARCHIVE_FOLLOW_SLOT',
 };
 
 /** Google publisher ids look like ca-pub- followed by digits. No value is stored here. */
@@ -117,7 +125,7 @@ export function resolvePlacement(placement: string, env: AdEnv): ResolvedAd {
   if (config.enabled && config.clientId && slotId) {
     return { mode: 'adsense', clientId: config.clientId, slotId };
   }
-  if (adsPreviewRequested(env)) return { mode: 'preview' };
+  if (PREVIEW_PLACEMENTS.has(placement) && adsPreviewRequested(env)) return { mode: 'preview' };
   return { mode: 'none' };
 }
 
@@ -127,7 +135,10 @@ export function adEnvFromImportMeta(env: ImportMetaEnv): AdEnv {
     VITE_ADSENSE_ENABLED: env.VITE_ADSENSE_ENABLED,
     VITE_ADSENSE_CLIENT_ID: env.VITE_ADSENSE_CLIENT_ID,
     VITE_ADSENSE_HOME_SLOT: env.VITE_ADSENSE_HOME_SLOT,
+    VITE_ADSENSE_HOME_FOLLOW_SLOT: env.VITE_ADSENSE_HOME_FOLLOW_SLOT,
     VITE_ADSENSE_STADIUMS_SLOT: env.VITE_ADSENSE_STADIUMS_SLOT,
+    VITE_ADSENSE_STADIUMS_FOLLOW_SLOT: env.VITE_ADSENSE_STADIUMS_FOLLOW_SLOT,
     VITE_ADSENSE_ARCHIVE_SLOT: env.VITE_ADSENSE_ARCHIVE_SLOT,
+    VITE_ADSENSE_ARCHIVE_FOLLOW_SLOT: env.VITE_ADSENSE_ARCHIVE_FOLLOW_SLOT,
   };
 }

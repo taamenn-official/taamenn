@@ -1,4 +1,5 @@
 import type { Match, MatchStatus } from '../data/footballData';
+import { sanitizeMatchFormat } from '../domain/matches/matchFormat.ts';
 import { legacyDurationMinutes, sanitizeStoredTiming, scheduleFromTiming } from '../domain/matches/matchTiming.ts';
 import {
   dateISOToKey,
@@ -52,6 +53,9 @@ export function normalizeMatch(record: Match): Match {
   };
   if (timing) normalized.timing = timing;
   else delete normalized.timing;
+  const matchFormat = sanitizeMatchFormat(record.matchFormat);
+  if (matchFormat) normalized.matchFormat = matchFormat;
+  else delete normalized.matchFormat;
   return normalized;
 }
 

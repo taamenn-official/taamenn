@@ -24,10 +24,10 @@ export default function MatchCard({match,language,featured=false,onClick,actions
   const confetti=!recorded||winner==='draw'?null:<div className={`winner-confetti ${winner}`} aria-hidden="true">{Array.from({length:10},(_,i)=><i key={i} className={`confetti-piece piece-${i}`}/>)}</div>;
   const statusCopy:Record<MatchStatus,string>={UPCOMING:matchUiCopy[language].upcoming,ACTIVE:matchUiCopy[language].active,COMPLETED_PENDING_RESULT:matchUiCopy[language].resultPending,COMPLETED_WITH_RESULT:matchUiCopy[language].resultRecorded,ARCHIVED:matchUiCopy[language].archived};
   const meta=[
-    match.id ? `#${match.id}` : '',
-    match.stadium || '',
-    match.city || '',
-  ].filter(Boolean);
+    match.stadium ? { text: match.stadium, secondary: false } : null,
+    match.city ? { text: match.city, secondary: true } : null,
+    match.id ? { text: `#${match.id}`, secondary: true } : null,
+  ].filter((item): item is { text: string; secondary: boolean } => Boolean(item));
   return <article className={`match-card match-card-premium type-${accent} ${recorded?(winner!=='draw'?`has-winner winner-${winner}`:'is-draw'):'result-pending'} ${featured?'is-featured':''}`} onClick={onClick} tabIndex={onClick?0:undefined} onKeyDown={event=>{if(onClick&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick()}}} aria-label={`${match.team1} ${ar?'مقابل':'vs'} ${match.team2}${recorded?` - ${match.score1}:${match.score2}`:''}`} >
     {confetti}
     <div className="match-card-top">
@@ -50,7 +50,7 @@ export default function MatchCard({match,language,featured=false,onClick,actions
       </div>
     </div>
     </MatchScheduleBlock>
-    {meta.length>0&&<div className="match-meta-row">{meta.map((item,i)=><span key={`${item}-${i}`}>{item}</span>)}</div>}
+    {meta.length>0&&<div className="match-meta-row">{meta.map(item=><span key={item.text} className={item.secondary?'is-secondary':''}>{item.text}</span>)}</div>}
     {match.story&&<p className="match-story">{match.story}</p>}
     {match.details&&<div className="match-metrics">
       <span>{match.score1+match.score2}<small>{archiveCopy[language].goals}</small></span>

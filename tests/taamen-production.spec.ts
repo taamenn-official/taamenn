@@ -54,12 +54,13 @@ test.describe('TAAMEN production path', () => {
     await useEnglish(page);
     await page.goto('/#profile');
     await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Public share' }).click();
-    const shareField = page.locator('.share-link-field input');
-    await expect(shareField).toHaveValue(/\/share\/profile\//);
-    const url = await shareField.inputValue();
-    expect(url.toLowerCase()).not.toContain('phone');
-    expect(url).not.toContain('@');
+    await expect(page.getByRole('button', { name: 'Public share' })).toHaveCount(0);
+    await expect(page.locator('.profile-inline-save')).toHaveCount(1);
+    await page.getByRole('textbox', { name: /Family/ }).fill('Nasser');
+    await page.locator('.profile-inline-save').click();
+    await expect(page.getByText(/Profile saved|تم حفظ الملف/)).toBeVisible();
+    const token = btoa(JSON.stringify({ v: 2, type: 'profile', displayName: 'Lina' })).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+    const url = `/share/profile/${token}`;
 
     const sharePage = await context.newPage();
     await sharePage.goto(url);

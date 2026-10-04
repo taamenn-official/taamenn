@@ -382,3 +382,210 @@ html[data-theme="light"] .contact-action-icon {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.brand-image,
+.boot-screen img,
+.install-banner-mark,
+.acquisition-brand img {
+  background: #f4f7f2;
+  border-radius: 8px;
+}
+
+.match-card {
+  padding: 12px 14px;
+}
+
+.match-card .match-score-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.match-card .team-block strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.match-card .score-block b {
+  font-size: clamp(28px, 4vw, 40px);
+}
+
+.match-card .match-story {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 8px 0 0;
+}
+
+.match-card .match-metrics {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.match-card .match-metrics span {
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.current-match-card {
+  padding: 12px;
+}
+
+.current-match-card.is-next {
+  padding: 16px;
+}
+
+.current-match-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.current-match-teams strong {
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.current-match-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.current-match-actions .icon-button {
+  margin-inline-start: auto;
+}
+
+.match-format-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.match-format-row,
+.match-format-choice,
+.stadium-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.match-format-choice button,
+.timing-presets button {
+  min-height: 40px;
+}
+
+.match-format-chip {
+  margin-inline-start: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.contribution-capacity {
+  color: var(--muted, #bac8d9);
+  font-size: 12px;
+}
+
+.format-why-modal,
+.trophy-card,
+.campaign-card,
+.support-guide {
+  display: grid;
+  gap: 10px;
+}
+
+.format-why-modal {
+  position: relative;
+  z-index: 2;
+  width: min(520px, calc(100% - 24px));
+  padding: 16px;
+}
+
+.support-guide ol {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  display: grid;
+  gap: 4px;
+}
+
+.support-example,
+.campaign-card,
+.trophy-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--ta-line, rgba(186, 200, 217, .28));
+  background: rgba(255, 255, 255, .03);
+}
+
+.campaign-card {
+  color: inherit;
+  text-decoration: none;
+  margin: 0 0 16px;
+}
+
+.campaign-card em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ta-lime, #9bf272);
+}
+
+.stadium-actions .primary-action,
+.stadium-actions .dark-action {
+  margin: 0;
+}
+
+html[data-theme="light"] .campaign-card,
+html[data-theme="light"] .trophy-card,
+html[data-theme="light"] .support-example,
+html[data-theme="light"] .format-why-modal {
+  background: #f7faf8;
+  color: #102228;
+  border-color: #1a2c30;
+}
+
+html[data-theme="light"] .campaign-card em {
+  color: #14532d;
+}
+
+@media (max-width: 430px) {
+  .match-card,
+  .current-match-card {
+    padding: 10px;
+  }
+
+  .match-card .match-meta-row .is-secondary,
+  .match-card .match-metrics {
+    display: none;
+  }
+
+  .match-card .match-score-layout,
+  .current-match-teams {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .current-match-actions .icon-button {
+    margin-inline-start: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-card,
+  .match-format-choice button {
+    transition: none;
+  }
+}

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { AVATAR_CROP_ASPECT, BANNER_CROP_ASPECT, cropSourceRect } from './imageProcessing.ts';
+import { AVATAR_CROP_ASPECT, BANNER_CROP_ASPECT, canTryImageFile, cropSourceRect } from './imageProcessing.ts';
+
+test('an empty file type can still be decoded, and a non-image type cannot', () => {
+  assert.equal(canTryImageFile({ type: '' }), true);
+  assert.equal(canTryImageFile({ type: 'image/jpeg' }), true);
+  assert.equal(canTryImageFile({ type: 'application/pdf' }), false);
+});
 
 test('avatar crop at rest uses the centered square', () => {
   const rect = cropSourceRect(200, 100, { aspect: AVATAR_CROP_ASPECT, zoom: 1, panX: 0, panY: 0 });

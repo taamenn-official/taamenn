@@ -89,7 +89,9 @@ test('adsense markup is returned only for a real publisher id and slot', () => {
 });
 
 test('only home, stadiums, and archive are approved placements', () => {
-  assert.deepEqual([...AD_PLACEMENTS], ['home', 'stadiums', 'archive']);
+  assert.deepEqual([...AD_PLACEMENTS], ['home', 'home-follow', 'stadiums', 'stadiums-follow', 'archive', 'archive-follow']);
+  assert.equal(resolvePlacement('home-follow', { VITE_ADS_PREVIEW: 'true' }).mode, 'none');
+  assert.equal(resolvePlacement('trophy', { VITE_ADS_PREVIEW: 'true' }).mode, 'none');
   assert.equal(surfaceAllowsAd('home'), true);
   assert.equal(surfaceAllowsAd('stadiums'), true);
   assert.equal(surfaceAllowsAd('archive'), true);

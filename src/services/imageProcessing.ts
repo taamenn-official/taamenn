@@ -43,6 +43,11 @@ export function cropSourceRect(imageWidth: number, imageHeight: number, frame: C
   };
 }
 
+/** Empty MIME is common for camera rolls. Only a declared non-image type is rejected up front. */
+export function canTryImageFile(file: { type?: string }) {
+  return !file.type || file.type.startsWith('image/');
+}
+
 export function loadImageElement(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
@@ -52,8 +57,34 @@ export function loadImageElement(src: string) {
   });
 }
 
+/**
+ * Decode a file once. The caller owns `release` and must call it after the preview
+ * is no longer displayed. A failed decode revokes its own URL.
+ */
+export async function readImageFile(file: File): Promise<{ url: string; width: number; height: number; release: () => void }> {
+  if (!canTryImageFile(file)) throw new Error('Unsupported image');
+  const url = URL.createObjectURL(file);
+  const release = () => URL.revokeObjectURL(url);
+  try {
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      const width = bitmap.width;
+      const height = bitmap.height;
+      bitmap.close();
+      if (!width || !height) throw new Error('Image decode failed');
+      return { url, width, height, release };
+    }
+    const img = await loadImageElement(url);
+    if (!img.naturalWidth || !img.naturalHeight) throw new Error('Image decode failed');
+    return { url, width: img.naturalWidth, height: img.naturalHeight, release };
+  } catch (error) {
+    release();
+    throw error;
+  }
+}
+
 export async function cropImageToDataUrl(file: File, frame: CropFrame, options: { maxWidth?: number; maxHeight?: number; quality?: number } = {}) {
-  if (!file.type.startsWith('image/')) throw new Error('Unsupported image');
+  if (!canTryImageFile(file)) throw new Error('Unsupported image');
   const sourceUrl = URL.createObjectURL(file);
   try {
     const source = await loadImageElement(sourceUrl);
@@ -78,7 +109,7 @@ export async function imageFileToDataUrl(file: File, options:{maxWidth?:number;m
   const maxWidth = options.maxWidth ?? 1600;
   const maxHeight = options.maxHeight ?? 1200;
   const quality = options.quality ?? .84;
-  if (!file.type.startsWith('image/')) throw new Error('Unsupported image');
+  if (!canTryImageFile(file)) throw new Error('Unsupported image');
   const source = await new Promise<HTMLImageElement>((resolve,reject)=>{
     const url=URL.createObjectURL(file); const img=new Image();
     img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};

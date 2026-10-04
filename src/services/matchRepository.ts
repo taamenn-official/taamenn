@@ -110,13 +110,16 @@ export async function archiveMatch(id:string){
   return archived;
 }
 
-export async function recordMatchResult(id:string,score1:number,score2:number,story?:string,playerContributions?:Match['playerContributions']){
+export async function recordMatchResult(id:string,score1:number,score2:number,story?:string,playerContributions?:Match['playerContributions'],matchFormat?:Match['matchFormat']){
   if(!validScore(score1)||!validScore(score2))throw new Error('invalid-score');
   const current=(await listMatches()).find(x=>x.id===id);
   if(!current)throw new Error('Match not found');
   if(!isArchiveStatus(current.status))throw new Error('match-not-completed');
   const now=Date.now();
-  const value=await putCanonical({...current,score1,score2,story:story??current.story,playerContributions,status:statusAfterResult(current.status),resultRecordedAt:now,updatedAt:now});
+  const format=matchFormat==='7v7'?'7v7':'5v5';
+  const cap=format==='7v7'?7:5;
+  const clipped=playerContributions?{team1:playerContributions.team1.slice(0,cap),team2:playerContributions.team2.slice(0,cap)}:undefined;
+  const value=await putCanonical({...current,score1,score2,story:story??current.story,playerContributions:clipped,matchFormat:format,status:statusAfterResult(current.status),resultRecordedAt:now,updatedAt:now});
   await emitMatchNotification(value,'result-recorded',now);
   return value;
 }

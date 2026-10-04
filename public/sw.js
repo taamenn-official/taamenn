@@ -1,4 +1,4 @@
-const VERSION='v9';
+const VERSION='v10';
 const SHELL=`taamen-shell-${VERSION}`;
 const RUNTIME=`taamen-runtime-${VERSION}`;
 const CORE=['/','/manifest.webmanifest','/assets/taamen-brand-mark.png'];
@@ -16,7 +16,7 @@ self.addEventListener('fetch',event=>{
   if(url.pathname==='/ads.txt'||url.pathname==='/sitemap.xml'||url.pathname==='/robots.txt') return;
   // Share tokens are unique URLs. Do not fill Cache Storage with them.
   // Network first, then the SPA shell so React can decode the still-current path.
-  if(url.pathname.startsWith('/share/') || url.pathname==='/acquisition'){
+  if(url.pathname.startsWith('/share/') || url.pathname==='/acquisition' || url.pathname==='/trophy'){
     event.respondWith((async()=>{
       try{
         return await fetch(event.request);
