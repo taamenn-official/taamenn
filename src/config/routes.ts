@@ -9,7 +9,7 @@ export const routeRegistry:RouteMeta[]=[
  {id:'home',icon:HomeIcon,label:{ar:'الرئيسية',en:'Home'},scopes:['normal','featured'],showInMobileNav:true,showInDesktopNav:true,section:'core'},
  {id:'match-center',icon:ClipboardList,label:{ar:'مركز المباريات',en:'Match Center'},scopes:['normal'],showInMobileNav:true,showInDesktopNav:true,section:'football'},
  {id:'historical-match-center',icon:ClipboardList,label:{ar:'المباريات التاريخية',en:'Historical Matches'},scopes:['featured'],showInMobileNav:true,showInDesktopNav:true,section:'football'},
- {id:'archive',icon:Archive,label:{ar:'السجل',en:'Archive'},scopes:['normal'],showInMobileNav:true,showInDesktopNav:true,section:'football'},
+ {id:'archive',icon:Archive,label:{ar:'الأرشيف',en:'Archive'},scopes:['normal'],showInMobileNav:true,showInDesktopNav:true,section:'football'},
  {id:'stadiums',icon:Goal,label:{ar:'الملاعب',en:'Stadiums'},scopes:['normal','featured'],showInMobileNav:true,showInDesktopNav:true,section:'football'},
  {id:'profile',icon:UserRound,label:{ar:'الملف الشخصي',en:'Profile'},scopes:['normal'],showInMobileNav:true,showInDesktopNav:true,section:'personal'},
  {id:'tactical',icon:Swords,label:{ar:'الملعب التكتيكي',en:'Tactical Playground'},scopes:['normal'],showInMobileNav:false,showInDesktopNav:false,section:'football'},

@@ -10,6 +10,7 @@ import { matchUiCopy, uiCopy } from '../i18n/translations';
 import { useHomeEntrance, useHomeMatchReveal } from '../motion/useHomeEntrance';
 import AdSlot from '../components/monetization/AdSlot';
 import { isCampaignActive } from '../config/campaign';
+import { challengeCopy } from '../i18n/challenge';
 
 export default function Home({language,go,profile,session=null}:{language:'ar'|'en';go:(p:RouteId)=>void;profile?:{firstName:string};session?:Session|null}) {
   const ar=language==='ar';
@@ -56,11 +57,11 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
     {error&&<div className="error-banner" role="alert">{error}</div>}
     {isCampaignActive() && (
       <a className="campaign-card" href="/trophy">
-        <p className="eyebrow">TAAMEN</p>
-        <strong>{ar ? 'فعالية TAAMEN القادمة' : 'Upcoming TAAMEN campaign'}</strong>
-        <span>{ar ? 'شارك في فعالية TAAMEN واربح فرصة لعب مباراة مع فريقك في ملعب شريك.' : 'Join the TAAMEN campaign and earn a chance to play a match with your team at a partner ground.'}</span>
-        <b dir="ltr">31 October — 15 November 2026</b>
-        <em>{ar ? 'اكتشف الفعالية' : 'Discover the campaign'}</em>
+        <p className="eyebrow">{challengeCopy(language).kicker}</p>
+        <strong>{challengeCopy(language).headline}</strong>
+        <span>{challengeCopy(language).homeLead}</span>
+        <b dir="ltr">{challengeCopy(language).dates}</b>
+        <em>{challengeCopy(language).homeCta}</em>
       </a>
     )}
     <div className="stats-grid home-stats">

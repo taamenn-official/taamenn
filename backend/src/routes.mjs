@@ -10,6 +10,7 @@ import { requiredEmail, requiredString } from './validate.mjs';
 import { historicalMatchDto, sessionMemberDto } from './dto.mjs';
 import { contactConfigured, sendContactMessage } from './contact.mjs';
 import { pushPublicConfig, pushSchedule, pushSubscribe, pushTest, pushUnsubscribe } from './pushHttp.mjs';
+import { challengeConfig, challengeEvents, challengeLogout, challengeMe, challengeOperator, challengeOtpRequest, challengeOtpVerify } from './challenge/http.mjs';
 import { vapidConfigured } from './webPush.mjs';
 
 const recognitionLimiter = createRateLimiter();
@@ -194,6 +195,14 @@ const routes = [
     path: '/api/push/test',
     handler: ({ request, ip }) => pushTest(request, ip),
   },
+
+  { method: 'GET', path: '/api/challenge/config', handler: ({ request }) => challengeConfig(request) },
+  { method: 'GET', path: '/api/challenge/me', handler: ({ request }) => challengeMe(request) },
+  { method: 'POST', path: '/api/challenge/otp/request', handler: ({ request, ip }) => challengeOtpRequest(request, ip) },
+  { method: 'POST', path: '/api/challenge/otp/verify', handler: ({ request, ip, secure }) => challengeOtpVerify(request, ip, secure) },
+  { method: 'POST', path: '/api/challenge/events', handler: ({ request, ip }) => challengeEvents(request, ip) },
+  { method: 'POST', path: '/api/challenge/logout', handler: ({ request, secure }) => challengeLogout(request, secure) },
+  { method: 'POST', path: '/api/challenge/operator/status', handler: ({ request }) => challengeOperator(request) },
 ];
 
 function matchRoute(pathname) {

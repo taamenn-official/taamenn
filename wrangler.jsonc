@@ -15,6 +15,10 @@
   // Worker keys: `data` (historical/operator document), `sessions`, and `push`
   // (subscription + reminder jobs only). VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY,
   // and VAPID_SUBJECT are Worker secrets. Never put the private key here.
+  // Challenge D1 is separate. Do not invent a database id. After
+  // `npx wrangler d1 create taamen-challenge`, add the returned id here and
+  // under env.production:
+  // "d1_databases": [{ "binding": "TAAMEN_CHALLENGE_DB", "database_name": "taamen-challenge", "database_id": "<wrangler id>", "migrations_dir": "backend/migrations" }]
   "triggers": {
     "crons": ["*/5 * * * *"]
   },

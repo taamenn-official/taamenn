@@ -83,6 +83,7 @@ export async function createLocalUpcomingMatch(input:{title?:string;team1:string
   const value=await putCanonical(match);
   await emitMatchNotification(value,'created',now);
   queuePush(value,'created');
+  void import('./challengeQueue.ts').then(mod => mod.rememberChallengeEvent('match_created', value.id, { localMatchId: value.id })).catch(() => undefined);
   return value;
 }
 
