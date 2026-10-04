@@ -217,4 +217,43 @@ export const api = {
   sendTestPush(subscriptionId: string) {
     return request<{ ok: boolean; sent: number; duplicate: boolean }>('/push/test', { method: 'POST', body: { subscriptionId } });
   },
+
+  challengeConfig() {
+    return request<{ phase: 'before' | 'active' | 'ended'; otpAvailable: boolean; campaignId: string }>('/challenge/config');
+  },
+
+  challengeMe() {
+    return request<ChallengeProgress>('/challenge/me');
+  },
+
+  requestChallengeOtp(body: { phone: string; source?: string | null }) {
+    return request<{ ok: true; delivery: 'accepted' }>('/challenge/otp/request', { method: 'POST', body });
+  },
+
+  verifyChallengeOtp(body: { phone: string; code: string; displayName?: string; source?: string | null }) {
+    return request<ChallengeProgress & { ok: true; phoneMasked?: string }>('/challenge/otp/verify', { method: 'POST', body });
+  },
+
+  challengeEvents(events: unknown[]) {
+    return request<ChallengeProgress & { ok: true; accepted: number; duplicate: number }>('/challenge/events', { method: 'POST', body: { events } });
+  },
+};
+
+export type ChallengeTaskState = {
+  id: string;
+  required: number;
+  count: number;
+  evidence: 'server_verified' | 'recorded' | 'soft_claim';
+  state: 'incomplete' | 'active' | 'complete';
+};
+
+export type ChallengeProgress = {
+  participantId: string;
+  displayName: string;
+  status: 'active' | 'eligible_pending_review' | 'finalist' | 'winner' | 'disqualified';
+  provisional: boolean;
+  completed: number;
+  total: number;
+  percent: number;
+  tasks: ChallengeTaskState[];
 };

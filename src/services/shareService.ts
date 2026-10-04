@@ -312,6 +312,7 @@ export async function shareMatch(m: Match, options?: { includeContributions?: bo
     if (navigator.share) {
       await navigator.share({ title: `${m.team1} × ${m.team2}`, text: m.title || 'TAAMEN match', url });
       await emitMatchNotification(m, 'shared');
+      void import('./challengeQueue.ts').then(mod => mod.rememberChallengeEvent('match_shared', m.id, { localMatchId: m.id })).catch(() => undefined);
       return { method: 'shared' as const, url };
     }
   } catch {
@@ -321,6 +322,7 @@ export async function shareMatch(m: Match, options?: { includeContributions?: bo
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(url);
       await emitMatchNotification(m, 'shared');
+      void import('./challengeQueue.ts').then(mod => mod.rememberChallengeEvent('match_shared', m.id, { localMatchId: m.id })).catch(() => undefined);
       return { method: 'copied' as const, url };
     }
   } catch {

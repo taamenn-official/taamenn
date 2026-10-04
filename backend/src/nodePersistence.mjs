@@ -5,6 +5,7 @@ import { config } from './config.mjs';
 import { createJsonFile } from './jsonFile.mjs';
 import { setStores, resetStores } from './runtime.mjs';
 import { createMemoryDocument, setPushStore } from './pushStore.mjs';
+import { createMemoryChallengeStore, setChallengeStore } from './challenge/store.mjs';
 import { validateData, store } from './store.mjs';
 import { validateSessions } from './sessions.mjs';
 import { inspectCanonicalSource, normalizeMatch } from './kvMigration.mjs';
@@ -42,6 +43,7 @@ export function initNodeRuntime() {
     }),
   });
   setPushStore(createMemoryDocument());
+  setChallengeStore(createMemoryChallengeStore());
   initialized = true;
 }
 

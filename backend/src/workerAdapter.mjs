@@ -3,6 +3,9 @@ import { applyEnv } from './config.mjs';
 import { createKvJsonFile } from './kvStore.mjs';
 import { setStores } from './runtime.mjs';
 import { emptyPushDocument, setPushStore, validatePushDocument } from './pushStore.mjs';
+import { createD1ChallengeStore } from './challenge/d1Store.mjs';
+import { setChallengeStore } from './challenge/store.mjs';
+import { setChallengeEnv } from './challenge/service.mjs';
 import { validateData, store } from './store.mjs';
 import { validateSessions } from './sessions.mjs';
 import { syncFeaturedMembers } from './featuredMembers.mjs';
@@ -18,6 +21,7 @@ export function initWorkerRuntime(env, exampleData) {
   if (ready) return ready;
   ready = (async () => {
     applyEnv(env);
+    setChallengeEnv(env);
     const kv = env.TAAMEN_KV;
     if (!kv || typeof kv.get !== 'function') {
       throw new Error('TAAMEN_KV binding is missing.');
@@ -46,6 +50,9 @@ export function initWorkerRuntime(env, exampleData) {
       validate: validatePushDocument,
       createFallback: async () => emptyPushDocument(),
     }));
+    if (env.TAAMEN_CHALLENGE_DB && typeof env.TAAMEN_CHALLENGE_DB.prepare === 'function') {
+      setChallengeStore(createD1ChallengeStore(env.TAAMEN_CHALLENGE_DB));
+    }
     await store.load();
     await store.update(data => { syncFeaturedMembers(data); });
   })();

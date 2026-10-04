@@ -1,0 +1,159 @@
+.trophy-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+  display: grid;
+  gap: 16px;
+}
+
+.trophy-hero,
+.trophy-card,
+.challenge-dashboard {
+  display: grid;
+  gap: 10px;
+}
+
+.trophy-hero h1,
+.challenge-id strong {
+  margin: 0;
+}
+
+.challenge-dashboard {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+}
+
+.challenge-id,
+.challenge-progress,
+.challenge-task {
+  border: 1px solid rgba(186, 200, 217, .28);
+  border-radius: 12px;
+  background: rgba(7, 19, 22, .45);
+  color: #f4f7f2;
+}
+
+.challenge-id,
+.challenge-progress {
+  padding: 14px;
+}
+
+.challenge-id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.challenge-id strong {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.challenge-meter {
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(186, 200, 217, .18);
+  overflow: hidden;
+}
+
+.challenge-meter span {
+  display: block;
+  height: 100%;
+  background: #9bf272;
+  transition: width 600ms cubic-bezier(.22, .61, .36, 1);
+}
+
+.challenge-tasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.challenge-task {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px;
+  align-items: start;
+}
+
+.challenge-task.is-active {
+  border-color: rgba(155, 242, 114, .45);
+}
+
+.challenge-task.is-complete {
+  background: rgba(155, 242, 114, .14);
+  border-color: #7abf5a;
+  color: #f4f7f2;
+}
+
+.challenge-task small,
+.challenge-task p {
+  color: #bac8d9;
+}
+
+.challenge-task.is-complete small {
+  color: #e7f8dc;
+}
+
+.challenge-task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.challenge-task-actions .primary-action,
+.challenge-task-actions .dark-action {
+  margin: 0;
+  text-decoration: none;
+}
+
+.challenge-form {
+  display: grid;
+  gap: 10px;
+}
+
+.challenge-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.challenge-ready {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9bf272;
+}
+
+html[data-theme="light"] .challenge-id,
+html[data-theme="light"] .challenge-progress,
+html[data-theme="light"] .challenge-task {
+  background: #f7faf8;
+  color: #102228;
+  border-color: #1a2c30;
+}
+
+html[data-theme="light"] .challenge-task.is-complete {
+  background: #e7f6df;
+  color: #102228;
+}
+
+html[data-theme="light"] .challenge-task small {
+  color: #3d555c;
+}
+
+@media (max-width: 800px) {
+  .challenge-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .challenge-meter span,
+  .challenge-task {
+    transition: none;
+  }
+}
