@@ -18,18 +18,19 @@ import MatchTimingFields from '../components/MatchTimingFields';
 import { blankTimingDraft, timingDraftFromMatch, timingFromDraft, type TimingDraft } from '../domain/matches/matchTiming';
 import { scheduleCopy } from '../i18n/translations';
 import { useOverlayPresence } from '../motion/useOverlayPresence';
+import { consumeMatchFromStadium, type StadiumPrefill } from '../services/stadiumHandoff';
 
 type Draft={title:string;team1:string;team2:string;stadium:string;city:string;date:string;time:string;timing:TimingDraft;note:string;type:MatchType;visibility:'LOCAL'|'PUBLIC'};
 const blank=():Draft=>({title:'',team1:'TAAMEN',team2:'',stadium:'',city:'',date:todayInTimeZone(),time:'20:00',timing:blankTimingDraft(),note:'',type:'normal',visibility:'LOCAL'});
 
-function MatchEditor({language,initial,onClose,onSaved}:{language:'ar'|'en';initial:Match|null;onClose:()=>void;onSaved:()=>void}){
+function MatchEditor({language,initial,prefill,onClose,onSaved}:{language:'ar'|'en';initial:Match|null;prefill?:StadiumPrefill|null;onClose:()=>void;onSaved:()=>void}){
   const copy=matchUiCopy[language];
   const types=archiveCopy[language];
   const[draft,setDraft]=useState<Draft>(()=>initial?{
     title:initial.title||'',team1:initial.team1,team2:initial.team2,stadium:initial.stadium||'',city:initial.city||'',
     date:initial.dateISO?.slice(0,10)||'',time:initial.time||'',timing:timingDraftFromMatch(initial),note:initial.story||'',type:initial.type,
     visibility:initial.visibility==='PUBLIC'?'PUBLIC':'LOCAL',
-  }:blank());
+  }:prefill?{...blank(),stadium:prefill.stadium,city:prefill.city}:blank());
   const[error,setError]=useState('');
   const[busy,setBusy]=useState(false);
   const{backdropRef,panelRef,requestClose}=useOverlayPresence<HTMLButtonElement,HTMLElement>('modal',onClose);
@@ -80,7 +81,7 @@ function Countdown({match,language,now}:{match:Match;language:'ar'|'en';now:numb
 export default function Matches({language}:{language:'ar'|'en'}){
   const copy=matchUiCopy[language];
   const[matches,setMatches]=useState<Match[]>([]);
-  const[editor,setEditor]=useState<{open:boolean;match:Match|null}>({open:false,match:null});
+  const[editor,setEditor]=useState<{open:boolean;match:Match|null;prefill?:StadiumPrefill|null}>({open:false,match:null});
   const[share,setShare]=useState<Match|null>(null);
   const[now,setNow]=useState(Date.now());
   const[msg,setMsg]=useState('');
@@ -96,7 +97,13 @@ export default function Matches({language}:{language:'ar'|'en'}){
     },1000);
     const refresh=()=>void load();
     window.addEventListener('taamen-matches-changed',refresh);
-    return()=>{clearInterval(tick);window.removeEventListener('taamen-matches-changed',refresh)};
+    const openFromStadium=()=>{
+      const next=consumeMatchFromStadium();
+      if(next)setEditor({open:true,match:null,prefill:next});
+    };
+    window.addEventListener('taamen-create-match',openFromStadium);
+    openFromStadium();
+    return()=>{clearInterval(tick);window.removeEventListener('taamen-matches-changed',refresh);window.removeEventListener('taamen-create-match',openFromStadium)};
   },[load]);
   const active=matches.filter(match=>canonicalStatus(match.status)==='ACTIVE');
   const upcoming=matches.filter(match=>canonicalStatus(match.status)==='UPCOMING').sort((a,b)=>matchStartTime(a)-matchStartTime(b));
@@ -119,7 +126,7 @@ export default function Matches({language}:{language:'ar'|'en'}){
     {next&&<section className="next-match-section"><header><CalendarClock size={18}/><h2>{copy.nextMatch}</h2></header>{card(next,true)}</section>}
     {(active.length>0||remaining.length>0)&&<section className="matches-list-section"><h2>{copy.yourMatches}</h2><div className="current-match-grid">{remaining.map(match=>card(match))}</div></section>}
     {!matches.length&&<div className="empty-state"><CalendarClock size={25}/><strong>{copy.noMatches}</strong><span>{copy.noMatchesBody}</span><button className="primary-action" onClick={()=>setEditor({open:true,match:null})}>{copy.createFirst}</button></div>}
-    {editor.open&&<MatchEditor language={language} initial={editor.match} onClose={()=>setEditor({open:false,match:null})} onSaved={()=>{setMsg(copy.saved);void load()}}/>}
+    {editor.open&&<MatchEditor language={language} initial={editor.match} prefill={editor.prefill} onClose={()=>setEditor({open:false,match:null})} onSaved={()=>{setMsg(copy.saved);void load()}}/>}
     {share&&<MatchShareModal match={share} language={language} onClose={()=>setShare(null)}/>}
   </section>;
 }

@@ -101,7 +101,7 @@ export default function ArchiveDetailModal({ match, language, featured = false, 
 
           {hasContributions && (
             <div className="contributions-section">
-              <h3>{copy.contributions}</h3>
+              <h3>{copy.contributions}{match.matchFormat ? <span className="match-format-chip" dir="ltr">{match.matchFormat}</span> : null}</h3>
 
               {match.playerContributions!.team1.length > 0 && (
                 <div className="team-contributions">

@@ -9,6 +9,7 @@ import { api, type Session } from '../services/apiClient';
 import { matchUiCopy, uiCopy } from '../i18n/translations';
 import { useHomeEntrance, useHomeMatchReveal } from '../motion/useHomeEntrance';
 import AdSlot from '../components/monetization/AdSlot';
+import { isCampaignActive } from '../config/campaign';
 
 export default function Home({language,go,profile,session=null}:{language:'ar'|'en';go:(p:RouteId)=>void;profile?:{firstName:string};session?:Session|null}) {
   const ar=language==='ar';
@@ -53,6 +54,15 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
       </div>
     </div>
     {error&&<div className="error-banner" role="alert">{error}</div>}
+    {isCampaignActive() && (
+      <a className="campaign-card" href="/trophy">
+        <p className="eyebrow">TAAMEN</p>
+        <strong>{ar ? 'فعالية TAAMEN القادمة' : 'Upcoming TAAMEN campaign'}</strong>
+        <span>{ar ? 'شارك في فعالية TAAMEN واربح فرصة لعب مباراة مع فريقك في ملعب شريك.' : 'Join the TAAMEN campaign and earn a chance to play a match with your team at a partner ground.'}</span>
+        <b dir="ltr">31 October — 15 November 2026</b>
+        <em>{ar ? 'اكتشف الفعالية' : 'Discover the campaign'}</em>
+      </a>
+    )}
     <div className="stats-grid home-stats">
       <button type="button" className="stat-card stat-dark" data-ta-motion="card" onClick={()=>go(featured?'historical-match-center':'archive')}>
         <span>{ar?'السجل':'Archive'}</span><strong>{total}</strong><small>{featured?(ar?'سجلات تاريخية':'historical records'):(ar?'سجلات متاحة':'available records')}</small>
@@ -74,5 +84,6 @@ export default function Home({language,go,profile,session=null}:{language:'ar'|'
       <div className="panel-heading"><div><p className="eyebrow">{featured?'TAAMEN / HISTORY':(ar?'من السجل':'FROM THE ARCHIVE')}</p><h2>{ar?'أحدث المواجهات':'Latest matches'}</h2></div><button className="text-button" data-ta-icons onClick={()=>go(featured?'historical-match-center':'archive')}>{ar?'عرض الكل':'View all'}<ChevronRight size={15}/></button></div>
       <div className="home-match-list">{latest.map(m=><MatchCard key={m.id} match={m} language={language} featured={featured}/>)}</div>
     </section>
+    {latest.length > 0 && <AdSlot placement="home-follow" />}
   </section>;
 }

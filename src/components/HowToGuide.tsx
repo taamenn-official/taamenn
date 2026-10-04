@@ -138,7 +138,7 @@ const sections: GuideSection[] = [
     purpose: { ar: 'هويتك المحلية داخل TAAMEN.', en: 'Your local identity inside TAAMEN.' },
     what: {
       ar: 'الاسم والصورة والغلاف. الحفظ ينشط عند وجود تغيير. قص الصورة يُبقي الإطار ثابتًا وتحرك الصورة خلفه بالسحب والتكبير، ثم تؤكد أو تلغي.',
-      en: 'Name, photo, and cover. Save turns on when something changed. Cropping keeps the frame still and you move the photo behind it with drag and zoom, then confirm or cancel.',
+      en: 'Name, photo, and cover stay on this device. Save turns on when something changed. Cropping keeps the frame still and you move the photo behind it with drag and zoom, then confirm or cancel.',
     },
     steps: {
       ar: ['عدّل الحقول ثم احفظ.', 'لاختيار صورة: اختر الملف، حرّكها، كبّرها، ثم أكّد.', 'الإلغاء يُبقي الصورة السابقة.', 'المشاركة العامة تعرض الاسم والصور فقط.'],
@@ -210,16 +210,16 @@ const sections: GuideSection[] = [
     title: { ar: 'الدعم', en: 'Support' },
     purpose: { ar: 'رسالة للفريق، مع حالة إرسال واضحة.', en: 'A message to the team, with a clear send state.' },
     what: {
-      ar: 'النموذج يرسل عبر TAAMEN. أثناء الإرسال يتعطّل الزر. عند النجاح يبقى النص ظاهرًا وتظهر حالة «أُرسلت». عند الفشل تبقى الرسالة لإعادة المحاولة. واتساب والقناة الرسمية متاحان من الصفحة نفسها.',
-      en: 'The form sends through TAAMEN. While sending, the button is disabled. On success the text stays visible and the button shows Sent. On failure the message stays so you can retry. WhatsApp and the official channel are on the same page.',
+      ar: 'كيف تستخدم الدعم: أرسل للفريق المشكلة، وأين حدثت، وماذا كنت تفعل. كلما كان السياق أوضح كان التحقق أسهل. أثناء الإرسال يتوقف الزر. عند النجاح يبقى النص وتظهر حالة الإرسال. عند الفشل تبقى الرسالة لإعادة المحاولة.',
+      en: 'How to use Support: send the team the problem, where it happened, and what you were doing. The more useful the context, the easier it is to investigate. While sending, the button waits. On success the text stays and the delivery state is shown. On failure the message stays so you can retry.',
     },
     steps: {
-      ar: ['اكتب الصفحة وما فعلت وما حدث.', 'أرسل وانتظر حالة الزر.', 'إذا فشل الإرسال، عدّل النص وأعد المحاولة.', 'لا تكتب «الموقع لا يعمل» فقط.'],
-      en: ['Name the page, what you did, and what happened.', 'Send and watch the button state.', 'If sending fails, edit the text and try again.', 'Do not write only “the site is broken.”'],
+      ar: ['صف صفحة TAAMEN المعنية.', 'صف ما كنت تحاول فعله.', 'صف ما حدث فعلًا.', 'أرسل الرسالة وراقب حالة التسليم.'],
+      en: ['Describe the relevant TAAMEN page.', 'Describe what you were trying to do.', 'Describe what actually happened.', 'Send the message and watch the delivery state.'],
     },
     example: {
-      ar: 'بدل «لا يعمل»: «في السجل، بعد إدخال نتيجة مباراة الجمعة، لم تظهر في النتائج المسجّلة.»',
-      en: 'Instead of “it does not work”: “In Archive, after I entered Friday’s score, the match did not move to recorded results.”',
+      ar: 'مثال مفيد: «بعد أن أدخلت نتيجة مباراة الجمعة في السجل، لم تظهر المباراة ضمن النتائج المسجّلة.»',
+      en: 'Example of a useful report: “After I entered Friday’s match result in Archive, the match did not appear under recorded results.”',
     },
   },
 ];

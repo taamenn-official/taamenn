@@ -1,4 +1,5 @@
-import type { Match, MatchTiming, MatchType, PlayerContribution } from '../data/footballData';
+import type { Match, MatchFormat, MatchTiming, MatchType, PlayerContribution } from '../data/footballData';
+import { contributionCapacity, sanitizeMatchFormat } from '../domain/matches/matchFormat.ts';
 import { sanitizeStoredTiming, scheduleFromMatch, scheduleFromTiming, timingFingerprint } from '../domain/matches/matchTiming.ts';
 import { formatClockRange } from '../shared/formatting/matchPresentation.ts';
 import { dateKeyToISO, PALESTINE_TIMEZONE } from '../shared/formatting/dateTime.ts';
@@ -38,6 +39,7 @@ export type MatchSharePayload = {
   /** Enough structure to rebuild periods and breaks. Absent on links created before v5. */
   timing?: MatchTiming;
   story?: string;
+  matchFormat?: MatchFormat;
   visibility: 'PUBLIC';
   playerContributions?: {
     team1: PlayerContribution[];
@@ -68,9 +70,9 @@ function shareTiming(match: Match): MatchTiming {
     ?? { mode: 'continuous', durationMinutes: scheduleFromMatch(match).playingMinutes };
 }
 
-function clipContributions(list: unknown): PlayerContribution[] {
+function clipContributions(list: unknown, limit = 5): PlayerContribution[] {
   if (!Array.isArray(list)) return [];
-  return list.slice(0, 5).map((row) => {
+  return list.slice(0, limit).map((row) => {
     const item = row as Partial<PlayerContribution>;
     return {
       playerName: String(item.playerName || '').slice(0, 60),
@@ -104,14 +106,16 @@ function safe(m: Match, options: { includeContributions?: boolean; allowSave?: b
     durationMinutes: scheduleFromMatch(match).scheduledMinutes,
     timing: shareTiming(match),
     story: match.story ? String(match.story).slice(0, 500) : undefined,
+    matchFormat: sanitizeMatchFormat(match.matchFormat),
     visibility: 'PUBLIC',
   };
   if (options.includeContributions && match.playerContributions) {
+    const limit = contributionCapacity(sanitizeMatchFormat(match.matchFormat) ?? '5v5');
     return {
       ...base,
       playerContributions: {
-        team1: clipContributions(match.playerContributions.team1),
-        team2: clipContributions(match.playerContributions.team2),
+        team1: clipContributions(match.playerContributions.team1, limit),
+        team2: clipContributions(match.playerContributions.team2, limit),
       },
     };
   }
@@ -230,6 +234,7 @@ export function materializeSharedMatch(payload: MatchSharePayload): Match {
     dateKey: Number(payload.dateKey),
     timezone: PALESTINE_TIMEZONE,
     story: payload.story || '',
+    matchFormat: sanitizeMatchFormat(payload.matchFormat),
     title: payload.title,
     stadium: payload.stadium,
     city: payload.city,
@@ -279,9 +284,13 @@ export function decodeMatchShare(payload: string): MatchSharePayload | null {
       durationMinutes,
       timing,
       story: x.story ? String(x.story).slice(0, 500) : undefined,
+      matchFormat: sanitizeMatchFormat(x.matchFormat),
       visibility: 'PUBLIC',
       playerContributions: x.playerContributions
-        ? { team1: clipContributions(x.playerContributions.team1), team2: clipContributions(x.playerContributions.team2) }
+        ? {
+            team1: clipContributions(x.playerContributions.team1, contributionCapacity(sanitizeMatchFormat(x.matchFormat) ?? '5v5')),
+            team2: clipContributions(x.playerContributions.team2, contributionCapacity(sanitizeMatchFormat(x.matchFormat) ?? '5v5')),
+          }
         : undefined,
     };
   } catch {

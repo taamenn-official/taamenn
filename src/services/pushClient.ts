@@ -54,8 +54,12 @@ export async function enableBackgroundPush(prefs: PushPrefs = defaultPushPrefs()
     const registration = await navigator.serviceWorker.register('/sw.js');
     const ready = await navigator.serviceWorker.ready;
     const config = await api.pushConfig();
-    if (!config.publicKey) return { ok: false, reason: 'not-configured' };
-    const subscription = await (ready || registration).pushManager.subscribe({
+    if (!config.publicKey) {
+      forgetSubscription();
+      return { ok: false, reason: 'not-configured' };
+    }
+    const pushManager = (ready || registration).pushManager;
+    const subscription = await pushManager.getSubscription() || await pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(config.publicKey),
     });
@@ -65,8 +69,12 @@ export async function enableBackgroundPush(prefs: PushPrefs = defaultPushPrefs()
       preferences: prefs,
       subscription: { endpoint: json.endpoint, keys: json.keys },
     });
+    if (!saved.configured) {
+      forgetSubscription();
+      return { ok: false, reason: 'not-configured' };
+    }
     rememberSubscription(saved.subscriptionId);
-    return { ok: true, subscriptionId: saved.subscriptionId, configured: saved.configured };
+    return { ok: true, subscriptionId: saved.subscriptionId, configured: true };
   } catch (error) {
     if (error instanceof ApiError && error.status === 503) return { ok: false, reason: 'not-configured' };
     return { ok: false, reason: 'failed' };

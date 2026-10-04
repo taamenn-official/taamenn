@@ -92,20 +92,30 @@ export default function Support({language,profile,onBack}:{language:'ar'|'en';pr
     <div className="contact-actions" role="group" aria-label={ar ? 'طرق التواصل' : 'Contact actions'}>
       <a className="contact-action" href={INSTAGRAM_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><AtSign size={18} /></span>
-        <span className="contact-action-copy"><strong>{copy.officialInstagramTitle}</strong><small>{copy.officialHandle}</small></span>
+        <span className="contact-action-copy"><strong>{ar ? 'إنستغرام TAAMEN الرسمي' : 'Official TAAMEN Instagram'}</strong><small>{copy.officialHandle}</small></span>
       </a>
       {WHATSAPP_URL && <a className="contact-action" href={WHATSAPP_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><MessageCircle size={18} /></span>
-        <span className="contact-action-copy"><strong>{ar ? 'واتساب' : 'WhatsApp'}</strong><small>{copy.openWhatsApp}</small></span>
+        <span className="contact-action-copy"><strong>{ar ? 'واتساب TAAMEN الرسمي' : 'Official TAAMEN WhatsApp'}</strong><small>{copy.openWhatsApp}</small></span>
       </a>}
       <a className="contact-action" href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer noopener">
         <span className="contact-action-icon" aria-hidden="true"><Radio size={18} /></span>
-        <span className="contact-action-copy"><strong>{ar ? 'القناة الرسمية' : 'Official channel'}</strong><small>{copy.openWhatsAppChannel}</small></span>
+        <span className="contact-action-copy"><strong>{ar ? 'قناة واتساب TAAMEN الرسمية' : 'Official TAAMEN WhatsApp Channel'}</strong><small>{copy.openWhatsAppChannel}</small></span>
       </a>
     </div>
     <div className="content-grid support-grid official-contact-grid">
       <section className="panel support-card support-contact">
-        <div className="panel-heading"><div><p className="eyebrow">CONTACT TAAMEN</p><h2>{copy.contactTitle}</h2></div><Mail size={18}/></div>
+        <div className="panel-heading"><div><p className="eyebrow">CONTACT TAAMEN</p><h2>{ar ? 'كيف تستخدم الدعم' : 'How to use Support'}</h2></div><Mail size={18}/></div>
+        <div className="support-guide">
+          <p>{ar ? 'أرسل لفريق TAAMEN المشكلة، وأين حدثت، وماذا كنت تفعل حينها. كلما كان السياق أوضح كان التحقق أسهل.' : 'Send the TAAMEN team the problem, where it happened, and what you were doing when it happened. The more useful the context, the easier it is to investigate.'}</p>
+          <ol>
+            <li>{ar ? 'صف صفحة TAAMEN المعنية.' : 'Describe the relevant TAAMEN page.'}</li>
+            <li>{ar ? 'صف ما كنت تحاول فعله.' : 'Describe what you were trying to do.'}</li>
+            <li>{ar ? 'صف ما حدث فعلًا.' : 'Describe what actually happened.'}</li>
+            <li>{ar ? 'أرسل الرسالة وراقب حالة التسليم.' : 'Send the message and watch the delivery state.'}</li>
+          </ol>
+          <div className="support-example"><strong>{ar ? 'مثال لتقرير مفيد' : 'Example of a useful report'}</strong><p>{ar ? 'بعد أن أدخلت نتيجة مباراة الجمعة في السجل، لم تظهر المباراة ضمن النتائج المسجّلة.' : 'After I entered Friday’s match result in Archive, the match did not appear under recorded results.'}</p></div>
+        </div>
         <form className="support-contact-form" onSubmit={submit} noValidate>
           {hasProfileEmail
             ? <p className="settings-note">{copy.contactUsingProfileEmail} <strong>{profileEmail}</strong></p>

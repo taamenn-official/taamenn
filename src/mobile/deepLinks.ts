@@ -19,6 +19,7 @@ export type ParsedDeepLink =
   | { kind: 'route'; route: RouteId }
   | { kind: 'share'; share: 'match' | 'profile'; token: string }
   | { kind: 'acquisition' }
+  | { kind: 'trophy' }
   | { kind: 'legal'; document: 'privacy' | 'terms' }
   | { kind: 'unknown' };
 
@@ -40,6 +41,7 @@ export function parseAppDeepLink(input: string): ParsedDeepLink {
     return { kind: 'share', share: share[1] as 'match' | 'profile', token: decodeURIComponent(share[2]) };
   }
   if (path === '/acquisition') return { kind: 'acquisition' };
+  if (path === '/trophy') return { kind: 'trophy' };
   const legal = legalDocumentForPath(path);
   if (legal) return { kind: 'legal', document: legal };
   const hash = decodeURIComponent(url.hash.replace(/^#/, ''));

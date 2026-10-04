@@ -8,6 +8,7 @@ import {
   clampUnit,
   cropImageToDataUrl,
   cropSourceRect,
+  readImageFile,
   type CropFrame,
 } from '../services/imageProcessing';
 
@@ -41,23 +42,26 @@ export function ImageCropOverlay({
   const drag = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    let alive = true;
+    let release = () => {};
+    setPreviewUrl('');
     setFailed(false);
     setLoadFailed(false);
-    const img = new Image();
-    img.onload = () => {
-      if (cancelled) return;
-      setNatural({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 });
-    };
-    img.onerror = () => {
-      if (!cancelled) setLoadFailed(true);
-    };
-    img.src = url;
+    readImageFile(file).then((result) => {
+      if (!alive) {
+        result.release();
+        return;
+      }
+      release = result.release;
+      setNatural({ width: result.width, height: result.height });
+      setPreviewUrl(result.url);
+      setLoadFailed(false);
+    }).catch(() => {
+      if (alive) setLoadFailed(true);
+    });
     return () => {
-      cancelled = true;
-      URL.revokeObjectURL(url);
+      alive = false;
+      release();
     };
   }, [file]);
 

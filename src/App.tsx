@@ -22,6 +22,7 @@ import { getItem } from './services/localDb';
 import { analyticsEnabled, syncAhrefsAnalytics } from './services/analytics';
 import { legalDocumentForPath } from './config/publicRoutes';
 import LegalDocument from './pages/LegalDocument';
+import Trophy from './pages/Trophy';
 import PrivacyPolicyModal, { hasAcceptedConsent } from './components/PrivacyPolicyModal';
 import { SideProjectorsBadge } from './components/SideProjectorsBadge';
 import { NotificationToast } from './components/NotificationToast';
@@ -219,6 +220,7 @@ export default function App(){
  },[]);
  const sharePath=pathName.match(/^\/share\/(match|profile)\/(.+)$/);
  const isAcquisition=pathName==='/acquisition';
+ const isTrophy=pathName==='/trophy';
  const legalDocument=legalDocumentForPath(pathName);
  const[language,setLanguage]=useState<Language>(()=>(localStorage.getItem('taamen-language') as Language)||'ar');
  const[theme,setTheme]=useState<TaamenTheme>(()=>readTheme());
@@ -276,6 +278,7 @@ export default function App(){
 
  if(legalDocument)return <ErrorBoundary language={language} label={legalDocument}><LegalDocument language={language} onLanguage={toggle} documentId={legalDocument}/></ErrorBoundary>;
  if(isAcquisition)return <ErrorBoundary language={language} label="acquisition"><Suspense fallback={<div className="boot-screen"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT}/></div>}><Acquisition language={language} onLanguage={toggle} theme={theme} onTheme={toggleTheme}/></Suspense></ErrorBoundary>;
+ if(isTrophy)return <ErrorBoundary language={language} label="trophy"><Trophy language={language} onLanguage={toggle}/></ErrorBoundary>;
  if(sharePath)return <PublicSharePreview language={language} kind={sharePath[1] as 'match'|'profile'} token={decodeURIComponent(sharePath[2])} onHome={returnHome} onLanguage={toggle}/>;
  if(boot)return <div className="boot-screen" role="status"><img src={TAAMEN_LOGO_SRC} alt={TAAMEN_LOGO_ALT} width={70} height={70}/></div>;
  /* One persistent atmosphere host. Keeping it first in both branches means the

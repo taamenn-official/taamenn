@@ -41,6 +41,8 @@ export default function MatchTimingFields({
   const panelId = useId();
   const invalid = issues.length > 0;
   const [advanced, setAdvanced] = useState(draft.mode === 'periods');
+  const [customArmed, setCustomArmed] = useState(false);
+  const periodFieldId = useId();
   const preview = parsed
     ? presentMatch({
       dateISO: date,
@@ -50,7 +52,7 @@ export default function MatchTimingFields({
       durationMinutes: parsed.schedule.scheduledMinutes,
     }, language)
     : null;
-  const chosen = activePreset(draft);
+  const chosen = customArmed ? 'custom' : activePreset(draft);
 
   const setMode = (mode: TimingDraft['mode']) => {
     if (mode === draft.mode) return;
@@ -111,19 +113,19 @@ export default function MatchTimingFields({
                     type="button"
                     aria-pressed={chosen === preset.id}
                     className={chosen === preset.id ? 'is-selected' : ''}
-                    onClick={() => onChange({ ...draft, mode: 'periods', periodCount: preset.periodCount, periodMinutes: preset.periodMinutes })}
+                    onClick={() => { setCustomArmed(false); onChange({ ...draft, mode: 'periods', periodCount: preset.periodCount, periodMinutes: preset.periodMinutes }); }}
                   >
                     {copy[preset.label]}
                   </button>
                 ))}
-                <button type="button" aria-pressed={chosen === 'custom'} className={chosen === 'custom' ? 'is-selected' : ''} onClick={() => undefined}>
+                <button type="button" aria-pressed={chosen === 'custom'} className={chosen === 'custom' ? 'is-selected' : ''} onClick={() => { setCustomArmed(true); onChange({ ...draft, mode: 'periods' }); document.getElementById(periodFieldId)?.focus(); }}>
                   {copy.custom}
                 </button>
               </div>
               <div className="timing-panel">
                 <label className={issues.includes('periodCount') ? 'is-invalid' : ''}>
                   {copy.periodCount}
-                  <input type="number" inputMode="numeric" min={TIMING_LIMITS.periodCount.min} max={TIMING_LIMITS.periodCount.max} value={draft.periodCount} aria-invalid={issues.includes('periodCount')} onChange={(event) => onChange({ ...draft, periodCount: event.target.value })} />
+                  <input id={periodFieldId} type="number" inputMode="numeric" min={TIMING_LIMITS.periodCount.min} max={TIMING_LIMITS.periodCount.max} value={draft.periodCount} aria-invalid={issues.includes('periodCount')} onChange={(event) => { setCustomArmed(false); onChange({ ...draft, periodCount: event.target.value }); }} />
                 </label>
                 <label className={issues.includes('periodMinutes') ? 'is-invalid' : ''}>
                   {copy.periodLength}

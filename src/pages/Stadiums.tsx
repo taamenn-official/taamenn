@@ -4,6 +4,7 @@ import { searchStadiums } from '../data/stadiums';
 import { WHATSAPP_URL } from '../config/support';
 import { uiCopy } from '../i18n/translations';
 import AdSlot from '../components/monetization/AdSlot';
+import { requestMatchFromStadium } from '../services/stadiumHandoff';
 
 type Language = 'ar' | 'en';
 
@@ -112,16 +113,19 @@ export default function Stadiums({ language }: { language: Language }) {
                     {description && (
                       <p className="stadium-description">{description}</p>
                     )}
-                    <a className="dark-action stadium-use" href="/#match-center">{ar ? 'استخدمه في مباراة' : 'Use in a match'}</a>
-                    {contact && (
-                      <button
-                        className="whatsapp-button"
-                        onClick={() => openWhatsApp(contact)}
-                      >
-                        <MessageCircle size={16} />
-                        {ar ? 'واتساب' : 'WhatsApp'}
-                      </button>
-                    )}
+                    <div className="stadium-actions">
+                      <button type="button" className="primary-action stadium-use" onClick={() => { requestMatchFromStadium({ stadium: name, city: city || '' }); window.location.hash = '#match-center'; }}>{ar ? 'استخدمه في مباراة' : 'Use in a match'}</button>
+                      {contact && (
+                        <button
+                          type="button"
+                          className="dark-action whatsapp-button"
+                          onClick={() => openWhatsApp(contact)}
+                        >
+                          <MessageCircle size={16} />
+                          {ar ? 'واتساب الملعب' : 'WhatsApp venue'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </article>
@@ -141,6 +145,7 @@ export default function Stadiums({ language }: { language: Language }) {
       )}
 
       <AdSlot placement="stadiums" />
+      {filteredStadiums.length >= 4 && <AdSlot placement="stadiums-follow" />}
 
       <aside className="venue-admin-helper stadiums-support-note">
         <p>{uiCopy[language].missingStadiumPage}</p>

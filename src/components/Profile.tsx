@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, ImagePlus, Save, Share2, Trash2 } from 'lucide-react';
+import { Camera, ImagePlus, Save, Trash2 } from 'lucide-react';
 import type { LocalProfile } from '../services/profileRepository';
 import { saveProfile } from '../services/profileRepository';
 import { isProfileDraftDirty } from '../services/profileDraft';
+import { canTryImageFile } from '../services/imageProcessing';
 import { ImageCropOverlay } from './ImageCropOverlay';
-import { shareProfile } from '../services/profileShareService';
 import type { Session } from '../services/apiClient';
 import { uiCopy } from '../i18n/translations';
 import { ImageActionSheet, ImageViewer } from './ImageActionOverlay';
@@ -26,7 +26,7 @@ export default function Profile({
   const ar = language === 'ar';
   const [draft, setDraft] = useState(profile);
   const [status, setStatus] = useState('');
-  const [shareUrl, setShareUrl] = useState('');
+  const [cropToken, setCropToken] = useState(0);
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
@@ -122,26 +122,14 @@ export default function Profile({
 
   const queueCrop = (file: File | undefined, kind: 'avatar' | 'banner') => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
+    if (!canTryImageFile(file)) {
       setFailed(true);
       setStatus(copy.imageProcessFailed);
       return;
     }
     setFailed(false);
+    setCropToken(value => value + 1);
     setCrop({ file, kind });
-  };
-
-  const share = async () => {
-    try {
-      const result = await shareProfile(draft);
-      if (result.method === 'cancelled') return;
-      setFailed(false);
-      setShareUrl(result.url);
-      setStatus(result.method === 'copied' ? copy.profileShareCopied : result.method === 'shared' ? copy.profileShareReady : copy.profileShareLinkReady);
-    } catch {
-      setFailed(true);
-      setStatus(copy.profileShareFailed);
-    }
   };
 
   const reminderLevel = Math.min(Math.max(attempts, 1), 3);
@@ -155,29 +143,8 @@ export default function Profile({
           <h1>{ar ? 'الملف الشخصي' : 'Profile'}</h1>
           <p className="subtitle">{ar ? 'هويتك الشخصية المحلية في TAAMEN.' : 'Your local identity inside TAAMEN.'}</p>
         </div>
-        <div className="setting-actions">
-          <button className="dark-action" type="button" onClick={share}>
-            <Share2 size={15} />
-            {ar ? 'مشاركة عامة' : 'Public share'}
-          </button>
-          <button
-            ref={saveRef}
-            id="profile-save-button"
-            type="button"
-            className={`primary-action${dirty ? ' is-dirty-save' : ''}`}
-            onClick={save}
-            disabled={!dirty || busy}
-            aria-disabled={!dirty || busy}
-            title={dirty ? copy.saveProfile : copy.noUnsavedChanges}
-            aria-live="polite"
-          >
-            <Save size={15} />
-            {busy ? copy.savingProfile : copy.saveProfile}
-          </button>
-        </div>
       </div>
       {status && <div className={failed ? 'error-banner' : 'success-banner'} role={failed ? 'alert' : undefined}>{status}</div>}
-      {shareUrl && !failed && <label className="share-link-field">{copy.profileShareLinkReady}<input readOnly value={shareUrl} onFocus={(event) => event.currentTarget.select()} /></label>}
       {dirty && <p className="profile-dirty-hint">{copy.unsavedChanges}</p>}
 
       <section className="panel profile-hero-card">
@@ -226,7 +193,7 @@ export default function Profile({
             <span className="status-chip">{draft.emailVerified ? (ar ? 'البريد مؤكد' : 'Email verified') : (ar ? 'ملف محلي' : 'Local profile')}</span>
             {photoPending && <span className="status-chip pending-chip">{copy.photoPending}</span>}
             <h2>{draft.firstName} {draft.lastName}</h2>
-            <p>{ar ? 'بياناتك الشخصية محفوظة محليًا ويمكنك مشاركة نسخة عامة آمنة.' : 'Your personal data stays local; you can share a safe public profile.'}</p>
+            <p>{ar ? 'بياناتك الشخصية تبقى على هذا الجهاز.' : 'Your personal data stays on this device.'}</p>
           </div>
         </div>
       </section>
@@ -250,7 +217,7 @@ export default function Profile({
           {photoPending && <button className="text-button" type="button" onClick={() => update('avatarData', profile.avatarData || '')}>{copy.revertPhoto}</button>}
           {bannerPending && <button className="text-button" type="button" onClick={() => update('bannerData', profile.bannerData || '')}>{copy.revertCover}</button>}
           {busy && <span className="settings-note">{copy.processingImage}</span>}
-          <button type="button" className={`primary-action profile-inline-save${dirty ? ' is-dirty-save' : ''}`} onClick={save} disabled={!dirty || busy} aria-disabled={!dirty || busy} title={dirty ? copy.saveProfile : copy.noUnsavedChanges}>
+          <button ref={saveRef} id="profile-save-button" type="button" className={`primary-action profile-inline-save${dirty ? ' is-dirty-save' : ''}`} onClick={save} disabled={!dirty || busy} aria-disabled={!dirty || busy} title={dirty ? copy.saveProfile : copy.noUnsavedChanges}>
             <Save size={15} />
             {busy ? copy.savingProfile : copy.saveProfile}
           </button>
@@ -259,6 +226,7 @@ export default function Profile({
 
       {crop && (
         <ImageCropOverlay
+          key={cropToken}
           file={crop.file}
           kind={crop.kind}
           language={language}
